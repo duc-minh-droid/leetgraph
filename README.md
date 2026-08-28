@@ -6,6 +6,10 @@ track every attempt across a Slay-the-Spire-style skill graph.
 Each roadmap is generated from a real LeetCode company CSV export through one
 pipeline:
 
+![alt text](<Screenshot 2026-08-28 at 18.41.45.png>)
+
+try it here: https://leetgraph-iota.vercel.app/
+
 ```
 CSV (export) ──▶ parseProblems ──▶ buildActsGraph ──▶ JSON map
 ```
