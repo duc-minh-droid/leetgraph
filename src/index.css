@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    background: #fffdf5;
+    color: #000;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Brutalist focus ring: thick, square, high-contrast. */
+  :focus-visible {
+    outline: 4px solid #000;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* ---- Reusable brutalist primitives ---- */
+  .neo-btn {
+    @apply inline-flex items-center justify-center gap-2 border-4 border-black bg-neo-accent px-5 py-3
+      font-bold uppercase tracking-wide text-black shadow-neo-sm transition-all duration-100
+      ease-linear active:translate-x-[4px] active:translate-y-[4px] active:shadow-none;
+  }
+  .neo-btn:hover {
+    @apply bg-neo-secondary;
+  }
+  .neo-btn-yellow {
+    @apply bg-neo-secondary;
+  }
+  .neo-btn-yellow:hover {
+    @apply bg-neo-accent;
+  }
+  .neo-btn-ghost {
+    @apply bg-white;
+  }
+  .neo-btn-ghost:hover {
+    @apply bg-neo-muted;
+  }
+
+  .neo-card {
+    @apply border-4 border-black bg-white shadow-neo transition-all duration-200 ease-out;
+  }
+
+  .neo-input {
+    @apply w-full border-4 border-black bg-white px-3 py-3 font-bold text-black
+      placeholder:text-black/40 focus:bg-neo-secondary focus:shadow-neo-sm focus:outline-none;
+  }
+
+  .neo-tag {
+    @apply inline-flex items-center border-4 border-black px-2 py-0.5 text-xs font-black uppercase tracking-widest;
+  }
+}
+
+@layer utilities {
+  .text-stroke {
+    -webkit-text-stroke: 2px #000;
+    color: transparent;
+  }
+  .text-stroke-white {
+    -webkit-text-stroke: 2px #fff;
+    color: transparent;
+  }
+  /* Halftone dot field used as decorative texture. */
+  .bg-halftone {
+    background-image: radial-gradient(#000 1.5px, transparent 1.5px);
+    background-size: 20px 20px;
+  }
+  .bg-grid {
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.12) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.12) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
+
+/* ---- react-flow brutalist overrides ---- */
+.react-flow__edge-path {
+  stroke: #000 !important;
+  stroke-width: 3 !important;
+}
+.react-flow__edge.active .react-flow__edge-path {
+  stroke: #ff6b6b !important;
+  stroke-width: 5 !important;
+}
+.react-flow__edge.future .react-flow__edge-path {
+  stroke: #000 !important;
+  stroke-dasharray: 4 6;
+  opacity: 0.35;
+}
+.react-flow__attribution {
+  display: none;
+}
+/* Hide the default node wrapper chrome. */
+.react-flow__node {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  width: auto !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.react-flow__handle {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow,
+  .animate-pop-in {
+    animation: none !important;
+  }
+}

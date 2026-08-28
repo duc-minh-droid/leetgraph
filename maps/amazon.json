@@ -1,0 +1,1570 @@
+{
+  "name": "Amazon",
+  "eloMin": 900,
+  "eloMax": 2468,
+  "nodes": [
+    {
+      "id": "0-4",
+      "row": 0,
+      "col": 4,
+      "edges_out": [
+        "1-4",
+        "1-5"
+      ],
+      "slug": "concatenation-of-array",
+      "act": 0
+    },
+    {
+      "id": "1-4",
+      "row": 1,
+      "col": 4,
+      "edges_out": [
+        "2-3",
+        "2-4"
+      ],
+      "slug": "kids-with-the-greatest-number-of-candies",
+      "act": 0
+    },
+    {
+      "id": "1-5",
+      "row": 1,
+      "col": 5,
+      "edges_out": [
+        "2-6"
+      ],
+      "slug": "intersection-of-two-arrays",
+      "act": 0
+    },
+    {
+      "id": "2-3",
+      "row": 2,
+      "col": 3,
+      "edges_out": [
+        "3-2"
+      ],
+      "slug": "array-partition",
+      "act": 0
+    },
+    {
+      "id": "2-4",
+      "row": 2,
+      "col": 4,
+      "edges_out": [
+        "3-5"
+      ],
+      "slug": "reverse-string",
+      "act": 0
+    },
+    {
+      "id": "2-6",
+      "row": 2,
+      "col": 6,
+      "edges_out": [
+        "3-5"
+      ],
+      "slug": "reverse-linked-list",
+      "act": 0
+    },
+    {
+      "id": "3-2",
+      "row": 3,
+      "col": 2,
+      "edges_out": [
+        "4-2"
+      ],
+      "slug": "fibonacci-number",
+      "act": 0
+    },
+    {
+      "id": "3-5",
+      "row": 3,
+      "col": 5,
+      "edges_out": [
+        "4-5",
+        "4-4"
+      ],
+      "slug": "single-number",
+      "act": 0
+    },
+    {
+      "id": "4-2",
+      "row": 4,
+      "col": 2,
+      "edges_out": [
+        "5-2"
+      ],
+      "slug": "maximum-length-substring-with-two-occurrences",
+      "act": 0
+    },
+    {
+      "id": "4-4",
+      "row": 4,
+      "col": 4,
+      "edges_out": [
+        "5-4"
+      ],
+      "slug": "next-greater-element-i",
+      "act": 0
+    },
+    {
+      "id": "4-5",
+      "row": 4,
+      "col": 5,
+      "edges_out": [
+        "5-4"
+      ],
+      "slug": "subsets",
+      "act": 0
+    },
+    {
+      "id": "5-2",
+      "row": 5,
+      "col": 2,
+      "edges_out": [
+        "6-1"
+      ],
+      "slug": "roman-to-integer",
+      "act": 0
+    },
+    {
+      "id": "5-4",
+      "row": 5,
+      "col": 4,
+      "edges_out": [
+        "6-3"
+      ],
+      "slug": "merge-two-sorted-lists",
+      "act": 0
+    },
+    {
+      "id": "6-1",
+      "row": 6,
+      "col": 1,
+      "edges_out": [
+        "7-1"
+      ],
+      "slug": "best-time-to-buy-and-sell-stock",
+      "act": 0
+    },
+    {
+      "id": "6-3",
+      "row": 6,
+      "col": 3,
+      "edges_out": [
+        "7-4",
+        "7-2"
+      ],
+      "slug": "range-sum-query-immutable",
+      "act": 0
+    },
+    {
+      "id": "7-1",
+      "row": 7,
+      "col": 1,
+      "edges_out": [
+        "8-0"
+      ],
+      "slug": "diameter-of-binary-tree",
+      "act": 0
+    },
+    {
+      "id": "7-2",
+      "row": 7,
+      "col": 2,
+      "edges_out": [
+        "8-1"
+      ],
+      "slug": "binary-search-tree-to-greater-sum-tree",
+      "act": 0
+    },
+    {
+      "id": "7-4",
+      "row": 7,
+      "col": 4,
+      "edges_out": [
+        "8-4"
+      ],
+      "slug": "palindrome-number",
+      "act": 0
+    },
+    {
+      "id": "8-0",
+      "row": 8,
+      "col": 0,
+      "edges_out": [
+        "9-0"
+      ],
+      "slug": "move-zeroes",
+      "act": 0
+    },
+    {
+      "id": "8-1",
+      "row": 8,
+      "col": 1,
+      "edges_out": [
+        "9-1"
+      ],
+      "slug": "permutations",
+      "act": 0
+    },
+    {
+      "id": "8-4",
+      "row": 8,
+      "col": 4,
+      "edges_out": [
+        "9-5"
+      ],
+      "slug": "find-pivot-index",
+      "act": 0
+    },
+    {
+      "id": "9-0",
+      "row": 9,
+      "col": 0,
+      "edges_out": [
+        "10-0"
+      ],
+      "slug": "customer-who-visited-but-did-not-make-any-transactions",
+      "act": 0
+    },
+    {
+      "id": "9-1",
+      "row": 9,
+      "col": 1,
+      "edges_out": [
+        "10-0"
+      ],
+      "slug": "remove-element",
+      "act": 0
+    },
+    {
+      "id": "9-5",
+      "row": 9,
+      "col": 5,
+      "edges_out": [
+        "10-5"
+      ],
+      "slug": "add-binary",
+      "act": 0
+    },
+    {
+      "id": "10-0",
+      "row": 10,
+      "col": 0,
+      "edges_out": [
+        "11-1"
+      ],
+      "slug": "ransom-note",
+      "act": 0
+    },
+    {
+      "id": "10-5",
+      "row": 10,
+      "col": 5,
+      "edges_out": [
+        "11-5"
+      ],
+      "slug": "minimum-number-of-pushes-to-type-word-ii",
+      "act": 0
+    },
+    {
+      "id": "11-1",
+      "row": 11,
+      "col": 1,
+      "edges_out": [
+        "12-2",
+        "12-1"
+      ],
+      "slug": "palindrome-linked-list",
+      "act": 0
+    },
+    {
+      "id": "11-5",
+      "row": 11,
+      "col": 5,
+      "edges_out": [
+        "12-4"
+      ],
+      "slug": "product-of-array-except-self",
+      "act": 0
+    },
+    {
+      "id": "12-1",
+      "row": 12,
+      "col": 1,
+      "edges_out": [
+        "13-0"
+      ],
+      "slug": "longest-common-prefix",
+      "act": 0
+    },
+    {
+      "id": "12-2",
+      "row": 12,
+      "col": 2,
+      "edges_out": [
+        "13-1"
+      ],
+      "slug": "rotate-image",
+      "act": 0
+    },
+    {
+      "id": "12-4",
+      "row": 12,
+      "col": 4,
+      "edges_out": [
+        "13-5"
+      ],
+      "slug": "container-with-most-water",
+      "act": 0
+    },
+    {
+      "id": "13-0",
+      "row": 13,
+      "col": 0,
+      "edges_out": [
+        "14-1"
+      ],
+      "slug": "two-sum-ii-input-array-is-sorted",
+      "act": 0
+    },
+    {
+      "id": "13-1",
+      "row": 13,
+      "col": 1,
+      "edges_out": [
+        "14-2"
+      ],
+      "slug": "copy-list-with-random-pointer",
+      "act": 0
+    },
+    {
+      "id": "13-5",
+      "row": 13,
+      "col": 5,
+      "edges_out": [
+        "14-5"
+      ],
+      "slug": "number-of-islands",
+      "act": 0
+    },
+    {
+      "id": "14-1",
+      "row": 14,
+      "col": 1,
+      "edges_out": [
+        "15-2"
+      ],
+      "slug": "rotting-oranges",
+      "act": 0
+    },
+    {
+      "id": "14-2",
+      "row": 14,
+      "col": 2,
+      "edges_out": [
+        "15-1"
+      ],
+      "slug": "lowest-common-ancestor-of-a-binary-tree",
+      "act": 0
+    },
+    {
+      "id": "14-5",
+      "row": 14,
+      "col": 5,
+      "edges_out": [
+        "15-6"
+      ],
+      "slug": "design-browser-history",
+      "act": 0
+    },
+    {
+      "id": "15-1",
+      "row": 15,
+      "col": 1,
+      "edges_out": [
+        "16-1"
+      ],
+      "slug": "happy-number",
+      "act": 0
+    },
+    {
+      "id": "15-2",
+      "row": 15,
+      "col": 2,
+      "edges_out": [
+        "16-2"
+      ],
+      "slug": "climbing-stairs",
+      "act": 0
+    },
+    {
+      "id": "15-6",
+      "row": 15,
+      "col": 6,
+      "edges_out": [
+        "16-7"
+      ],
+      "slug": "maximum-average-subarray-i",
+      "act": 0
+    },
+    {
+      "id": "16-1",
+      "row": 16,
+      "col": 1,
+      "edges_out": [
+        "17-4"
+      ],
+      "slug": "check-if-array-is-sorted-and-rotated",
+      "act": 0
+    },
+    {
+      "id": "16-2",
+      "row": 16,
+      "col": 2,
+      "edges_out": [
+        "17-4"
+      ],
+      "slug": "task-scheduler",
+      "act": 0
+    },
+    {
+      "id": "16-7",
+      "row": 16,
+      "col": 7,
+      "edges_out": [
+        "17-4"
+      ],
+      "slug": "count-number-of-nice-subarrays",
+      "act": 0
+    },
+    {
+      "id": "17-4",
+      "row": 17,
+      "col": 4,
+      "edges_out": [
+        "18-4"
+      ],
+      "slug": "valid-parentheses",
+      "act": 0
+    },
+    {
+      "id": "18-4",
+      "row": 18,
+      "col": 4,
+      "edges_out": [
+        "19-3",
+        "19-4",
+        "19-5"
+      ],
+      "slug": "palindrome-partitioning",
+      "act": 1
+    },
+    {
+      "id": "19-3",
+      "row": 19,
+      "col": 3,
+      "edges_out": [
+        "20-2",
+        "20-3"
+      ],
+      "slug": "linked-list-cycle",
+      "act": 1
+    },
+    {
+      "id": "19-4",
+      "row": 19,
+      "col": 4,
+      "edges_out": [
+        "20-4"
+      ],
+      "slug": "trapping-rain-water",
+      "act": 1
+    },
+    {
+      "id": "19-5",
+      "row": 19,
+      "col": 5,
+      "edges_out": [
+        "20-4",
+        "20-6"
+      ],
+      "slug": "unique-paths",
+      "act": 1
+    },
+    {
+      "id": "20-2",
+      "row": 20,
+      "col": 2,
+      "edges_out": [
+        "21-2"
+      ],
+      "slug": "minimum-operations-to-make-array-non-decreasing",
+      "act": 1
+    },
+    {
+      "id": "20-3",
+      "row": 20,
+      "col": 3,
+      "edges_out": [
+        "21-3"
+      ],
+      "slug": "valid-palindrome",
+      "act": 1
+    },
+    {
+      "id": "20-4",
+      "row": 20,
+      "col": 4,
+      "edges_out": [
+        "21-5",
+        "21-4",
+        "21-3"
+      ],
+      "slug": "number-of-provinces",
+      "act": 1
+    },
+    {
+      "id": "20-6",
+      "row": 20,
+      "col": 6,
+      "edges_out": [
+        "21-6"
+      ],
+      "slug": "merge-intervals",
+      "act": 1
+    },
+    {
+      "id": "21-2",
+      "row": 21,
+      "col": 2,
+      "edges_out": [
+        "22-2"
+      ],
+      "slug": "smallest-subsequence-of-distinct-characters",
+      "act": 1
+    },
+    {
+      "id": "21-3",
+      "row": 21,
+      "col": 3,
+      "edges_out": [
+        "22-3",
+        "22-4"
+      ],
+      "slug": "maximum-subarray",
+      "act": 1
+    },
+    {
+      "id": "21-4",
+      "row": 21,
+      "col": 4,
+      "edges_out": [
+        "22-3"
+      ],
+      "slug": "valid-sudoku",
+      "act": 1
+    },
+    {
+      "id": "21-5",
+      "row": 21,
+      "col": 5,
+      "edges_out": [
+        "22-6"
+      ],
+      "slug": "remove-methods-from-project",
+      "act": 1
+    },
+    {
+      "id": "21-6",
+      "row": 21,
+      "col": 6,
+      "edges_out": [
+        "22-6"
+      ],
+      "slug": "find-the-index-of-the-first-occurrence-in-a-string",
+      "act": 1
+    },
+    {
+      "id": "22-2",
+      "row": 22,
+      "col": 2,
+      "edges_out": [
+        "23-2"
+      ],
+      "slug": "sort-colors",
+      "act": 1
+    },
+    {
+      "id": "22-3",
+      "row": 22,
+      "col": 3,
+      "edges_out": [
+        "23-4",
+        "23-3"
+      ],
+      "slug": "search-insert-position",
+      "act": 1
+    },
+    {
+      "id": "22-4",
+      "row": 22,
+      "col": 4,
+      "edges_out": [
+        "23-4"
+      ],
+      "slug": "predict-the-winner",
+      "act": 1
+    },
+    {
+      "id": "22-6",
+      "row": 22,
+      "col": 6,
+      "edges_out": [
+        "23-7"
+      ],
+      "slug": "single-element-in-a-sorted-array",
+      "act": 1
+    },
+    {
+      "id": "23-2",
+      "row": 23,
+      "col": 2,
+      "edges_out": [
+        "24-1"
+      ],
+      "slug": "course-schedule",
+      "act": 1
+    },
+    {
+      "id": "23-3",
+      "row": 23,
+      "col": 3,
+      "edges_out": [
+        "24-3"
+      ],
+      "slug": "power-of-two",
+      "act": 1
+    },
+    {
+      "id": "23-4",
+      "row": 23,
+      "col": 4,
+      "edges_out": [
+        "24-3"
+      ],
+      "slug": "max-consecutive-ones-iii",
+      "act": 1
+    },
+    {
+      "id": "23-7",
+      "row": 23,
+      "col": 7,
+      "edges_out": [
+        "24-6",
+        "24-8"
+      ],
+      "slug": "smallest-missing-integer-greater-than-sequential-prefix-sum",
+      "act": 1
+    },
+    {
+      "id": "24-1",
+      "row": 24,
+      "col": 1,
+      "edges_out": [
+        "25-1"
+      ],
+      "slug": "valid-palindrome-ii",
+      "act": 1
+    },
+    {
+      "id": "24-3",
+      "row": 24,
+      "col": 3,
+      "edges_out": [
+        "25-2"
+      ],
+      "slug": "isomorphic-strings",
+      "act": 1
+    },
+    {
+      "id": "24-6",
+      "row": 24,
+      "col": 6,
+      "edges_out": [
+        "25-5"
+      ],
+      "slug": "koko-eating-bananas",
+      "act": 1
+    },
+    {
+      "id": "24-8",
+      "row": 24,
+      "col": 8,
+      "edges_out": [
+        "25-7"
+      ],
+      "slug": "smallest-palindromic-rearrangement-i",
+      "act": 1
+    },
+    {
+      "id": "25-1",
+      "row": 25,
+      "col": 1,
+      "edges_out": [
+        "26-1"
+      ],
+      "slug": "reorganize-string",
+      "act": 1
+    },
+    {
+      "id": "25-2",
+      "row": 25,
+      "col": 2,
+      "edges_out": [
+        "26-3",
+        "26-2"
+      ],
+      "slug": "length-of-longest-subarray-with-at-most-k-frequency",
+      "act": 1
+    },
+    {
+      "id": "25-5",
+      "row": 25,
+      "col": 5,
+      "edges_out": [
+        "26-5"
+      ],
+      "slug": "sqrtx",
+      "act": 1
+    },
+    {
+      "id": "25-7",
+      "row": 25,
+      "col": 7,
+      "edges_out": [
+        "26-6"
+      ],
+      "slug": "capacity-to-ship-packages-within-d-days",
+      "act": 1
+    },
+    {
+      "id": "26-1",
+      "row": 26,
+      "col": 1,
+      "edges_out": [
+        "27-2"
+      ],
+      "slug": "monthly-transactions-i",
+      "act": 1
+    },
+    {
+      "id": "26-2",
+      "row": 26,
+      "col": 2,
+      "edges_out": [
+        "27-2"
+      ],
+      "slug": "longest-substring-without-repeating-characters",
+      "act": 1
+    },
+    {
+      "id": "26-3",
+      "row": 26,
+      "col": 3,
+      "edges_out": [
+        "27-2",
+        "27-3"
+      ],
+      "slug": "evaluate-division",
+      "act": 1
+    },
+    {
+      "id": "26-5",
+      "row": 26,
+      "col": 5,
+      "edges_out": [
+        "27-6"
+      ],
+      "slug": "lru-cache",
+      "act": 1
+    },
+    {
+      "id": "26-6",
+      "row": 26,
+      "col": 6,
+      "edges_out": [
+        "27-6"
+      ],
+      "slug": "combinations",
+      "act": 1
+    },
+    {
+      "id": "27-2",
+      "row": 27,
+      "col": 2,
+      "edges_out": [
+        "28-2",
+        "28-3",
+        "28-1"
+      ],
+      "slug": "fruit-into-baskets",
+      "act": 1
+    },
+    {
+      "id": "27-3",
+      "row": 27,
+      "col": 3,
+      "edges_out": [
+        "28-4"
+      ],
+      "slug": "separate-black-and-white-balls",
+      "act": 1
+    },
+    {
+      "id": "27-6",
+      "row": 27,
+      "col": 6,
+      "edges_out": [
+        "28-7",
+        "28-6"
+      ],
+      "slug": "longest-consecutive-sequence",
+      "act": 1
+    },
+    {
+      "id": "28-1",
+      "row": 28,
+      "col": 1,
+      "edges_out": [
+        "29-0"
+      ],
+      "slug": "house-robber-iii",
+      "act": 1
+    },
+    {
+      "id": "28-2",
+      "row": 28,
+      "col": 2,
+      "edges_out": [
+        "29-1"
+      ],
+      "slug": "set-mismatch",
+      "act": 1
+    },
+    {
+      "id": "28-3",
+      "row": 28,
+      "col": 3,
+      "edges_out": [
+        "29-2"
+      ],
+      "slug": "pacific-atlantic-water-flow",
+      "act": 1
+    },
+    {
+      "id": "28-4",
+      "row": 28,
+      "col": 4,
+      "edges_out": [
+        "29-3"
+      ],
+      "slug": "add-two-numbers",
+      "act": 1
+    },
+    {
+      "id": "28-6",
+      "row": 28,
+      "col": 6,
+      "edges_out": [
+        "29-5"
+      ],
+      "slug": "maximum-product-of-three-numbers",
+      "act": 1
+    },
+    {
+      "id": "28-7",
+      "row": 28,
+      "col": 7,
+      "edges_out": [
+        "29-7"
+      ],
+      "slug": "letter-combinations-of-a-phone-number",
+      "act": 1
+    },
+    {
+      "id": "29-0",
+      "row": 29,
+      "col": 0,
+      "edges_out": [
+        "30-0"
+      ],
+      "slug": "find-minimum-in-rotated-sorted-array",
+      "act": 1
+    },
+    {
+      "id": "29-1",
+      "row": 29,
+      "col": 1,
+      "edges_out": [
+        "30-0"
+      ],
+      "slug": "linked-list-cycle-ii",
+      "act": 1
+    },
+    {
+      "id": "29-2",
+      "row": 29,
+      "col": 2,
+      "edges_out": [
+        "30-1"
+      ],
+      "slug": "evaluate-reverse-polish-notation",
+      "act": 1
+    },
+    {
+      "id": "29-3",
+      "row": 29,
+      "col": 3,
+      "edges_out": [
+        "30-4"
+      ],
+      "slug": "stone-game-ii",
+      "act": 1
+    },
+    {
+      "id": "29-5",
+      "row": 29,
+      "col": 5,
+      "edges_out": [
+        "30-4"
+      ],
+      "slug": "merge-sorted-array",
+      "act": 1
+    },
+    {
+      "id": "29-7",
+      "row": 29,
+      "col": 7,
+      "edges_out": [
+        "30-8"
+      ],
+      "slug": "top-k-frequent-elements",
+      "act": 1
+    },
+    {
+      "id": "30-0",
+      "row": 30,
+      "col": 0,
+      "edges_out": [
+        "31-1",
+        "31-0"
+      ],
+      "slug": "maximum-points-you-can-obtain-from-cards",
+      "act": 1
+    },
+    {
+      "id": "30-1",
+      "row": 30,
+      "col": 1,
+      "edges_out": [
+        "31-2"
+      ],
+      "slug": "meeting-rooms-ii",
+      "act": 1
+    },
+    {
+      "id": "30-4",
+      "row": 30,
+      "col": 4,
+      "edges_out": [
+        "31-3",
+        "31-5"
+      ],
+      "slug": "reverse-nodes-in-k-group",
+      "act": 1
+    },
+    {
+      "id": "30-8",
+      "row": 30,
+      "col": 8,
+      "edges_out": [
+        "31-7"
+      ],
+      "slug": "search-a-2d-matrix-ii",
+      "act": 1
+    },
+    {
+      "id": "31-0",
+      "row": 31,
+      "col": 0,
+      "edges_out": [
+        "32-0"
+      ],
+      "slug": "asteroid-collision",
+      "act": 1
+    },
+    {
+      "id": "31-1",
+      "row": 31,
+      "col": 1,
+      "edges_out": [
+        "32-0"
+      ],
+      "slug": "maximum-sum-circular-subarray",
+      "act": 1
+    },
+    {
+      "id": "31-2",
+      "row": 31,
+      "col": 2,
+      "edges_out": [
+        "32-1"
+      ],
+      "slug": "3sum",
+      "act": 1
+    },
+    {
+      "id": "31-3",
+      "row": 31,
+      "col": 3,
+      "edges_out": [
+        "32-4"
+      ],
+      "slug": "contains-duplicate",
+      "act": 1
+    },
+    {
+      "id": "31-5",
+      "row": 31,
+      "col": 5,
+      "edges_out": [
+        "32-5"
+      ],
+      "slug": "first-unique-character-in-a-string",
+      "act": 1
+    },
+    {
+      "id": "31-7",
+      "row": 31,
+      "col": 7,
+      "edges_out": [
+        "32-6"
+      ],
+      "slug": "valid-anagram",
+      "act": 1
+    },
+    {
+      "id": "32-0",
+      "row": 32,
+      "col": 0,
+      "edges_out": [
+        "33-0"
+      ],
+      "slug": "insert-delete-getrandom-o1",
+      "act": 1
+    },
+    {
+      "id": "32-1",
+      "row": 32,
+      "col": 1,
+      "edges_out": [
+        "33-1"
+      ],
+      "slug": "design-circular-queue",
+      "act": 1
+    },
+    {
+      "id": "32-4",
+      "row": 32,
+      "col": 4,
+      "edges_out": [
+        "33-5"
+      ],
+      "slug": "permutation-in-string",
+      "act": 1
+    },
+    {
+      "id": "32-5",
+      "row": 32,
+      "col": 5,
+      "edges_out": [
+        "33-5"
+      ],
+      "slug": "group-anagrams",
+      "act": 1
+    },
+    {
+      "id": "32-6",
+      "row": 32,
+      "col": 6,
+      "edges_out": [
+        "33-5"
+      ],
+      "slug": "remove-duplicates-from-sorted-array",
+      "act": 1
+    },
+    {
+      "id": "33-0",
+      "row": 33,
+      "col": 0,
+      "edges_out": [
+        "34-0"
+      ],
+      "slug": "find-first-and-last-position-of-element-in-sorted-array",
+      "act": 1
+    },
+    {
+      "id": "33-1",
+      "row": 33,
+      "col": 1,
+      "edges_out": [
+        "34-1"
+      ],
+      "slug": "find-all-anagrams-in-a-string",
+      "act": 1
+    },
+    {
+      "id": "33-5",
+      "row": 33,
+      "col": 5,
+      "edges_out": [
+        "34-5",
+        "34-4",
+        "34-6"
+      ],
+      "slug": "remove-duplicate-letters",
+      "act": 1
+    },
+    {
+      "id": "34-0",
+      "row": 34,
+      "col": 0,
+      "edges_out": [
+        "35-0"
+      ],
+      "slug": "house-robber",
+      "act": 1
+    },
+    {
+      "id": "34-1",
+      "row": 34,
+      "col": 1,
+      "edges_out": [
+        "35-1"
+      ],
+      "slug": "maximum-coins-from-k-consecutive-bags",
+      "act": 1
+    },
+    {
+      "id": "34-4",
+      "row": 34,
+      "col": 4,
+      "edges_out": [
+        "35-3"
+      ],
+      "slug": "number-of-unique-xor-triplets-ii",
+      "act": 1
+    },
+    {
+      "id": "34-5",
+      "row": 34,
+      "col": 5,
+      "edges_out": [
+        "35-5"
+      ],
+      "slug": "ones-and-zeroes",
+      "act": 1
+    },
+    {
+      "id": "34-6",
+      "row": 34,
+      "col": 6,
+      "edges_out": [
+        "35-6"
+      ],
+      "slug": "combine-two-tables",
+      "act": 1
+    },
+    {
+      "id": "35-0",
+      "row": 35,
+      "col": 0,
+      "edges_out": [
+        "36-4"
+      ],
+      "slug": "bulls-and-cows",
+      "act": 1
+    },
+    {
+      "id": "35-1",
+      "row": 35,
+      "col": 1,
+      "edges_out": [
+        "36-4"
+      ],
+      "slug": "reverse-linked-list-ii",
+      "act": 1
+    },
+    {
+      "id": "35-3",
+      "row": 35,
+      "col": 3,
+      "edges_out": [
+        "36-4"
+      ],
+      "slug": "contiguous-array",
+      "act": 1
+    },
+    {
+      "id": "35-5",
+      "row": 35,
+      "col": 5,
+      "edges_out": [
+        "36-4"
+      ],
+      "slug": "rotate-array",
+      "act": 1
+    },
+    {
+      "id": "35-6",
+      "row": 35,
+      "col": 6,
+      "edges_out": [
+        "36-4"
+      ],
+      "slug": "majority-element",
+      "act": 1
+    },
+    {
+      "id": "36-4",
+      "row": 36,
+      "col": 4,
+      "edges_out": [
+        "37-4"
+      ],
+      "slug": "longest-palindromic-substring",
+      "act": 1
+    },
+    {
+      "id": "37-4",
+      "row": 37,
+      "col": 4,
+      "edges_out": [
+        "38-3",
+        "38-5"
+      ],
+      "slug": "partition-equal-subset-sum",
+      "act": 2
+    },
+    {
+      "id": "38-3",
+      "row": 38,
+      "col": 3,
+      "edges_out": [
+        "39-4",
+        "39-2"
+      ],
+      "slug": "3sum-closest",
+      "act": 2
+    },
+    {
+      "id": "38-5",
+      "row": 38,
+      "col": 5,
+      "edges_out": [
+        "39-5"
+      ],
+      "slug": "largest-number",
+      "act": 2
+    },
+    {
+      "id": "39-2",
+      "row": 39,
+      "col": 2,
+      "edges_out": [
+        "40-1"
+      ],
+      "slug": "longest-substring-of-one-repeating-character",
+      "act": 2
+    },
+    {
+      "id": "39-4",
+      "row": 39,
+      "col": 4,
+      "edges_out": [
+        "40-5"
+      ],
+      "slug": "path-sum-iii",
+      "act": 2
+    },
+    {
+      "id": "39-5",
+      "row": 39,
+      "col": 5,
+      "edges_out": [
+        "40-6"
+      ],
+      "slug": "longest-substring-with-at-least-k-repeating-characters",
+      "act": 2
+    },
+    {
+      "id": "40-1",
+      "row": 40,
+      "col": 1,
+      "edges_out": [
+        "41-1"
+      ],
+      "slug": "surrounded-regions",
+      "act": 2
+    },
+    {
+      "id": "40-5",
+      "row": 40,
+      "col": 5,
+      "edges_out": [
+        "41-5"
+      ],
+      "slug": "maximum-width-of-binary-tree",
+      "act": 2
+    },
+    {
+      "id": "40-6",
+      "row": 40,
+      "col": 6,
+      "edges_out": [
+        "41-7"
+      ],
+      "slug": "median-of-two-sorted-arrays",
+      "act": 2
+    },
+    {
+      "id": "41-1",
+      "row": 41,
+      "col": 1,
+      "edges_out": [
+        "42-2"
+      ],
+      "slug": "frequency-of-the-most-frequent-element",
+      "act": 2
+    },
+    {
+      "id": "41-5",
+      "row": 41,
+      "col": 5,
+      "edges_out": [
+        "42-4"
+      ],
+      "slug": "multiply-strings",
+      "act": 2
+    },
+    {
+      "id": "41-7",
+      "row": 41,
+      "col": 7,
+      "edges_out": [
+        "42-6"
+      ],
+      "slug": "interleaving-string",
+      "act": 2
+    },
+    {
+      "id": "42-2",
+      "row": 42,
+      "col": 2,
+      "edges_out": [
+        "43-1"
+      ],
+      "slug": "maximum-sum-of-distinct-subarrays-with-length-k",
+      "act": 2
+    },
+    {
+      "id": "42-4",
+      "row": 42,
+      "col": 4,
+      "edges_out": [
+        "43-4"
+      ],
+      "slug": "merge-k-sorted-lists",
+      "act": 2
+    },
+    {
+      "id": "42-6",
+      "row": 42,
+      "col": 6,
+      "edges_out": [
+        "43-5"
+      ],
+      "slug": "find-median-from-data-stream",
+      "act": 2
+    },
+    {
+      "id": "43-1",
+      "row": 43,
+      "col": 1,
+      "edges_out": [
+        "44-2"
+      ],
+      "slug": "4sum",
+      "act": 2
+    },
+    {
+      "id": "43-4",
+      "row": 43,
+      "col": 4,
+      "edges_out": [
+        "44-3"
+      ],
+      "slug": "jump-game",
+      "act": 2
+    },
+    {
+      "id": "43-5",
+      "row": 43,
+      "col": 5,
+      "edges_out": [
+        "44-4"
+      ],
+      "slug": "sliding-window-maximum",
+      "act": 2
+    },
+    {
+      "id": "44-2",
+      "row": 44,
+      "col": 2,
+      "edges_out": [
+        "45-1"
+      ],
+      "slug": "minimum-window-substring",
+      "act": 2
+    },
+    {
+      "id": "44-3",
+      "row": 44,
+      "col": 3,
+      "edges_out": [
+        "45-2"
+      ],
+      "slug": "powx-n",
+      "act": 2
+    },
+    {
+      "id": "44-4",
+      "row": 44,
+      "col": 4,
+      "edges_out": [
+        "45-3"
+      ],
+      "slug": "sum-of-subarray-minimums",
+      "act": 2
+    },
+    {
+      "id": "45-1",
+      "row": 45,
+      "col": 1,
+      "edges_out": [
+        "46-0"
+      ],
+      "slug": "reverse-integer",
+      "act": 2
+    },
+    {
+      "id": "45-2",
+      "row": 45,
+      "col": 2,
+      "edges_out": [
+        "46-1"
+      ],
+      "slug": "remove-k-digits",
+      "act": 2
+    },
+    {
+      "id": "45-3",
+      "row": 45,
+      "col": 3,
+      "edges_out": [
+        "46-2"
+      ],
+      "slug": "word-ladder",
+      "act": 2
+    },
+    {
+      "id": "46-0",
+      "row": 46,
+      "col": 0,
+      "edges_out": [
+        "47-1"
+      ],
+      "slug": "largest-rectangle-in-histogram",
+      "act": 2
+    },
+    {
+      "id": "46-1",
+      "row": 46,
+      "col": 1,
+      "edges_out": [
+        "47-2"
+      ],
+      "slug": "candy",
+      "act": 2
+    },
+    {
+      "id": "46-2",
+      "row": 46,
+      "col": 2,
+      "edges_out": [
+        "47-2"
+      ],
+      "slug": "minimum-cost-to-make-array-equal",
+      "act": 2
+    },
+    {
+      "id": "47-1",
+      "row": 47,
+      "col": 1,
+      "edges_out": [
+        "48-0"
+      ],
+      "slug": "super-washing-machines",
+      "act": 2
+    },
+    {
+      "id": "47-2",
+      "row": 47,
+      "col": 2,
+      "edges_out": [
+        "48-2"
+      ],
+      "slug": "binary-tree-maximum-path-sum",
+      "act": 2
+    },
+    {
+      "id": "48-0",
+      "row": 48,
+      "col": 0,
+      "edges_out": [
+        "49-4"
+      ],
+      "slug": "sliding-window-median",
+      "act": 2
+    },
+    {
+      "id": "48-2",
+      "row": 48,
+      "col": 2,
+      "edges_out": [
+        "49-4"
+      ],
+      "slug": "alien-dictionary",
+      "act": 2
+    },
+    {
+      "id": "49-4",
+      "row": 49,
+      "col": 4,
+      "edges_out": [],
+      "slug": "widest-possible-fence",
+      "act": 2
+    }
+  ]
+}
