@@ -154,6 +154,31 @@ export function getEnrichedAttempts(
   });
 }
 
+// Consecutive-day practice streak ending today (or yesterday, so a streak
+// isn't "broken" before you've practiced today).
+export function currentStreak(): number {
+  const log = getAllAttempts();
+  const days = new Set<number>();
+  for (const list of Object.values(log)) {
+    for (const a of list) {
+      const d = new Date(a.at);
+      d.setHours(0, 0, 0, 0);
+      days.add(d.getTime());
+    }
+  }
+  if (days.size === 0) return 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  let t = today.getTime();
+  if (!days.has(t)) t -= 86400000;
+  let streak = 0;
+  while (days.has(t)) {
+    streak += 1;
+    t -= 86400000;
+  }
+  return streak;
+}
+
 // ---------------- Chart data builders ----------------
 
 export interface EloPoint {

@@ -11,13 +11,29 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 32px;
+  padding: 40px 32px;
   text-align: center;
   border: 4px solid #000;
   background: #fff;
   box-shadow: 8px 8px 0 0 #000;
-  margin-top: 20px;
+  margin: 40px auto 0;
+  max-width: 520px;
   color: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.analytics-empty strong {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.analytics-empty-icon {
+  font-size: 40px;
+  color: #ff6b6b;
 }
 
 .stat-row {
@@ -146,6 +162,14 @@
   text-anchor: middle;
 }
 
+.hm-cell {
+  fill: #000;
+  font-size: 10px;
+  font-weight: 900;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
 .retry-table-wrap {
   overflow-x: auto;
   border: 4px solid #000;
@@ -201,6 +225,115 @@
 .r-tag.abandoned,
 .r-tag.failed {
   background: #ff6b6b;
+}
+
+.ach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.ach-card {
+  border: 3px solid #000;
+  background: #fff;
+  box-shadow: 4px 4px 0 0 #000;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ach-card strong {
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.ach-card p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #000;
+  opacity: 0.75;
+  line-height: 1.35;
+}
+
+.ach-card.locked {
+  background: #f1ede2;
+  box-shadow: none;
+  opacity: 0.65;
+}
+
+.ach-title {
+  align-self: flex-start;
+  border: 2px solid #000;
+  background: #ffd93d;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #000;
+}
+
+.ach-title:disabled {
+  background: #fff;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.ach-title.equipped {
+  background: #4ade80;
+}
+
+.coach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.coach-card {
+  border: 3px solid #000;
+  background: #fff;
+  box-shadow: 4px 4px 0 0 #000;
+  padding: 10px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.coach-card strong {
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.coach-card .coach-req {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #000;
+  opacity: 0.65;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.coach-card.locked {
+  background: #f1ede2;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.coach-card.equipped {
+  background: #d9f7e4;
+  outline: 3px solid #4ade80;
+  outline-offset: -3px;
 }
 
 @media (max-width: 1100px) {

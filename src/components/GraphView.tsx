@@ -30,12 +30,22 @@ import {
   FaPenToSquare,
   FaPaperPlane,
   FaShieldHalved,
+  FaSkull,
+  FaStopwatch,
+  FaBan,
+  FaKhanda,
 } from "react-icons/fa6";
 import { type MapData, type MapNode } from "../map";
 import { type Problem } from "../data/problems";
 import { deriveNodeStatus, type NodeStatus } from "../state/nodeState";
-import { addAttempt, touchedSlugs, type Attempt, type AttemptResult, type FailureMode } from "../state/attempts";
+import { touchedSlugs, type Attempt, type AttemptResult, type FailureMode } from "../state/attempts";
+import { currentStreak } from "../state/analytics";
+import { submitAttempt } from "../state/progress";
+import { dueReviews, type ReviewItem } from "../state/reviews";
+import { modifierOf, timedLimit, MODIFIER_META, type Modifier } from "../state/modifiers";
+import { emitCoach } from "../state/coachBus";
 import type { MapMeta } from "../state/library";
+import { Celebration, type CelebrationData } from "./Celebration";
 
 const ROW_HEIGHT = 300;
 const COL_WIDTH = 300;
@@ -81,7 +91,21 @@ interface SquareData extends Record<string, unknown> {
   topics: string;
   act: number;
   future: boolean;
+  modifier: Modifier | null;
+  rematchDue: boolean;
 }
+
+const MODIFIER_ICON: Record<Modifier, ReactNode> = {
+  elite: <FaSkull />,
+  timed: <FaStopwatch />,
+  purist: <FaBan />,
+};
+
+const MODIFIER_BG: Record<Modifier, string> = {
+  elite: "bg-black text-white",
+  timed: "bg-neo-blue text-black",
+  purist: "bg-neo-pink text-white",
+};
 
 // Literal class strings so Tailwind's content scanner picks them up.
 const STATUS_STYLE: Record<NodeStatus, string> = {
@@ -137,16 +161,24 @@ function SquareNode({ data }: NodeProps) {
     <motion.div
       initial={{ scale: 0.6, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      whileHover={{ scale: 1.07, rotate: d.current ? -2 : 1.5 }}
-      whileTap={{ scale: 0.94 }}
+      whileHover={{ scale: 1.08, y: -5, rotate: d.current ? -2 : 1.5 }}
+      whileTap={{ scale: 0.92, rotate: 0 }}
       transition={{ type: "spring", stiffness: 420, damping: 20 }}
-      className={`relative flex flex-col justify-between overflow-visible border-4 border-black p-2 shadow-neo-sm ${
+      className={`group relative flex flex-col justify-between overflow-visible border-4 border-black p-2 shadow-neo-sm ${
         d.future ? "opacity-60" : statusCls
       } ${d.current ? "!bg-neo-accent !text-black !shadow-neo z-10" : ""} ${
         d.future ? "cursor-not-allowed" : d.available ? "cursor-pointer" : "cursor-default"
       }`}
       style={{ width: SQ_W, height: SQ_H }}
     >
+      {d.available && !d.current && (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute -inset-2 z-0 border-4 border-neo-accent"
+          animate={{ opacity: [0.9, 0.15, 0.9], scale: [1, 1.06, 1] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
       <Handle id="top-0" type="source" position={Position.Top} isConnectable={false} style={{ left: "16.6%", opacity: 0, pointerEvents: "none" }} />
       <Handle id="top-1" type="source" position={Position.Top} isConnectable={false} style={{ left: "50%", opacity: 0, pointerEvents: "none" }} />
       <Handle id="top-2" type="source" position={Position.Top} isConnectable={false} style={{ left: "83.3%", opacity: 0, pointerEvents: "none" }} />
@@ -154,12 +186,17 @@ function SquareNode({ data }: NodeProps) {
       <Handle id="bottom-1" type="target" position={Position.Bottom} isConnectable={false} style={{ left: "50%", opacity: 0, pointerEvents: "none" }} />
       <Handle id="bottom-2" type="target" position={Position.Bottom} isConnectable={false} style={{ left: "83.3%", opacity: 0, pointerEvents: "none" }} />
 
-      <div className="absolute left-1 top-1 grid h-6 w-6 place-items-center border-2 border-black bg-white">
+      <div className="absolute left-1 top-1 grid h-6 w-6 place-items-center border-2 border-black bg-white transition-transform duration-150 group-hover:scale-110">
         <StatusBadge status={d.status} current={d.current} />
       </div>
 
-      <div className={`absolute -right-2 -top-3 z-20 flex rotate-6 items-center gap-0.5 border-4 border-black ${diffRibbon} px-1.5 py-0.5 text-[11px] font-black shadow-neo-sm`}>
-        <FaBolt className="text-[10px]" /> {d.elo}
+      <div className="absolute -right-2 -top-3 z-20 flex -rotate-3 items-stretch border-2 border-black bg-black shadow-neo-sm transition-all duration-150 group-hover:rotate-0 group-hover:scale-110">
+        <span className={`grid place-items-center px-1 ${diffRibbon}`}>
+          <FaBolt className="text-[9px] text-black" />
+        </span>
+        <span className="px-1.5 py-0.5 text-[11px] font-black tabular-nums leading-none text-white">
+          {d.elo}
+        </span>
       </div>
 
       <div className={`absolute inset-x-0 top-0 z-0 h-2 ${diffRibbon}`} />
@@ -176,7 +213,26 @@ function SquareNode({ data }: NodeProps) {
         <span className={`flex items-center gap-1 border-2 border-black px-1.5 py-0.5 text-[9px] font-black uppercase ${diffCls}`}>
           {diffIcon} {d.difficulty}
         </span>
+        {d.modifier && (
+          <span
+            title={MODIFIER_META[d.modifier].desc}
+            className={`flex items-center gap-1 border-2 border-black px-1.5 py-0.5 text-[9px] font-black uppercase transition-transform duration-150 group-hover:-rotate-3 group-hover:scale-110 ${MODIFIER_BG[d.modifier]}`}
+          >
+            {MODIFIER_ICON[d.modifier]} {MODIFIER_META[d.modifier].label}
+          </span>
+        )}
       </div>
+
+      {d.rematchDue && (
+        <motion.div
+          animate={{ rotate: [-8, 8, -8] }}
+          transition={{ duration: 1.2, repeat: Infinity }}
+          title="Rematch due — beat it this time"
+          className="absolute -bottom-3 -left-2 z-20 grid h-7 w-7 place-items-center border-4 border-black bg-neo-accent text-[12px] text-white shadow-neo-sm"
+        >
+          <FaKhanda />
+        </motion.div>
+      )}
     </motion.div>
   );
 }
@@ -190,6 +246,10 @@ function Legend() {
     { label: "Solved", cls: "bg-neo-ok", icon: <FaCircleCheck className="text-[10px]" /> },
     { label: "Solved w/ help", cls: "bg-neo-muted", icon: <FaCheckDouble className="text-[10px]" /> },
     { label: "Failed", cls: "bg-white border-neo-accent", icon: <FaXmark className="text-[10px]" /> },
+    { label: "Elite ×1.5", cls: "bg-black", icon: <FaSkull className="text-[10px] text-white" /> },
+    { label: "Timed bonus", cls: "bg-neo-blue", icon: <FaStopwatch className="text-[10px]" /> },
+    { label: "Purist bonus", cls: "bg-neo-pink", icon: <FaBan className="text-[10px] text-white" /> },
+    { label: "Rematch due", cls: "bg-neo-accent", icon: <FaKhanda className="text-[10px] text-white" /> },
   ];
   return (
     <motion.div
@@ -224,6 +284,7 @@ function ReportPanel({
   onClose: () => void;
   onSubmit: (a: Attempt) => void;
 }) {
+  const modifier = modifierOf(problem.slug);
   const [result, setResult] = useState<AttemptResult>("solved");
   const [readTime, setReadTime] = useState(0);
   const [writeTime, setWriteTime] = useState(() =>
@@ -259,8 +320,13 @@ function ReportPanel({
             <span className={`neo-tag ${DIFF_STYLE[problem.difficulty] ?? "bg-neo-secondary text-black"}`}>
               {problem.difficulty}
             </span>
-            <span className="neo-tag bg-white">
-              <FaBolt /> {problem.elo}
+            <span className="inline-flex items-stretch border-4 border-black bg-black shadow-neo-sm">
+              <span className="grid place-items-center bg-neo-secondary px-1.5">
+                <FaBolt className="text-[10px] text-black" />
+              </span>
+              <span className="px-2 py-0.5 text-xs font-black uppercase tracking-widest text-white">
+                Elo {problem.elo}
+              </span>
             </span>
           </div>
           <div className="mt-2 flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-black/70">
@@ -288,40 +354,88 @@ function ReportPanel({
         <FaArrowUpRightFromSquare /> Open problem
       </motion.a>
 
-      <label className="flex flex-col gap-1.5 text-sm font-bold uppercase tracking-wide">
+      {modifier && (
+        <div className={`flex items-center gap-2 border-4 border-black p-2 text-[11px] font-black uppercase shadow-neo-sm ${MODIFIER_BG[modifier]}`}>
+          {MODIFIER_ICON[modifier]}
+          <span>
+            {MODIFIER_META[modifier].label} node — {MODIFIER_META[modifier].desc}
+            {modifier === "timed" && ` Limit: ${Math.round(timedLimit(problem.difficulty) / 60)} min.`}
+          </span>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-1.5 text-sm font-bold uppercase tracking-wide">
         <span className="flex items-center gap-1">
           <FaCircleCheck className="text-neo-ok" /> Result
         </span>
-        <select
-          className="neo-input"
-          value={result}
-          onChange={(e) => setResult(e.target.value as AttemptResult)}
-        >
-          <option value="solved">Solved</option>
-          <option value="solved_with_help">Solved with help</option>
-          <option value="gave_up">Gave up</option>
-          <option value="abandoned">Abandoned mid-attempt</option>
-        </select>
-      </label>
+        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Result">
+          {(
+            [
+              { val: "solved", label: "Solved", cls: "bg-neo-ok", icon: <FaCircleCheck key="i" /> },
+              { val: "solved_with_help", label: "With help", cls: "bg-neo-muted", icon: <FaCheckDouble key="i" /> },
+              { val: "gave_up", label: "Gave up", cls: "bg-neo-accent", icon: <FaXmark key="i" /> },
+              { val: "abandoned", label: "Abandoned", cls: "bg-neo-secondary", icon: <FaArrowRight key="i" /> },
+            ] as { val: AttemptResult; label: string; cls: string; icon: ReactNode }[]
+          ).map((o) => (
+            <motion.button
+              key={o.val}
+              type="button"
+              role="radio"
+              aria-checked={result === o.val}
+              whileHover={{ y: -3, rotate: -1 }}
+              whileTap={{ scale: 0.93 }}
+              onClick={() => setResult(o.val)}
+              className={`flex items-center justify-center gap-1.5 border-4 border-black px-2 py-2.5 text-xs font-black uppercase transition-all duration-100 ${
+                result === o.val
+                  ? `${o.cls} shadow-neo-sm`
+                  : "bg-white text-black/60 hover:text-black hover:bg-neo-bg"
+              }`}
+            >
+              {o.icon} {o.label}
+            </motion.button>
+          ))}
+        </div>
+      </div>
 
-      {isFailure && (
-        <label className="flex flex-col gap-1.5 text-sm font-bold uppercase tracking-wide">
-          <span className="flex items-center gap-1">
-            <FaXmark className="text-neo-accent" /> Failure mode
-          </span>
-          <select
-            className="neo-input"
-            value={failureMode}
-            onChange={(e) => setFailureMode(e.target.value as FailureMode | "")}
+      <AnimatePresence initial={false}>
+        {isFailure && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="flex flex-col gap-1.5 overflow-hidden text-sm font-bold uppercase tracking-wide"
           >
-            <option value="">— not specified —</option>
-            <option value="wrong-answer">Wrong answer</option>
-            <option value="tle">Time limit exceeded</option>
-            <option value="runtime-error">Runtime error</option>
-            <option value="compile-error">Compile error</option>
-          </select>
-        </label>
-      )}
+            <span className="flex items-center gap-1">
+              <FaXmark className="text-neo-accent" /> Failure mode
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {(
+                [
+                  { val: "wrong-answer", label: "Wrong answer" },
+                  { val: "tle", label: "TLE" },
+                  { val: "runtime-error", label: "Runtime err" },
+                  { val: "compile-error", label: "Compile err" },
+                ] as { val: FailureMode; label: string }[]
+              ).map((o) => (
+                <motion.button
+                  key={o.val}
+                  type="button"
+                  whileTap={{ scale: 0.93 }}
+                  onClick={() => setFailureMode(failureMode === o.val ? "" : o.val)}
+                  aria-pressed={failureMode === o.val}
+                  className={`border-4 border-black px-2.5 py-1.5 text-[11px] font-black uppercase transition-all duration-100 ${
+                    failureMode === o.val
+                      ? "bg-neo-accent shadow-neo-sm"
+                      : "bg-white text-black/60 hover:text-black hover:bg-neo-bg"
+                  }`}
+                >
+                  {o.label}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <fieldset className="flex flex-col gap-2 border-4 border-black bg-white p-3 shadow-neo-sm">
         <legend className="flex items-center gap-1 px-2 text-xs font-black uppercase tracking-widest">
@@ -399,23 +513,28 @@ function ReportPanel({
         </label>
       </fieldset>
 
-      <div className="flex flex-col gap-2 border-4 border-black bg-white p-3 shadow-neo-sm">
+      <div className="grid grid-cols-3 gap-2">
         {(
           [
-            { label: "Used hints", val: hints, setter: setHints, icon: <FaLightbulb key="h" className="text-neo-orange" /> },
-            { label: "Used AI", val: ai, setter: setAi, icon: <FaRobot key="a" className="text-neo-pink" /> },
-            { label: "Verified syntax", val: verified, setter: setVerified, icon: <FaShieldHalved key="v" className="text-neo-blue" /> },
+            { label: "Hints", val: hints, setter: setHints, icon: <FaLightbulb key="h" /> },
+            { label: "AI", val: ai, setter: setAi, icon: <FaRobot key="a" /> },
+            { label: "Verified", val: verified, setter: setVerified, icon: <FaShieldHalved key="v" /> },
           ] as { label: string; val: boolean; setter: (b: boolean) => void; icon: ReactNode }[]
         ).map(({ label, val, setter, icon }) => (
-          <label key={label} className="flex items-center gap-2 text-xs font-bold uppercase">
-            <input
-              type="checkbox"
-              checked={val}
-              onChange={(e) => setter(e.target.checked)}
-              className="h-5 w-5 accent-[#FF6B6B]"
-            />
-            {icon} {label}
-          </label>
+          <motion.button
+            key={label}
+            type="button"
+            whileHover={{ y: -3, rotate: 1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setter(!val)}
+            aria-pressed={val}
+            className={`flex flex-col items-center gap-1 border-4 border-black px-2 py-2.5 text-[11px] font-black uppercase transition-all duration-100 ${
+              val ? "bg-neo-secondary shadow-neo-sm" : "bg-white text-black/60 hover:text-black hover:bg-neo-bg"
+            }`}
+          >
+            <span className="text-base">{icon}</span>
+            {label}
+          </motion.button>
         ))}
       </div>
 
@@ -463,9 +582,11 @@ function ReportPanel({
 export function GraphView({
   map,
   viewAct,
+  onAttempt,
 }: {
   map: MapMeta;
   viewAct: number;
+  onAttempt?: () => void;
 }) {
   const data: MapData = map.nodes;
   const bySlug = map.problems;
@@ -490,6 +611,17 @@ export function GraphView({
   });
   const [selected, setSelected] = useState<string | null>(null);
   const [startTime, setStartTime] = useState(0);
+  const [celebration, setCelebration] = useState<CelebrationData | null>(null);
+  // Rematch (spaced-repetition) state.
+  const [attemptsRev, setAttemptsRev] = useState(0);
+  const [rematchSlug, setRematchSlug] = useState<string | null>(null);
+  const [showRematches, setShowRematches] = useState(false);
+  const mapSlugs = useMemo(() => new Set(data.map((n) => n.slug)), [data]);
+  const due: ReviewItem[] = useMemo(() => {
+    void attemptsRev;
+    return dueReviews(mapSlugs);
+  }, [mapSlugs, attemptsRev]);
+  const dueSet = useMemo(() => new Set(due.map((r) => r.slug)), [due]);
   const rfRef = useRef<ReactFlowInstance | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
@@ -585,10 +717,22 @@ export function GraphView({
     return { fromIdx, toIdx };
   };
 
-  const available = useMemo(() => {
-    if (current === null) return data.filter((n) => n.row === 0).map((n) => n.id);
-    return data.find((n) => n.id === current)?.edges_out ?? [];
-  }, [data, current]);
+  // A node is attemptable when order isn't broken: entry-row nodes are always
+  // open, and any untouched node unlocks once ANY of its parents has been
+  // attempted. This opens sibling paths for extra practice instead of locking
+  // you to a single walk like real StS.
+  const available = useMemo(
+    () =>
+      data
+        .filter((n) => {
+          if (visited.has(n.id)) return false;
+          if (n.row === 0) return true;
+          const parents = inEdges.get(n.id) ?? [];
+          return parents.some((p) => visited.has(p));
+        })
+        .map((n) => n.id),
+    [data, visited, inEdges]
+  );
 
   const statusOf = (n: MapNode): NodeStatus => {
     const st = deriveNodeStatus(n.slug);
@@ -617,10 +761,12 @@ export function GraphView({
               topics: (bySlug[n.slug]?.topics ?? []).join(" · "),
               act: n.act,
               future: false,
+              modifier: modifierOf(n.slug),
+              rematchDue: dueSet.has(n.slug),
             } as SquareData,
           };
         }),
-    [data, pos, available, visited, current, viewAct]
+    [data, pos, available, visited, current, viewAct, dueSet]
   );
 
   const rfEdges: Edge[] = useMemo(
@@ -651,19 +797,51 @@ export function GraphView({
     if (!available.includes(id)) return;
     setSelected(id);
     setStartTime(Date.now());
+    const slug = data.find((n) => n.id === id)?.slug;
+    emitCoach({ type: "opened", title: (slug && bySlug[slug]?.title) || "this one" });
   }
 
   function submitReport(a: Attempt) {
-    if (!selected) return;
-    const slug = data.find((n) => n.id === selected)!.slug;
-    addAttempt(slug, { ...a, at: Date.now() });
-    setVisited((prev) => new Set(prev).add(selected));
-    setCurrent(selected);
+    const slug = rematchSlug ?? (selected ? data.find((n) => n.id === selected)!.slug : null);
+    if (!slug) return;
+    const outcome = submitAttempt(slug, { ...a, at: Date.now() });
+    if (selected && !rematchSlug) {
+      setVisited((prev) => new Set(prev).add(selected));
+      setCurrent(selected);
+    }
     setSelected(null);
+    setRematchSlug(null);
+    setAttemptsRev((r) => r + 1);
+    const p = bySlug[slug];
+    setCelebration({
+      kind: a.result === "solved" ? "solved" : a.result === "solved_with_help" ? "assisted" : "logged",
+      title: p?.title ?? slug,
+      elo: p?.elo ?? 0,
+      streak: currentStreak(),
+      seq: Date.now(),
+      ratingDelta: outcome.ratingDelta,
+      ratingAfter: outcome.ratingAfter,
+      achievements: outcome.newAchievements.map((x) => x.name),
+      questCompleted: outcome.questJustCompleted,
+    });
+    if (outcome.newAchievements.length > 0) {
+      emitCoach({ type: "achievement", name: outcome.newAchievements[0].name });
+    } else if (a.result === "solved") {
+      emitCoach({ type: "solved", clean: !a.hints && !a.ai });
+    } else if (a.result === "solved_with_help") {
+      emitCoach({ type: "assisted" });
+    } else {
+      emitCoach({ type: "failed" });
+    }
+    onAttempt?.();
   }
 
   const selectedNode = selected ? data.find((n) => n.id === selected) : null;
-  const selectedProblem = selectedNode ? bySlug[selectedNode.slug] : null;
+  const selectedProblem = rematchSlug
+    ? (bySlug[rematchSlug] ?? null)
+    : selectedNode
+      ? bySlug[selectedNode.slug]
+      : null;
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col p-3 md:p-5">
@@ -702,6 +880,71 @@ export function GraphView({
         </ReactFlow>
 
         <Legend />
+
+        {/* Rematch queue badge + drawer */}
+        {due.length > 0 && (
+          <motion.button
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            whileTap={{ scale: 0.93 }}
+            onClick={() => setShowRematches((s) => !s)}
+            className="absolute right-4 top-4 z-20 flex rotate-1 items-center gap-2 border-4 border-black bg-neo-accent px-3 py-2 text-sm font-black uppercase text-white shadow-neo"
+          >
+            <motion.span animate={{ rotate: [-10, 10, -10] }} transition={{ duration: 1.2, repeat: Infinity }}>
+              <FaKhanda />
+            </motion.span>
+            {due.length} rematch{due.length > 1 ? "es" : ""} due
+          </motion.button>
+        )}
+        <AnimatePresence>
+          {showRematches && due.length > 0 && (
+            <motion.div
+              initial={{ x: 40, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 40, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 26 }}
+              className="absolute right-4 top-16 z-20 flex max-h-[60%] w-72 flex-col overflow-hidden border-4 border-black bg-white shadow-neo"
+            >
+              <div className="border-b-4 border-black bg-neo-secondary px-3 py-2 text-xs font-black uppercase">
+                Beat them this time
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                {due.map((r) => {
+                  const p = bySlug[r.slug];
+                  return (
+                    <motion.button
+                      key={r.slug}
+                      whileHover={{ x: 5 }}
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => {
+                        setRematchSlug(r.slug);
+                        setSelected(null);
+                        setStartTime(Date.now());
+                        setShowRematches(false);
+                      }}
+                      className="flex w-full items-center justify-between gap-2 border-b-2 border-black px-3 py-2 text-left transition-colors hover:bg-neo-bg"
+                    >
+                      <div className="min-w-0">
+                        <div className="truncate text-xs font-black uppercase">{p?.title ?? r.slug}</div>
+                        <div className="text-[10px] font-bold uppercase text-black/60">
+                          {p?.elo ?? "?"} elo · last: {r.lastResult.replace(/_/g, " ")}
+                          {r.overdueDays > 0 ? ` · ${r.overdueDays}d overdue` : " · due today"}
+                        </div>
+                      </div>
+                      <FaKhanda className="shrink-0 text-neo-accent" />
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {celebration && (
+            <Celebration data={celebration} onDone={() => setCelebration(null)} />
+          )}
+        </AnimatePresence>
       </div>
 
       <AnimatePresence>
@@ -709,7 +952,10 @@ export function GraphView({
           <ReportPanel
             problem={selectedProblem}
             startTime={startTime}
-            onClose={() => setSelected(null)}
+            onClose={() => {
+              setSelected(null);
+              setRematchSlug(null);
+            }}
             onSubmit={submitReport}
           />
         )}

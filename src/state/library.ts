@@ -66,13 +66,19 @@ const DESCRIPTORS: Descriptor[] = [
   },
 ];
 
+// Parsing a CSV per call is wasteful — derived systems (rating, achievements)
+// rebuild maps often, so cache by id. Maps are immutable at runtime.
+const buildCache = new Map<string, MapMeta>();
+
 function build(id: string, json: unknown, csv: string): MapMeta {
+  const cached = buildCache.get(id);
+  if (cached) return cached;
   const j = json as MapJson;
   const problems = parseProblems(csv);
   const bySlug: Record<string, Problem> = Object.fromEntries(
     problems.map((p) => [p.slug, p])
   );
-  return {
+  const meta: MapMeta = {
     id,
     name: j.name,
     description: DESCRIPTORS.find((d) => d.id === id)?.description ?? "",
@@ -82,6 +88,8 @@ function build(id: string, json: unknown, csv: string): MapMeta {
     eloMax: j.eloMax,
     createdAt: Date.now(),
   };
+  buildCache.set(id, meta);
+  return meta;
 }
 
 export function listMaps() {
@@ -96,6 +104,7 @@ export function listMaps() {
       eloMax: m.eloMax,
       nodeCount: m.nodes.length,
       acts,
+      progress: progressOf(m),
     };
   });
 }
