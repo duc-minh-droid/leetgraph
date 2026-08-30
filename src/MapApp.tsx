@@ -17,7 +17,7 @@ import { AnalyticsView } from "./components/AnalyticsView";
 import { AchievementsView } from "./components/AchievementsView";
 import { Coach } from "./components/Coach";
 import { getMap, listMaps, progressOf, currentActOf } from "./state/library";
-import { currentRating } from "./state/rating";
+import { currentEngine, decayCountdown, RANKS } from "./state/rating";
 import { equippedTitle } from "./state/achievements";
 import { currentStreak } from "./state/analytics";
 
@@ -29,9 +29,12 @@ type Tab = "map" | "analytics" | "awards" | "interview";
 const tap = { scale: 0.94 };
 const hover = { scale: 1.04 };
 
-// Rating (with animated ± delta) · streak.
+// Rank badge (with animated ± delta) · promo series · streak.
 function PlayerStrip({ rev }: { rev: number }) {
-  const rating = useMemo(() => currentRating(), [rev]);
+  const engine = useMemo(() => currentEngine(), [rev]);
+  const rating = engine.rating;
+  const rank = RANKS[engine.rankIdx];
+  const decayIn = useMemo(() => decayCountdown(), [rev]);
   const title = useMemo(() => equippedTitle(), [rev]);
   const streak = useMemo(() => currentStreak(), [rev]);
 
@@ -52,10 +55,15 @@ function PlayerStrip({ rev }: { rev: number }) {
       <motion.div
         whileHover={{ y: -2, rotate: -1 }}
         className="relative flex items-stretch border-4 border-black bg-black shadow-neo-sm"
-        title={`Your Elo rating — playing as "${title}"`}
+        title={`${rank.name} — ${rating} rating, playing as "${title}". Next rank at ${
+          RANKS[engine.rankIdx + 1]?.min ?? "—"
+        }.${decayIn === 0 ? " DECAYING −5/day — go solve something!" : ""}`}
       >
-        <span className="flex items-center gap-1 bg-neo-secondary px-1.5 text-[10px] font-black uppercase tracking-widest text-black">
-          <FaRankingStar /> Elo
+        <span
+          className="flex items-center gap-1 px-1.5 text-[10px] font-black uppercase tracking-widest"
+          style={{ background: rank.color, color: rank.text }}
+        >
+          <FaRankingStar /> {rank.name}
         </span>
         <motion.span
           key={rating}
@@ -65,6 +73,16 @@ function PlayerStrip({ rev }: { rev: number }) {
         >
           {rating}
         </motion.span>
+        {decayIn === 0 && (
+          <motion.span
+            animate={{ opacity: [1, 0.4, 1] }}
+            transition={{ duration: 1.2, repeat: Infinity }}
+            className="flex items-center bg-neo-accent px-1 text-[9px] font-black uppercase text-white"
+            title="Inactivity decay is draining your rating — solve anything to stop it"
+          >
+            −5/d
+          </motion.span>
+        )}
         <AnimatePresence>
           {delta !== 0 && (
             <motion.span
@@ -83,10 +101,22 @@ function PlayerStrip({ rev }: { rev: number }) {
         </AnimatePresence>
       </motion.div>
 
+      {engine.promo && (
+        <motion.span
+          initial={{ scale: 0 }}
+          animate={{ scale: 1, rotate: [-2, 2, -2] }}
+          transition={{ rotate: { duration: 1.2, repeat: Infinity } }}
+          title={`PROMOTION SERIES for ${RANKS[engine.promo.target].name}: win 2 of 3. Currently ${engine.promo.wins}W–${engine.promo.losses}L.`}
+          className="flex items-center gap-1 border-4 border-black bg-black px-2 py-1 text-[10px] font-black uppercase text-neo-secondary shadow-neo-sm"
+        >
+          <FaTrophy /> Promos {engine.promo.wins}–{engine.promo.losses}
+        </motion.span>
+      )}
+
       {streak > 0 && (
         <motion.span
           whileHover={{ y: -2, rotate: 2, scale: 1.06 }}
-          title={`${streak}-day practice streak`}
+          title={`${streak}-day practice streak — it also defends your rating from decay`}
           className="flex items-center gap-1 border-4 border-black bg-white px-2 py-1 text-xs font-black shadow-neo-sm"
         >
           <FaFire className="text-neo-orange" /> {streak}

@@ -46,12 +46,13 @@ import { submitAttempt } from "../state/progress";
 import { dueReviews, type ReviewItem } from "../state/reviews";
 import { modifierOf, MODIFIER_META, type Modifier } from "../state/modifiers";
 import { effectiveTimedLimit } from "../state/relics";
+import { currentRating, farmCutoff, RANKS } from "../state/rating";
 import { emitCoach } from "../state/coachBus";
 import { mysteryPending, isMysteryNode } from "../state/events";
 import { getInventory, type Inventory } from "../state/inventory";
 import type { MapMeta } from "../state/library";
 import { Celebration, type CelebrationData } from "./Celebration";
-import { EventModal, ChestModal, BossIntro, Belt } from "./Loot";
+import { EventModal, ChestModal, BossIntro, Belt, RankUpCeremony } from "./Loot";
 
 const ROW_HEIGHT = 300;
 const COL_WIDTH = 300;
@@ -350,6 +351,11 @@ function ReportPanel({
 }) {
   const modifier = modifierOf(problem.slug);
   const [secondChance, setSecondChance] = useState(false);
+  // Farming warning: this problem is too far below your rating to pay out.
+  const beneathYou = useMemo(
+    () => !blind && problem.elo < currentRating() - farmCutoff(),
+    [problem.elo, blind]
+  );
   const [result, setResult] = useState<AttemptResult>("solved");
   const [readTime, setReadTime] = useState(0);
   const [writeTime, setWriteTime] = useState(() =>
@@ -443,6 +449,13 @@ function ReportPanel({
             {MODIFIER_META[modifier].label} node — {MODIFIER_META[modifier].desc}
             {modifier === "timed" && ` Limit: ${Math.round(effectiveTimedLimit(problem.slug, problem.difficulty) / 60)} min.`}
           </span>
+        </div>
+      )}
+
+      {beneathYou && (
+        <div className="flex items-center gap-2 border-4 border-black bg-white p-2 text-[11px] font-black uppercase text-black/70 shadow-neo-sm">
+          <FaBan />
+          <span>Beneath you — {farmCutoff()}+ under your rating. Solving this earns no rating.</span>
         </div>
       )}
 
@@ -720,6 +733,7 @@ export function GraphView({
   const [eventNode, setEventNode] = useState<string | null>(null);
   const [blindAttempt, setBlindAttempt] = useState(false);
   const [bossIntroFor, setBossIntroFor] = useState<string | null>(null);
+  const [rankUpTo, setRankUpTo] = useState<string | null>(null);
   const [shake, setShake] = useState(0);
   // Rematch (spaced-repetition) state.
   const [attemptsRev, setAttemptsRev] = useState(0);
@@ -970,7 +984,17 @@ export function GraphView({
       curseGained: outcome.curseGained,
       curseCleansed: outcome.curseCleansed,
       combo: outcome.comboToday,
+      farmed: outcome.farmed,
+      rankDown: outcome.rankDown,
+      promoNote: outcome.promoLost
+        ? "PROMO SERIES LOST — −10 rating"
+        : outcome.promoArmed && outcome.promo
+          ? `PROMO SERIES: win 2 of 3 for ${RANKS[outcome.promo.target].name}!`
+          : outcome.promo
+            ? `PROMOS: ${outcome.promo.wins}W–${outcome.promo.losses}L`
+            : null,
     });
+    if (outcome.rankUp) setRankUpTo(outcome.rankUp);
     if (outcome.newAchievements.length > 0) {
       emitCoach({ type: "achievement", name: outcome.newAchievements[0].name });
     } else if (a.result === "solved") {
@@ -1141,6 +1165,18 @@ export function GraphView({
         <AnimatePresence>
           {celebration && (
             <Celebration data={celebration} onDone={() => setCelebration(null)} />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {rankUpTo && !celebration && (
+            <RankUpCeremony
+              rankName={rankUpTo}
+              onDone={() => {
+                setRankUpTo(null);
+                setShake((s) => s + 1);
+              }}
+            />
           )}
         </AnimatePresence>
       </motion.div>

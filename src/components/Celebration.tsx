@@ -19,6 +19,9 @@ export interface CelebrationData {
   curseGained?: string | null;
   curseCleansed?: string | null;
   combo?: number; // solves today
+  promoNote?: string | null; // promo series status line
+  rankDown?: string | null; // demoted to this rank
+  farmed?: boolean; // farming cutoff hit — no rating earned
 }
 
 interface Particle {
@@ -62,7 +65,13 @@ export function Celebration({ data, onDone }: { data: CelebrationData; onDone: (
   );
 
   const hasExtras = Boolean(
-    data.achievements?.length || data.questCompleted || data.effectNotes?.length || data.curseGained || data.curseCleansed
+    data.achievements?.length ||
+      data.questCompleted ||
+      data.effectNotes?.length ||
+      data.curseGained ||
+      data.curseCleansed ||
+      data.promoNote ||
+      data.rankDown
   );
   useEffect(() => {
     const t = setTimeout(onDone, (confetti ? 2000 : 1400) + (hasExtras ? 1200 : 0));
@@ -159,6 +168,37 @@ export function Celebration({ data, onDone }: { data: CelebrationData; onDone: (
             </motion.span>
           )}
         </div>
+
+        {data.farmed && (
+          <motion.span
+            initial={{ scale: 0 }}
+            animate={{ scale: 1, rotate: -2 }}
+            transition={{ delay: 0.35, type: "spring", stiffness: 380, damping: 14 }}
+            className="border-2 border-black bg-white px-2 py-0.5 text-[11px] font-black uppercase text-black/70 shadow-neo-sm"
+          >
+            Beneath you — no rating earned
+          </motion.span>
+        )}
+        {data.promoNote && (
+          <motion.span
+            initial={{ scale: 0, rotate: 8 }}
+            animate={{ scale: 1, rotate: -2 }}
+            transition={{ delay: 0.4, type: "spring", stiffness: 380, damping: 14 }}
+            className="border-4 border-black bg-black px-3 py-1 text-sm font-black uppercase text-neo-secondary shadow-neo-sm"
+          >
+            {data.promoNote}
+          </motion.span>
+        )}
+        {data.rankDown && (
+          <motion.span
+            initial={{ scale: 0 }}
+            animate={{ scale: 1, rotate: 2 }}
+            transition={{ delay: 0.4, type: "spring", stiffness: 380, damping: 14 }}
+            className="border-4 border-black bg-neo-accent px-3 py-1 text-sm font-black uppercase text-white shadow-neo-sm"
+          >
+            DEMOTED to {data.rankDown}
+          </motion.span>
+        )}
 
         {(data.effectNotes?.length ?? 0) > 0 && (
           <div className="flex max-w-[300px] flex-wrap items-center justify-center gap-1">

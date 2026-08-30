@@ -2,7 +2,7 @@
 // attempt, writes it, then diffs every derived system (rating, achievements,
 // quest, curses, chests) so the UI can celebrate exactly what changed.
 import { addAttempt, getAttempts, getAllAttempts, type Attempt } from "./attempts";
-import { currentRating } from "./rating";
+import { currentEngine, ratingEngine, RANKS, type PromoState } from "./rating";
 import { unlockedAchievements, ACHIEVEMENTS, type AchievementDef } from "./achievements";
 import { todaysQuest } from "./quests";
 import { getInventory, updateInventory } from "./inventory";
@@ -26,6 +26,13 @@ export interface SubmitOutcome {
   curseCleansed: string | null;
   chestDropped: boolean;
   comboToday: number; // solves today, for the combo chip
+  // Competitive frame events.
+  rankUp: string | null; // new rank name when promoted this attempt
+  rankDown: string | null;
+  promo: PromoState | null; // active promo series after this attempt
+  promoArmed: boolean; // promo just started
+  promoLost: boolean; // promo series just failed
+  farmed: boolean; // hit the farming cutoff — earned nothing
 }
 
 function dayKey(ms: number): string {
@@ -34,7 +41,8 @@ function dayKey(ms: number): string {
 }
 
 export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOptions = {}): SubmitOutcome {
-  const ratingBefore = currentRating();
+  const engineBefore = currentEngine();
+  const ratingBefore = engineBefore.rating;
   const achBefore = unlockedAchievements();
   const questBefore = todaysQuest().done;
 
@@ -107,10 +115,15 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
         .filter((a) => dayKey(a.at) === today && (a.result === "solved" || a.result === "solved_with_help")).length
     : 0;
 
-  const ratingAfter = currentRating();
+  const engineResult = ratingEngine();
+  const engineAfter = engineResult.state;
+  const ratingAfter = engineAfter.rating;
   const achAfter = unlockedAchievements();
   const newAchievements = ACHIEVEMENTS.filter((a) => achAfter.has(a.id) && !achBefore.has(a.id));
   const questJustCompleted = !questBefore && todaysQuest().done;
+  // The just-submitted attempt is the final replay point — the engine already
+  // knows whether it hit the farming cutoff.
+  const farmed = engineResult.points[engineResult.points.length - 1]?.farmed ?? false;
 
   return {
     ratingBefore,
@@ -124,5 +137,12 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
     curseCleansed,
     chestDropped,
     comboToday,
+    rankUp: engineAfter.rankIdx > engineBefore.rankIdx ? RANKS[engineAfter.rankIdx].name : null,
+    rankDown: engineAfter.rankIdx < engineBefore.rankIdx ? RANKS[engineAfter.rankIdx].name : null,
+    promo: engineAfter.promo,
+    promoArmed: !engineBefore.promo && Boolean(engineAfter.promo),
+    promoLost:
+      Boolean(engineBefore.promo) && !engineAfter.promo && engineAfter.rankIdx === engineBefore.rankIdx,
+    farmed,
   };
 }

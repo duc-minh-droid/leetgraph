@@ -13,7 +13,10 @@ import {
 import { getInventory, updateInventory, type Inventory } from "../state/inventory";
 import { eventFor, resolveEvent, type EventResolution } from "../state/events";
 import { draftRelics, relicById, curseById, potionById, type RelicDef, type Rarity } from "../state/relics";
+import { RANKS, type Rank } from "../state/rating";
 import { emitCoach } from "../state/coachBus";
+
+const RANKS_LOOKUP: Record<string, Rank> = Object.fromEntries(RANKS.map((r) => [r.name, r]));
 
 const RARITY_STYLE: Record<Rarity, string> = {
   common: "bg-white",
@@ -225,6 +228,47 @@ export function BossIntro({ title, onDone }: { title: string; onDone: () => void
         >
           {title} — clear it to breach the next act
         </motion.p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ---------------- Rank-up ceremony ----------------
+export function RankUpCeremony({ rankName, onDone }: { rankName: string; onDone: () => void }) {
+  const rank = RANKS_LOOKUP[rankName];
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onAnimationComplete={() => setTimeout(onDone, 2000)}
+      className="absolute inset-0 z-50 grid place-items-center bg-black/85"
+    >
+      <div className="flex flex-col items-center gap-4">
+        <motion.span
+          initial={{ y: -40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="text-sm font-black uppercase tracking-[0.3em] text-white"
+        >
+          Promotion earned
+        </motion.span>
+        <motion.div
+          initial={{ scale: 4, opacity: 0, rotate: 12 }}
+          animate={{ scale: 1, opacity: 1, rotate: -2 }}
+          transition={{ type: "spring", stiffness: 260, damping: 14, delay: 0.15 }}
+          className="border-4 border-black px-10 py-5 shadow-[10px_10px_0_0_#000]"
+          style={{ background: rank?.color ?? "#FFD93D", color: rank?.text ?? "#000" }}
+        >
+          <span className="text-4xl font-black uppercase tracking-tight md:text-6xl">{rankName}</span>
+        </motion.div>
+        <motion.span
+          initial={{ scale: 0 }}
+          animate={{ scale: 1, rotate: [0, -6, 6, 0] }}
+          transition={{ delay: 0.6, type: "spring", stiffness: 300, damping: 12 }}
+          className="border-2 border-black bg-white px-3 py-1 text-xs font-black uppercase shadow-neo-sm"
+        >
+          Defend it. Decay is watching.
+        </motion.span>
       </div>
     </motion.div>
   );

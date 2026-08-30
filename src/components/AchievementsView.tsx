@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { FaTrophy, FaLock, FaCrown, FaUserGroup, FaRankingStar, FaFire } from "react-icons/fa6";
+import { FaTrophy, FaLock, FaCrown, FaUserGroup, FaRankingStar, FaFire, FaCalendarDays } from "react-icons/fa6";
 import {
   ACHIEVEMENTS,
   unlockedAchievements,
@@ -14,7 +14,7 @@ import {
   equipSkin,
   achievementName,
 } from "../state/coachSkins";
-import { currentRating, peakRating } from "../state/rating";
+import { currentEngine, RANKS } from "../state/rating";
 import { currentStreak } from "../state/analytics";
 import { emitCoach } from "../state/coachBus";
 import { CoachPreview } from "./Coach";
@@ -126,9 +126,16 @@ export function AchievementsView({ onChanged }: { onChanged?: () => void }) {
     onChanged?.();
   };
   const unlockedCount = useMemo(() => unlockedAchievements().size, [rev]);
-  const rating = useMemo(() => currentRating(), [rev]);
-  const peak = useMemo(() => peakRating(), [rev]);
+  const engine = useMemo(() => currentEngine(), [rev]);
+  const rating = engine.rating;
+  const rank = RANKS[engine.rankIdx];
+  const peak = engine.peakAllTime;
   const streak = useMemo(() => currentStreak(), [rev]);
+
+  const seasonLabel = (key: string) => {
+    const [y, m] = key.split("-").map(Number);
+    return new Date(y, m - 1, 1).toLocaleString("en", { month: "short", year: "numeric" });
+  };
 
   return (
     <div className="analytics">
@@ -142,13 +149,13 @@ export function AchievementsView({ onChanged }: { onChanged?: () => void }) {
         <motion.div initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.05 }} className="stat">
           <strong>
             <FaRankingStar className="mr-1 inline text-neo-accent" />
-            {rating}
+            {rank.name} · {rating}
           </strong>
-          <span>Elo</span>
+          <span>Rank</span>
         </motion.div>
         <motion.div initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="stat">
           <strong>{peak}</strong>
-          <span>Peak Elo</span>
+          <span>All-time peak</span>
         </motion.div>
         <motion.div initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }} className="stat">
           <strong>
@@ -160,6 +167,41 @@ export function AchievementsView({ onChanged }: { onChanged?: () => void }) {
       </div>
 
       <div className="dash-grid">
+        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
+          <h3><FaCalendarDays className="mr-1 inline text-neo-blue" />Seasons</h3>
+          <p className="dash-sub">
+            Every month your rating soft-resets toward 1000 and the climb restarts — season peaks live here forever.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <motion.div
+              whileHover={{ y: -3, rotate: -1 }}
+              className="flex flex-col gap-1 border-4 border-black p-3 shadow-neo-sm"
+              style={{ background: rank.color, color: rank.text }}
+            >
+              <span className="text-[10px] font-black uppercase tracking-widest opacity-80">
+                Current — {seasonLabel(engine.seasonKey)}
+              </span>
+              <span className="text-lg font-black uppercase">
+                {rank.name} · peak {engine.seasonPeak}
+              </span>
+            </motion.div>
+            {[...engine.seasons].reverse().map((s) => (
+              <motion.div
+                key={s.key}
+                whileHover={{ y: -3, rotate: 1 }}
+                className="flex flex-col gap-1 border-4 border-black bg-white p-3 shadow-neo-sm"
+              >
+                <span className="text-[10px] font-black uppercase tracking-widest text-black/60">
+                  {seasonLabel(s.key)}
+                </span>
+                <span className="text-lg font-black uppercase">
+                  {RANKS[s.rankIdx].name} · peak {s.peak}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
         <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
           <h3><FaTrophy className="mr-1 inline text-neo-orange" />Achievements</h3>
           <p className="dash-sub">Unlock achievements to earn titles — click an unlocked title to wear it.</p>
