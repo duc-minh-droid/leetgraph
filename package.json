@@ -17,6 +17,8 @@
     "@codemirror/lang-rust": "^6.0.2",
     "@elevenlabs/react": "^1.15.0",
     "@excalidraw/excalidraw": "^0.18.1",
+    "@supabase/server": "^1.4.1",
+    "@supabase/supabase-js": "^2.112.4",
     "@uiw/react-codemirror": "^4.25.11",
     "@xyflow/react": "^12.11.5",
     "boneyard-js": "^1.9.0",

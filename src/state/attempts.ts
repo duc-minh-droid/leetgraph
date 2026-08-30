@@ -42,7 +42,7 @@ export interface Attempt {
 
 const KEY = "leegraph.attempts";
 
-type AttemptLog = Record<string, Attempt[]>;
+export type AttemptLog = Record<string, Attempt[]>;
 
 function read(): AttemptLog {
   try {
@@ -68,6 +68,15 @@ export function addAttempt(slug: string, attempt: Attempt) {
   const log = read();
   if (!log[slug]) log[slug] = [];
   log[slug].push(attempt);
+  write(log);
+  // Cloud sync (no-op when signed out / unconfigured) — see state/sync.ts.
+  window.dispatchEvent(
+    new CustomEvent("leetgraph:persist", { detail: { kind: "attempt", slug, attempt } })
+  );
+}
+
+// Replace the whole local mirror (cloud hydration). Does not emit persist events.
+export function replaceAttempts(log: AttemptLog) {
   write(log);
 }
 

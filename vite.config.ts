@@ -10,6 +10,10 @@ export default defineConfig({
     boneyardPlugin({
       routes: ["/", "/map/amazon", "/map/amazon?tab=interview"],
       wait: 2500,
+      // The auth gate blocks the headless capture browser; existing bones in
+      // src/bones keep working. To re-capture after UI changes, temporarily
+      // blank VITE_SUPABASE_URL and restart dev.
+      skipInitial: true,
     }),
   ],
 });

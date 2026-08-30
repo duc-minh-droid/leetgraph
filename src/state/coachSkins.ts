@@ -69,6 +69,15 @@ export function equippedSkin(): CoachSkin {
 
 export function equipSkin(id: string) {
   localStorage.setItem(KEY, id);
+  window.dispatchEvent(
+    new CustomEvent("leetgraph:persist", { detail: { kind: "profile", coachSkin: id } })
+  );
+}
+
+// Cloud hydration setter — no persist emit.
+export function setSkinLocal(id: string | null) {
+  if (id) localStorage.setItem(KEY, id);
+  else localStorage.removeItem(KEY);
 }
 
 // The skin (if any) rewarded by a given achievement — for unlock callouts.

@@ -125,6 +125,12 @@
   grid-column: span 3;
 }
 
+/* Charts stretch to fill their card so grid rows line up with no dead space. */
+.card-dash .recharts-responsive-container {
+  flex: 1 1 auto;
+  min-height: 240px;
+}
+
 .card-dash h3 {
   margin: 8px 0 4px;
   font-size: 18px;

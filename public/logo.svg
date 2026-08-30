@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- LeetGraph — an StS-style node climb: two entry nodes converge and rise
+       to a boss node crowned with a bolt. Neo-brutalist: hard shadow, thick
+       black strokes, flat palette. -->
+  <rect x="6" y="6" width="54" height="54" fill="#000"/>
+  <rect x="2" y="2" width="54" height="54" fill="#FF6B6B" stroke="#000" stroke-width="4"/>
+  <g stroke="#000" stroke-width="4" fill="none">
+    <path d="M15 44 L29 30"/>
+    <path d="M43 44 L29 30"/>
+    <path d="M29 30 L29 14"/>
+  </g>
+  <rect x="9" y="38" width="12" height="12" fill="#FFFDF5" stroke="#000" stroke-width="3"/>
+  <rect x="37" y="38" width="12" height="12" fill="#C4B5FD" stroke="#000" stroke-width="3"/>
+  <rect x="23" y="24" width="12" height="12" fill="#FFFDF5" stroke="#000" stroke-width="3"/>
+  <rect x="21" y="6" width="16" height="16" fill="#FFD93D" stroke="#000" stroke-width="3"/>
+  <path d="M32 8 L26 15 H29.5 L27 20.5 L34 13.5 H30.5 L33.5 8 Z" fill="#000"/>
+</svg>

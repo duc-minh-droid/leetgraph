@@ -31,4 +31,12 @@ export function saveInterview(rec: InterviewRecord) {
   all.push(rec);
   // Cap stored transcripts so localStorage doesn't balloon.
   localStorage.setItem(KEY, JSON.stringify(all.slice(-50)));
+  window.dispatchEvent(
+    new CustomEvent("leetgraph:persist", { detail: { kind: "interview", rec } })
+  );
+}
+
+// Replace the whole local mirror (cloud hydration). Does not emit persist events.
+export function replaceInterviews(list: InterviewRecord[]) {
+  localStorage.setItem(KEY, JSON.stringify(list.slice(-50)));
 }

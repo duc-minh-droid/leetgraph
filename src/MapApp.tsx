@@ -8,12 +8,13 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaFire,
-  FaArrowLeft,
   FaUserTie,
   FaRankingStar,
+  FaTrophy,
 } from "react-icons/fa6";
 import { GraphView } from "./components/GraphView";
 import { AnalyticsView } from "./components/AnalyticsView";
+import { AchievementsView } from "./components/AchievementsView";
 import { Coach } from "./components/Coach";
 import { getMap, listMaps, progressOf, currentActOf } from "./state/library";
 import { currentRating } from "./state/rating";
@@ -23,7 +24,7 @@ import { currentStreak } from "./state/analytics";
 // Heavy tab (CodeMirror + Excalidraw + ElevenLabs SDK) — loaded on demand.
 const InterviewView = lazy(() => import("./components/InterviewView"));
 
-type Tab = "map" | "analytics" | "interview";
+type Tab = "map" | "analytics" | "awards" | "interview";
 
 const tap = { scale: 0.94 };
 const hover = { scale: 1.04 };
@@ -107,7 +108,7 @@ export function MapApp() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get("tab");
   const [tab, setTabState] = useState<Tab>(
-    urlTab === "analytics" || urlTab === "interview" ? urlTab : "map"
+    urlTab === "analytics" || urlTab === "interview" || urlTab === "awards" ? urlTab : "map"
   );
   const setTab = (t: Tab) => {
     setTabState(t);
@@ -130,12 +131,14 @@ export function MapApp() {
     <div className="flex h-full flex-col bg-neo-bg font-display text-neo-ink">
       <header className="flex items-center justify-between gap-2 overflow-x-auto border-b-4 border-black bg-neo-secondary px-3 py-2 md:px-4 [scrollbar-width:none]">
         <div className="flex shrink-0 items-center gap-2">
-          <Link
-            to="/"
-            aria-label="Back to home"
-            className="grid h-9 w-9 rotate-[-2deg] place-items-center border-4 border-black bg-neo-accent shadow-neo-sm transition-transform hover:rotate-0"
-          >
-            <FaArrowLeft className="text-white" />
+          <Link to="/" aria-label="Back to home" title="Back to home">
+            <motion.img
+              src="/logo.svg"
+              alt="LeetGraph"
+              whileHover={{ rotate: -6, scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="h-9 w-9"
+            />
           </Link>
 
           <nav className="flex gap-1.5" aria-label="Primary">
@@ -143,6 +146,7 @@ export function MapApp() {
               [
                 { id: "map", label: "Map", icon: <FaMap key="i" /> },
                 { id: "analytics", label: "Analytics", icon: <FaChartLine key="i" /> },
+                { id: "awards", label: "Awards", icon: <FaTrophy key="i" /> },
                 { id: "interview", label: "Interview", icon: <FaUserTie key="i" />, ribbon: true },
               ] as { id: Tab; label: string; icon: React.ReactNode; ribbon?: boolean }[]
             ).map((t) => (
@@ -228,7 +232,9 @@ export function MapApp() {
         {tab === "map" ? (
           <GraphView map={map} viewAct={viewAct} onAttempt={() => setRev((r) => r + 1)} />
         ) : tab === "analytics" ? (
-          <AnalyticsView map={map} onChanged={() => setRev((r) => r + 1)} />
+          <AnalyticsView map={map} />
+        ) : tab === "awards" ? (
+          <AchievementsView onChanged={() => setRev((r) => r + 1)} />
         ) : (
           <BoneSuspense
             name="interview-room"

@@ -103,4 +103,13 @@ export function equippedTitle(): string {
 
 export function equipTitle(title: string) {
   localStorage.setItem(TITLE_KEY, title);
+  window.dispatchEvent(
+    new CustomEvent("leetgraph:persist", { detail: { kind: "profile", title } })
+  );
+}
+
+// Cloud hydration setter — no persist emit.
+export function setTitleLocal(title: string | null) {
+  if (title) localStorage.setItem(TITLE_KEY, title);
+  else localStorage.removeItem(TITLE_KEY);
 }

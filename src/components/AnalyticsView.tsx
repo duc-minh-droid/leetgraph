@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   FaChartLine,
@@ -9,11 +9,7 @@ import {
   FaRegClock,
   FaRotate,
   FaMap,
-  FaTrophy,
-  FaLock,
   FaCalendarDays,
-  FaCrown,
-  FaUserGroup,
 } from "react-icons/fa6";
 import {
   ResponsiveContainer,
@@ -51,21 +47,6 @@ import {
   type EnrichedAttempt,
 } from "../state/analytics";
 import { ratingHistory, currentRating, START_RATING } from "../state/rating";
-import {
-  ACHIEVEMENTS,
-  unlockedAchievements,
-  equippedTitle,
-  equipTitle,
-} from "../state/achievements";
-import {
-  COACH_SKINS,
-  isSkinUnlocked,
-  equippedSkin,
-  equipSkin,
-  achievementName,
-} from "../state/coachSkins";
-import { emitCoach } from "../state/coachBus";
-import { CoachPreview } from "./Coach";
 import type { MapMeta } from "../state/library";
 import "../analytics.css";
 
@@ -279,108 +260,7 @@ function Calendar({ data }: { data: EnrichedAttempt[] }) {
   );
 }
 
-// Achievements grid + equippable titles.
-function Achievements({ rev, onChanged }: { rev: number; onChanged?: () => void }) {
-  const unlocked = useMemo(() => unlockedAchievements(), [rev]);
-  const equipped = useMemo(() => equippedTitle(), [rev]);
-  return (
-    <div className="ach-grid">
-      {ACHIEVEMENTS.map((a) => {
-        const isUnlocked = unlocked.has(a.id);
-        const isEquipped = a.title === equipped;
-        return (
-          <motion.div
-            key={a.id}
-            whileHover={isUnlocked ? { y: -3, rotate: -1 } : {}}
-            className={`ach-card ${isUnlocked ? "" : "locked"}`}
-          >
-            <div className="flex items-center gap-2">
-              {isUnlocked ? <FaTrophy className="text-neo-orange" /> : <FaLock className="opacity-40" />}
-              <strong>{a.name}</strong>
-            </div>
-            <p>{a.desc}</p>
-            {a.title && (
-              <motion.button
-                whileHover={isUnlocked ? { scale: 1.08, rotate: -2 } : {}}
-                whileTap={isUnlocked ? { scale: 0.9 } : {}}
-                disabled={!isUnlocked}
-                onClick={() => {
-                  equipTitle(a.title!);
-                  onChanged?.();
-                }}
-                className={`ach-title ${isEquipped ? "equipped" : ""}`}
-                title={isUnlocked ? "Equip this title" : "Unlock to equip"}
-              >
-                {isEquipped && <FaCrown className="mr-1 inline text-[10px]" />}
-                {a.title}
-              </motion.button>
-            )}
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-}
-
-// Coach skin locker — skins are achievement rewards.
-function CoachLocker({ rev, onChanged }: { rev: number; onChanged?: () => void }) {
-  const unlocked = useMemo(() => unlockedAchievements(), [rev]);
-  const equipped = useMemo(() => {
-    void rev;
-    return equippedSkin().id;
-  }, [rev]);
-  return (
-    <div className="coach-grid">
-      {COACH_SKINS.map((skin) => {
-        const open = isSkinUnlocked(skin, unlocked);
-        const isEquipped = skin.id === equipped;
-        return (
-          <motion.button
-            key={skin.id}
-            whileHover={open ? { y: -4, rotate: -1 } : {}}
-            whileTap={open ? { scale: 0.93 } : {}}
-            disabled={!open}
-            onClick={() => {
-              equipSkin(skin.id);
-              emitCoach({ type: "skin-equipped", name: skin.name });
-              onChanged?.();
-            }}
-            className={`coach-card ${open ? "" : "locked"} ${isEquipped ? "equipped" : ""}`}
-            title={
-              open
-                ? isEquipped
-                  ? `${skin.name} is your coach`
-                  : `Equip ${skin.name}`
-                : `Unlock via "${achievementName(skin.achievement!)}"`
-            }
-          >
-            <div className={open ? "" : "grayscale opacity-50"}>
-              <CoachPreview skinId={skin.id} size={64} />
-            </div>
-            <strong>{skin.name}</strong>
-            <span className="coach-req">
-              {!open ? (
-                <>
-                  <FaLock className="inline text-[9px]" /> {achievementName(skin.achievement!)}
-                </>
-              ) : isEquipped ? (
-                <>
-                  <FaCrown className="inline text-[9px]" /> Equipped
-                </>
-              ) : skin.achievement ? (
-                achievementName(skin.achievement)
-              ) : (
-                "Starter"
-              )}
-            </span>
-          </motion.button>
-        );
-      })}
-    </div>
-  );
-}
-
-export function AnalyticsView({ map, onChanged }: { map: MapMeta; onChanged?: () => void }) {
+export function AnalyticsView({ map }: { map: MapMeta }) {
   const data = useMemo(
     () => getEnrichedAttempts(new Set(map.nodes.map((n) => n.slug)), map.problems),
     [map]
@@ -401,7 +281,6 @@ export function AnalyticsView({ map, onChanged }: { map: MapMeta; onChanged?: ()
   const scatter = useMemo(() => hintsVsElo(data), [data]);
   const retries = useMemo(() => retryTable(data), [data]);
   const streak = useMemo(() => currentStreak(), [data]);
-  const [achRev, setAchRev] = useState(0);
 
   if (data.length === 0) {
     return (
@@ -428,7 +307,7 @@ export function AnalyticsView({ map, onChanged }: { map: MapMeta; onChanged?: ()
         <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-2">
           <h3><FaChartLine className="mr-1 inline text-neo-accent" />1 · Player rating</h3>
           <p className="dash-sub">Your chess-style rating across all maps — every attempt moves it. Violet dots are the problems' elo.</p>
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={rating} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="ratingFill" x1="0" y1="0" x2="0" y2="1">
@@ -485,7 +364,7 @@ export function AnalyticsView({ map, onChanged }: { map: MapMeta; onChanged?: ()
         <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash">
           <h3><FaBullseye className="mr-1 inline text-neo-muted" />2 · Pattern radar</h3>
           <p className="dash-sub">Solve rate per pattern/tag. Shows your weak spike vs strong spike at a glance.</p>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height="100%">
             <RadarChart data={radar} outerRadius="72%">
               <PolarGrid stroke="#000" strokeOpacity={0.22} />
               <PolarAngleAxis dataKey="topic" tick={{ fill: "#000", fontSize: 11, fontWeight: 700 }} />
@@ -502,27 +381,10 @@ export function AnalyticsView({ map, onChanged }: { map: MapMeta; onChanged?: ()
           <Heatmap data={data} />
         </motion.section>
 
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-2">
-          <h3><FaBolt className="mr-1 inline text-neo-accent" />4 · Failure mode over time</h3>
-          <p className="dash-sub">Watch the TLE slice shrink vs wrong-answer as you move from "doesn't get it" to "gets it, needs to optimize".</p>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={failures} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-              <CartesianGrid stroke="rgba(0,0,0,0.12)" vertical={false} />
-              <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={AXIS_LINE} />
-              <YAxis tick={AXIS} allowDecimals={false} tickLine={false} axisLine={AXIS_LINE} width={36} />
-              <Tooltip contentStyle={tipStyle} cursor={{ fill: "rgba(0,0,0,0.06)" }} />
-              <Legend wrapperStyle={LEGEND} iconType="square" />
-              {FAILURE_MODES.map((m) => (
-                <Bar key={m.key} dataKey={m.key} stackId="f" fill={FAILURE_FILL[m.key]} stroke="#000" strokeWidth={2} name={m.label} maxBarSize={48} />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
-        </motion.section>
-
         <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash">
-          <h3><FaLightbulb className="mr-1 inline text-neo-pink" />5 · Hints vs elo</h3>
+          <h3><FaLightbulb className="mr-1 inline text-neo-pink" />4 · Hints vs elo</h3>
           <p className="dash-sub">Colored by AI use. Flat hints/AI as elo rises = solving harder but not more independently.</p>
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
               <CartesianGrid stroke="rgba(0,0,0,0.12)" />
               <XAxis type="number" dataKey="hints" name="hints" ticks={[0, 1]} tickFormatter={(v) => (v ? "hint" : "none")} tick={AXIS} tickLine={false} axisLine={AXIS_LINE} domain={[-0.5, 1.5]} />
@@ -537,9 +399,26 @@ export function AnalyticsView({ map, onChanged }: { map: MapMeta; onChanged?: ()
         </motion.section>
 
         <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-2">
+          <h3><FaBolt className="mr-1 inline text-neo-accent" />5 · Failure mode over time</h3>
+          <p className="dash-sub">Watch the TLE slice shrink vs wrong-answer as you move from "doesn't get it" to "gets it, needs to optimize".</p>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={failures} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke="rgba(0,0,0,0.12)" vertical={false} />
+              <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={AXIS_LINE} />
+              <YAxis tick={AXIS} allowDecimals={false} tickLine={false} axisLine={AXIS_LINE} width={36} />
+              <Tooltip contentStyle={tipStyle} cursor={{ fill: "rgba(0,0,0,0.06)" }} />
+              <Legend wrapperStyle={LEGEND} iconType="square" />
+              {FAILURE_MODES.map((m) => (
+                <Bar key={m.key} dataKey={m.key} stackId="f" fill={FAILURE_FILL[m.key]} stroke="#000" strokeWidth={2} name={m.label} maxBarSize={48} />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </motion.section>
+
+        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash">
           <h3><FaRegClock className="mr-1 inline text-neo-blue" />6 · Time phases</h3>
           <p className="dash-sub">Read/think vs write vs debug per bucket. Shrinking debug time is your most honest skill signal.</p>
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart data={phases} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
               <CartesianGrid stroke="rgba(0,0,0,0.12)" vertical={false} />
               <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={AXIS_LINE} />
@@ -598,29 +477,6 @@ export function AnalyticsView({ map, onChanged }: { map: MapMeta; onChanged?: ()
           <Calendar data={data} />
         </motion.section>
 
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
-          <h3><FaTrophy className="mr-1 inline text-neo-orange" />9 · Achievements</h3>
-          <p className="dash-sub">Unlock achievements to earn titles — click an unlocked title to wear it in the header.</p>
-          <Achievements
-            rev={achRev}
-            onChanged={() => {
-              setAchRev((r) => r + 1);
-              onChanged?.();
-            }}
-          />
-        </motion.section>
-
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
-          <h3><FaUserGroup className="mr-1 inline text-neo-pink" />10 · Coach locker</h3>
-          <p className="dash-sub">Coaches are achievement rewards — unlock them by playing, click one to make it yours.</p>
-          <CoachLocker
-            rev={achRev}
-            onChanged={() => {
-              setAchRev((r) => r + 1);
-              onChanged?.();
-            }}
-          />
-        </motion.section>
       </div>
     </div>
   );

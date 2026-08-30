@@ -108,6 +108,15 @@ export function Home() {
         >
           <div className="relative">
             <div className="mb-3 flex items-center gap-3">
+              <motion.img
+                src="/logo.svg"
+                alt="LeetGraph logo"
+                initial={{ rotate: -8, scale: 0 }}
+                animate={{ rotate: -4, scale: 1 }}
+                whileHover={{ rotate: 4, scale: 1.08 }}
+                transition={{ type: "spring", stiffness: 300, damping: 16 }}
+                className="h-14 w-14 md:h-[72px] md:w-[72px]"
+              />
               <motion.div
                 whileHover={{ rotate: 0, scale: 1.03 }}
                 className="inline-block rotate-[-2deg] border-4 border-black bg-neo-accent px-4 py-2 shadow-neo"
