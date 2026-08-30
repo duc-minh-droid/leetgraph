@@ -65,6 +65,24 @@ export function potionById(id: string): PotionDef | undefined {
   return POTIONS.find((p) => p.id === id);
 }
 
+// Achievements that don't reward a coach skin reward a relic instead.
+export const RELIC_FOR_ACHIEVEMENT: Record<string, string> = {
+  grinder: "xp-charm",
+  machine: "scholars-tome",
+  redeemer: "sturdy-helm",
+  "streak-7": "rubber-duck",
+  "club-1600": "crown",
+  "elite-hunter": "cursed-skull",
+  "speed-demon": "espresso",
+  "hard-boiled": "lucky-coin",
+  interviewee: "warm-coffee",
+};
+
+export function relicForAchievement(achievementId: string): RelicDef | undefined {
+  const id = RELIC_FOR_ACHIEVEMENT[achievementId];
+  return id ? relicById(id) : undefined;
+}
+
 // Rarity-weighted draft of `n` relics you don't own yet (level-gated relics
 // stay out of the pool until you've earned them).
 export function draftRelics(seed: number, n = 3): RelicDef[] {

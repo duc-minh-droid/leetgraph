@@ -302,6 +302,8 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
       xpEarned: outcome.xpEarned,
       levelUp: outcome.leveledUp,
       farmed: outcome.farmed,
+      coinsEarned: outcome.coinsEarned,
+      relicsGained: outcome.relicsGained,
     });
     if (outcome.newAchievements.length > 0) {
       emitCoach({ type: "achievement", name: outcome.newAchievements[0].name });

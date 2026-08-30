@@ -25,6 +25,7 @@ export interface CelebrationData {
   xpEarned?: number;
   levelUp?: number | null; // new level, if this attempt leveled you up
   coinsEarned?: number;
+  relicsGained?: string[]; // relics granted by achievement unlocks
 }
 
 interface Particle {
@@ -277,6 +278,19 @@ export function Celebration({ data, onDone }: { data: CelebrationData; onDone: (
             )}
           </div>
         )}
+
+        {(data.relicsGained?.length ?? 0) > 0 &&
+          data.relicsGained!.map((r, i) => (
+            <motion.span
+              key={r}
+              initial={{ scale: 0, rotate: -10 }}
+              animate={{ scale: 1, rotate: 2 }}
+              transition={{ delay: 0.55 + i * 0.15, type: "spring", stiffness: 360, damping: 13 }}
+              className="border-4 border-black bg-neo-muted px-3 py-1 text-sm font-black uppercase shadow-neo-sm"
+            >
+              💎 RELIC GAINED: {r}
+            </motion.span>
+          ))}
 
         {(data.achievements?.length || data.questCompleted) && (
           <div className="flex flex-col items-center gap-1.5">

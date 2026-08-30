@@ -15,10 +15,12 @@ import {
   FaVolumeXmark,
   FaLock,
   FaCoins,
+  FaShop,
 } from "react-icons/fa6";
 import { GraphView } from "./components/GraphView";
 import { AnalyticsView } from "./components/AnalyticsView";
 import { AchievementsView } from "./components/AchievementsView";
+import { ShopView } from "./components/ShopView";
 import { Coach } from "./components/Coach";
 import { getMap, listMaps, progressOf, currentActOf, requiredLevelFor } from "./state/library";
 import { currentEngine, decayCountdown, RANKS } from "./state/rating";
@@ -32,7 +34,7 @@ import { avatarUrl, ensureAvatar } from "./lib/avatars";
 // Heavy tab (CodeMirror + Excalidraw + ElevenLabs SDK) — loaded on demand.
 const InterviewView = lazy(() => import("./components/InterviewView"));
 
-type Tab = "map" | "analytics" | "awards" | "interview";
+type Tab = "map" | "analytics" | "awards" | "shop" | "interview";
 
 const tap = { scale: 0.94 };
 const hover = { scale: 1.04 };
@@ -238,7 +240,9 @@ export function MapApp() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get("tab");
   const [tab, setTabState] = useState<Tab>(
-    urlTab === "analytics" || urlTab === "interview" || urlTab === "awards" ? urlTab : "map"
+    urlTab === "analytics" || urlTab === "interview" || urlTab === "awards" || urlTab === "shop"
+      ? urlTab
+      : "map"
   );
   const setTab = (t: Tab) => {
     setTabState(t);
@@ -279,6 +283,7 @@ export function MapApp() {
               [
                 { id: "map", label: "Map", icon: <FaMap key="i" /> },
                 { id: "analytics", label: "Analytics", icon: <FaChartLine key="i" /> },
+                { id: "shop", label: "Shop", icon: <FaShop key="i" /> },
                 { id: "interview", label: "Interview", icon: <FaUserTie key="i" />, ribbon: true },
               ] as { id: Tab; label: string; icon: React.ReactNode; ribbon?: boolean }[]
             ).map((t) => (
@@ -393,6 +398,8 @@ export function MapApp() {
           <AnalyticsView map={map} />
         ) : tab === "awards" ? (
           <AchievementsView onChanged={() => setRev((r) => r + 1)} />
+        ) : tab === "shop" ? (
+          <ShopView onChanged={() => setRev((r) => r + 1)} />
         ) : (
           <BoneSuspense
             name="interview-room"

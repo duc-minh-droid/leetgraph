@@ -88,6 +88,21 @@ export function equipAvatar(id: string) {
   updateInventory({ avatar: id });
 }
 
+// Potions are also on sale — a steady coin sink.
+export const POTION_PRICES: Record<string, number> = {
+  "quest-reroll": 30,
+  "small-tonic": 40,
+  "second-chance": 60,
+};
+
+export function buyPotion(id: string): boolean {
+  const price = POTION_PRICES[id];
+  const inv = getInventory();
+  if (price === undefined || inv.coins < price) return false;
+  updateInventory((i) => ({ coins: i.coins - price, potions: [...i.potions, id] }));
+  return true;
+}
+
 // Everyone gets a random face on first load / account creation.
 export function ensureAvatar(): string {
   const inv = getInventory();

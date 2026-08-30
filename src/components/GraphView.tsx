@@ -53,6 +53,7 @@ import { getInventory, type Inventory } from "../state/inventory";
 import type { MapMeta } from "../state/library";
 import { Celebration, type CelebrationData } from "./Celebration";
 import { EventModal, ChestModal, BossIntro, Belt, RankUpCeremony } from "./Loot";
+import { MapWeather } from "./MapWeather";
 import { sfx } from "../lib/sfx";
 
 const ROW_HEIGHT = 300;
@@ -998,6 +999,8 @@ export function GraphView({
       rankDown: outcome.rankDown,
       xpEarned: outcome.xpEarned,
       levelUp: outcome.leveledUp,
+      coinsEarned: outcome.coinsEarned,
+      relicsGained: outcome.relicsGained,
       promoNote: outcome.promoLost
         ? "PROMO SERIES LOST — −10 rating"
         : outcome.promoArmed && outcome.promo
@@ -1064,6 +1067,9 @@ export function GraphView({
         >
           <Background variant={BackgroundVariant.Lines} gap={40} color="rgba(0,0,0,0.10)" />
         </ReactFlow>
+
+        {/* 8-bit ambient weather themed per company map. */}
+        <MapWeather mapId={map.id} />
 
         <Legend />
 

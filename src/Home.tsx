@@ -13,9 +13,11 @@ import {
   FaCheck,
   FaCrown,
   FaLock,
+  FaCoins,
 } from "react-icons/fa6";
 import { listMaps } from "./state/library";
-import { currentLevel } from "./state/xp";
+import { currentLevel, levelInfo } from "./state/xp";
+import { getInventory } from "./state/inventory";
 import { currentRating, START_RATING } from "./state/rating";
 import { equippedTitle } from "./state/achievements";
 import { currentStreak, getEnrichedAttempts } from "./state/analytics";
@@ -39,6 +41,8 @@ function PlayerCard() {
   const quest = useMemo(() => todaysQuest(), []);
   const due = useMemo(() => dueReviews().length, []);
   const skin = useMemo(() => equippedSkin(), []);
+  const lvl = useMemo(() => levelInfo(), []);
+  const coins = useMemo(() => getInventory().coins, []);
 
   return (
     <motion.div
@@ -68,7 +72,11 @@ function PlayerCard() {
             <span className="px-2 py-0.5 text-sm font-black tabular-nums text-white">{rating}</span>
           </div>
           <div className="mt-1 truncate text-[10px] font-black uppercase text-black/60">"{title}"</div>
-          <div className="mt-1 flex items-center gap-2 text-[11px] font-black uppercase">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-black uppercase">
+            <span className="border-2 border-black bg-neo-blue px-1 text-[9px] text-white">Lv{lvl.level}</span>
+            <span className="flex items-center gap-1">
+              <FaCoins className="text-neo-orange" /> {coins}
+            </span>
             <span className="flex items-center gap-1">
               <FaFire className="text-neo-orange" /> {streak}d
             </span>

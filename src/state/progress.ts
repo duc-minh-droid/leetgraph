@@ -6,7 +6,7 @@ import { currentEngine, ratingEngine, RANKS, type PromoState } from "./rating";
 import { unlockedAchievements, ACHIEVEMENTS, type AchievementDef } from "./achievements";
 import { todaysQuest } from "./quests";
 import { getInventory, updateInventory } from "./inventory";
-import { computeAttemptBonus, rollCurse, cleanseCheck, curseById } from "./relics";
+import { computeAttemptBonus, rollCurse, cleanseCheck, curseById, relicForAchievement } from "./relics";
 import { modifierOf, timedLimit } from "./modifiers";
 import { levelInfo } from "./xp";
 
@@ -40,6 +40,7 @@ export interface SubmitOutcome {
   level: number;
   leveledUp: number | null; // the new level, when this attempt leveled you up
   coinsEarned: number;
+  relicsGained: string[]; // relic names granted by newly unlocked achievements
 }
 
 function dayKey(ms: number): string {
@@ -170,6 +171,16 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
   if (questJustCompleted) coins += 20;
   updateInventory((i) => ({ coins: i.coins + coins }));
 
+  // Achievements without a coach skin grant their relic on unlock.
+  const relicsGained: string[] = [];
+  for (const ach of newAchievements) {
+    const relic = relicForAchievement(ach.id);
+    if (relic && !getInventory().relics.includes(relic.id)) {
+      updateInventory((i) => ({ relics: [...i.relics, relic.id] }));
+      relicsGained.push(relic.name);
+    }
+  }
+
   return {
     ratingBefore,
     ratingAfter,
@@ -193,5 +204,6 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
     level: levelInfo().level,
     leveledUp: levelInfo().level > levelBefore ? levelInfo().level : null,
     coinsEarned: coins,
+    relicsGained,
   };
 }
