@@ -123,39 +123,75 @@ export interface Bundle {
 export function bundleOffers(now = Date.now()): Bundle[] {
   const window = Math.floor(now / BUNDLE_WINDOW_MS);
   const rand = mulberry((window * 2246822519) >>> 0);
-  // 1. Avatar 3-pack at 40% off.
-  const avatars: string[] = [];
-  let avatarFull = 0;
-  while (avatars.length < 3) {
+
+  // Seeded pickers (order of calls matters — keep it stable).
+  const pickAvatar = () => {
     const style = DICEBEAR_STYLES[Math.floor(rand() * DICEBEAR_STYLES.length)];
-    const id = `${style}:${Math.floor(rand() * 1e9).toString(36)}`;
-    if (avatars.includes(id)) continue;
-    avatars.push(id);
-    avatarFull += 40 + Math.floor(rand() * 111);
-  }
-  // 2. Relic cache: a specific seeded relic + a potion, 25% off.
-  const relic = RELICS[Math.floor(rand() * RELICS.length)];
-  const potion = POTIONS[Math.floor(rand() * POTIONS.length)];
-  const relicFull = RELIC_PRICE[relic.rarity] + POTION_PRICES[potion.id];
+    return `${style}:${Math.floor(rand() * 1e9).toString(36)}`;
+  };
+  const avatarPrice = () => 40 + Math.floor(rand() * 111);
+  const pickRelic = () => RELICS[Math.floor(rand() * RELICS.length)];
+  const pickPotion = () => POTIONS[Math.floor(rand() * POTIONS.length)].id;
+  const sum = (potions: string[]) => potions.reduce((s, p) => s + POTION_PRICES[p], 0);
+
+  // 1. Face Heist: three avatars, −40%.
+  const heistAvatars = [pickAvatar(), pickAvatar(), pickAvatar()];
+  const heistFull = avatarPrice() + avatarPrice() + avatarPrice();
+
+  // 2. Relic Cache: a relic + a potion, −25%.
+  const cacheRelic = pickRelic();
+  const cachePotions = [pickPotion()];
+  const cacheFull = RELIC_PRICE[cacheRelic.rarity] + sum(cachePotions);
+
+  // 3. Adventurer's Kit: an avatar + two potions, −30%.
+  const kitAvatar = pickAvatar();
+  const kitPotions = [pickPotion(), pickPotion()];
+  const kitFull = avatarPrice() + sum(kitPotions);
+
+  // 4. War Chest: a relic + an avatar + a potion — the whole haul, −35%.
+  const chestRelic = pickRelic();
+  const chestAvatar = pickAvatar();
+  const chestPotions = [pickPotion()];
+  const chestFull = RELIC_PRICE[chestRelic.rarity] + avatarPrice() + sum(chestPotions);
+
   return [
     {
       id: "avatar-pack",
       name: "Face Heist",
       desc: "Three avatars, one shady discount.",
-      price: Math.round(avatarFull * 0.6),
-      fullPrice: avatarFull,
-      avatars,
+      price: Math.round(heistFull * 0.6),
+      fullPrice: heistFull,
+      avatars: heistAvatars,
       potions: [],
     },
     {
       id: "relic-cache",
       name: "Relic Cache",
-      desc: `${relic.name} (${relic.rarity}) + a ${potion.name}.`,
-      price: Math.round(relicFull * 0.75),
-      fullPrice: relicFull,
+      desc: `${cacheRelic.name} (${cacheRelic.rarity}) + a potion.`,
+      price: Math.round(cacheFull * 0.75),
+      fullPrice: cacheFull,
       avatars: [],
-      relic,
-      potions: [potion.id],
+      relic: cacheRelic,
+      potions: cachePotions,
+    },
+    {
+      id: "adventurer-kit",
+      name: "Adventurer's Kit",
+      desc: "A fresh face + two potions for the road.",
+      price: Math.round(kitFull * 0.7),
+      fullPrice: kitFull,
+      avatars: [kitAvatar],
+      potions: kitPotions,
+    },
+    {
+      id: "war-chest",
+      name: "War Chest",
+      desc: `${chestRelic.name} (${chestRelic.rarity}) + an avatar + a potion.`,
+      price: Math.round(chestFull * 0.65),
+      fullPrice: chestFull,
+      avatars: [chestAvatar],
+      relic: chestRelic,
+      potions: chestPotions,
     },
   ];
 }

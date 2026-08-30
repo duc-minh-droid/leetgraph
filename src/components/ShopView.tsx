@@ -16,7 +16,7 @@ import {
 } from "react-icons/fa6";
 import { ACHIEVEMENTS, unlockedAchievements, equippedTitle, equipTitle } from "../state/achievements";
 import { COACH_SKINS } from "../state/coachSkins";
-import { POTIONS, relicForAchievement } from "../state/relics";
+import { POTIONS, potionById, relicForAchievement } from "../state/relics";
 import { getInventory } from "../state/inventory";
 import {
   avatarUrl,
@@ -225,6 +225,18 @@ function BundleShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
               {b.relic && (
                 <span className="flex items-center gap-1 border-2 border-black bg-neo-muted px-1.5 py-0.5 text-[10px] font-black uppercase">
                   <FaGem /> {b.relic.name} — {b.relic.desc}
+                </span>
+              )}
+              {b.potions.length > 0 && (
+                <span className="flex flex-wrap gap-1">
+                  {b.potions.map((p, j) => (
+                    <span
+                      key={`${p}-${j}`}
+                      className="flex items-center gap-1 border-2 border-black bg-neo-blue px-1.5 py-0.5 text-[10px] font-black uppercase text-white"
+                    >
+                      <FaFlask /> {potionById(p)?.name ?? p}
+                    </span>
+                  ))}
                 </span>
               )}
               <span className="flex items-center gap-2 text-sm font-black tabular-nums">
