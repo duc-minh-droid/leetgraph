@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { FaBolt, FaFire, FaCircleCheck, FaCheckDouble, FaFlag, FaTrophy, FaScroll, FaArrowTrendUp, FaArrowTrendDown, FaSkullCrossbones, FaHandSparkles } from "react-icons/fa6";
+import { FaBolt, FaFire, FaCircleCheck, FaCheckDouble, FaFlag, FaTrophy, FaScroll, FaArrowTrendUp, FaArrowTrendDown, FaSkullCrossbones, FaHandSparkles, FaCoins } from "react-icons/fa6";
 
 const COLORS = ["#FF6B6B", "#FFD93D", "#C4B5FD", "#4ADE80", "#4D96FF", "#FF6FB5"];
 
@@ -24,6 +24,7 @@ export interface CelebrationData {
   farmed?: boolean; // farming cutoff hit — no rating earned
   xpEarned?: number;
   levelUp?: number | null; // new level, if this attempt leveled you up
+  coinsEarned?: number;
 }
 
 interface Particle {
@@ -171,15 +172,29 @@ export function Celebration({ data, onDone }: { data: CelebrationData; onDone: (
           )}
         </div>
 
-        {(data.xpEarned ?? 0) > 0 && (
-          <motion.span
-            initial={{ scale: 0, y: 8 }}
-            animate={{ scale: 1, y: 0 }}
-            transition={{ delay: 0.25, type: "spring", stiffness: 400, damping: 16 }}
-            className="border-2 border-black bg-neo-blue px-2 py-0.5 text-[11px] font-black uppercase text-white shadow-neo-sm"
-          >
-            +{data.xpEarned} XP
-          </motion.span>
+        {((data.xpEarned ?? 0) > 0 || (data.coinsEarned ?? 0) > 0) && (
+          <div className="flex items-center gap-1.5">
+            {(data.xpEarned ?? 0) > 0 && (
+              <motion.span
+                initial={{ scale: 0, y: 8 }}
+                animate={{ scale: 1, y: 0 }}
+                transition={{ delay: 0.25, type: "spring", stiffness: 400, damping: 16 }}
+                className="border-2 border-black bg-neo-blue px-2 py-0.5 text-[11px] font-black uppercase text-white shadow-neo-sm"
+              >
+                +{data.xpEarned} XP
+              </motion.span>
+            )}
+            {(data.coinsEarned ?? 0) > 0 && (
+              <motion.span
+                initial={{ scale: 0, y: 8 }}
+                animate={{ scale: 1, y: 0 }}
+                transition={{ delay: 0.32, type: "spring", stiffness: 400, damping: 16 }}
+                className="flex items-center gap-1 border-2 border-black bg-neo-secondary px-2 py-0.5 text-[11px] font-black uppercase shadow-neo-sm"
+              >
+                <FaCoins /> +{data.coinsEarned}
+              </motion.span>
+            )}
+          </div>
         )}
         {data.levelUp && (
           <motion.span

@@ -4,6 +4,7 @@ import { FaGoogle, FaEnvelope, FaBolt, FaRightFromBracket } from "react-icons/fa
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import { hydrateFromCloud, startCloudPersistence, clearLocalMirror } from "../state/sync";
+import { ensureAvatar } from "../lib/avatars";
 
 type Phase = "loading" | "signed-out" | "ready";
 
@@ -178,6 +179,8 @@ export function AuthGate({ children }: { children: ReactNode }) {
         console.error("[sync] hydrate failed — running on local mirror:", e);
       }
       startCloudPersistence(u.id);
+      // New accounts get a random DiceBear face (persisted via inventory sync).
+      ensureAvatar();
       setUser(u);
       setPhase("ready");
     };

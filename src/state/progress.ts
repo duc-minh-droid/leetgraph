@@ -39,6 +39,7 @@ export interface SubmitOutcome {
   xpEarned: number;
   level: number;
   leveledUp: number | null; // the new level, when this attempt leveled you up
+  coinsEarned: number;
 }
 
 function dayKey(ms: number): string {
@@ -117,6 +118,11 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
     return { pendingBonus: 0, potions };
   });
 
+  // ---- coins: shop currency, earned by playing ----
+  let coins = solved ? (attempt.result === "solved" ? 15 : 10) : 5;
+  if (opts.isBossNode && solved) coins += 25;
+  if (bonus.crit) coins *= 2;
+
   addAttempt(slug, stamped);
 
   // Curses: cleanse first (this attempt may cure), otherwise maybe gain one.
@@ -161,6 +167,9 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
   // knows whether it hit the farming cutoff.
   const farmed = engineResult.points[engineResult.points.length - 1]?.farmed ?? false;
 
+  if (questJustCompleted) coins += 20;
+  updateInventory((i) => ({ coins: i.coins + coins }));
+
   return {
     ratingBefore,
     ratingAfter,
@@ -183,5 +192,6 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
     xpEarned: xp,
     level: levelInfo().level,
     leveledUp: levelInfo().level > levelBefore ? levelInfo().level : null,
+    coinsEarned: coins,
   };
 }

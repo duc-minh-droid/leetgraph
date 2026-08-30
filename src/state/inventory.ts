@@ -15,6 +15,11 @@ export interface Inventory {
   questRerolls: Record<string, number>;
   // Slugs of mystery/event nodes already triggered (event fires once).
   eventsSeen: string[];
+  // Currency earned by playing, spent in the avatar shop.
+  coins: number;
+  // DiceBear avatar ids ("style:seed") you own + the one you wear.
+  avatars: string[];
+  avatar: string | null;
 }
 
 const KEY = "leetgraph.inventory";
@@ -27,6 +32,9 @@ const EMPTY: Inventory = {
   pendingChest: null,
   questRerolls: {},
   eventsSeen: [],
+  coins: 0,
+  avatars: [],
+  avatar: null,
 };
 
 export function getInventory(): Inventory {

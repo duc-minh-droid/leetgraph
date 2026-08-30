@@ -14,6 +14,7 @@ import {
   FaVolumeHigh,
   FaVolumeXmark,
   FaLock,
+  FaCoins,
 } from "react-icons/fa6";
 import { GraphView } from "./components/GraphView";
 import { AnalyticsView } from "./components/AnalyticsView";
@@ -24,7 +25,9 @@ import { currentEngine, decayCountdown, RANKS } from "./state/rating";
 import { equippedTitle } from "./state/achievements";
 import { currentStreak } from "./state/analytics";
 import { levelInfo, currentLevel } from "./state/xp";
+import { getInventory } from "./state/inventory";
 import { AMBIENTS, playAmbient, stopAmbient, currentAmbient, onAmbientChange, sfx } from "./lib/sfx";
+import { avatarUrl, ensureAvatar } from "./lib/avatars";
 
 // Heavy tab (CodeMirror + Excalidraw + ElevenLabs SDK) — loaded on demand.
 const InterviewView = lazy(() => import("./components/InterviewView"));
@@ -245,6 +248,9 @@ export function MapApp() {
   const [rev, setRev] = useState(0);
   const act = currentActOf(map);
   const progress = progressOf(map);
+  // Identity + wallet (avatar assigned on first visit if none yet).
+  const avatar = useMemo(() => ensureAvatar(), [rev]);
+  const coins = useMemo(() => getInventory().coins, [rev]);
   const totalActs = Math.max(...map.nodes.map((n) => n.act)) + 1;
 
   // Which act is being viewed on the map. Defaults to the latest unlocked act
@@ -273,7 +279,6 @@ export function MapApp() {
               [
                 { id: "map", label: "Map", icon: <FaMap key="i" /> },
                 { id: "analytics", label: "Analytics", icon: <FaChartLine key="i" /> },
-                { id: "awards", label: "Awards", icon: <FaTrophy key="i" /> },
                 { id: "interview", label: "Interview", icon: <FaUserTie key="i" />, ribbon: true },
               ] as { id: Tab; label: string; icon: React.ReactNode; ribbon?: boolean }[]
             ).map((t) => (
@@ -301,59 +306,83 @@ export function MapApp() {
         <div className="flex shrink-0 items-center gap-2">
           <PlayerStrip rev={rev} />
 
-          <div className="flex items-center gap-1.5">
-            <motion.button
-              onClick={() => setViewAct((a) => Math.max(0, a - 1))}
-              disabled={viewAct === 0}
-              aria-label="Previous act"
-              whileHover={{ scale: 1.15, x: -2 }}
-              whileTap={tap}
-              className="grid h-8 w-8 place-items-center border-4 border-black bg-white text-sm font-black shadow-neo-sm transition-colors hover:enabled:bg-neo-muted disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
-            >
-              <FaChevronLeft />
-            </motion.button>
-            <motion.span
-              key={viewAct}
-              initial={{ rotate: -3, scale: 0.9 }}
-              animate={{ rotate: 1, scale: 1 }}
-              className="whitespace-nowrap border-4 border-black bg-neo-muted px-2 py-1 text-center text-xs font-black uppercase tracking-wide shadow-neo-sm"
-            >
-              Act {viewAct + 1}/{totalActs}
-            </motion.span>
-            <motion.button
-              onClick={() => setViewAct((a) => Math.min(act, a + 1))}
-              disabled={viewAct >= act}
-              aria-label="Next act"
-              whileHover={{ scale: 1.15, x: 2 }}
-              whileTap={tap}
-              className="grid h-8 w-8 place-items-center border-4 border-black bg-white text-sm font-black shadow-neo-sm transition-colors hover:enabled:bg-neo-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
-            >
-              <FaChevronRight />
-            </motion.button>
-          </div>
+          {tab === "map" && (
+            <div className="flex items-center gap-1.5">
+              <motion.button
+                onClick={() => setViewAct((a) => Math.max(0, a - 1))}
+                disabled={viewAct === 0}
+                aria-label="Previous act"
+                whileHover={{ scale: 1.15, x: -2 }}
+                whileTap={tap}
+                className="grid h-8 w-8 place-items-center border-4 border-black bg-white text-sm font-black shadow-neo-sm transition-colors hover:enabled:bg-neo-muted disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+              >
+                <FaChevronLeft />
+              </motion.button>
+              <motion.span
+                key={viewAct}
+                initial={{ rotate: -3, scale: 0.9 }}
+                animate={{ rotate: 1, scale: 1 }}
+                className="whitespace-nowrap border-4 border-black bg-neo-muted px-2 py-1 text-center text-xs font-black uppercase tracking-wide shadow-neo-sm"
+              >
+                Act {viewAct + 1}/{totalActs}
+              </motion.span>
+              <motion.button
+                onClick={() => setViewAct((a) => Math.min(act, a + 1))}
+                disabled={viewAct >= act}
+                aria-label="Next act"
+                whileHover={{ scale: 1.15, x: 2 }}
+                whileTap={tap}
+                className="grid h-8 w-8 place-items-center border-4 border-black bg-white text-sm font-black shadow-neo-sm transition-colors hover:enabled:bg-neo-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+              >
+                <FaChevronRight />
+              </motion.button>
 
-          <div className="flex items-center gap-1.5 border-4 border-black bg-white px-2 py-1 shadow-neo-sm">
-            <FaFire className="text-neo-accent" />
-            <div className="hidden h-3.5 w-24 border-2 border-black bg-neo-bg md:block">
-              <motion.div
-                className="h-full bg-neo-accent"
-                initial={false}
-                animate={{ width: `${progress}%` }}
-                transition={{ type: "spring", stiffness: 120, damping: 20 }}
-              />
+              <div className="flex items-center gap-1.5 border-4 border-black bg-white px-2 py-1 shadow-neo-sm">
+                <FaFire className="text-neo-accent" />
+                <div className="hidden h-3.5 w-24 border-2 border-black bg-neo-bg md:block">
+                  <motion.div
+                    className="h-full bg-neo-accent"
+                    initial={false}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                  />
+                </div>
+                <motion.span
+                  key={progress}
+                  initial={{ scale: 1.4 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                  className="text-xs font-black tabular-nums"
+                >
+                  {progress}%
+                </motion.span>
+              </div>
             </div>
-            <motion.span
-              key={progress}
-              initial={{ scale: 1.4 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15 }}
-              className="text-xs font-black tabular-nums"
-            >
-              {progress}%
-            </motion.span>
-          </div>
+          )}
+
+          <motion.span
+            whileHover={{ y: -2, rotate: 2 }}
+            title={`${coins} coins — earn by solving, spend in the avatar shop (Profile)`}
+            className="flex items-center gap-1 border-4 border-black bg-neo-secondary px-2 py-1 text-xs font-black tabular-nums shadow-neo-sm"
+          >
+            <FaCoins /> {coins}
+          </motion.span>
 
           <AmbientPicker rev={rev} />
+
+          <motion.button
+            onClick={() => setTab("awards")}
+            aria-pressed={tab === "awards"}
+            aria-label="Profile"
+            title="Profile — avatars, achievements, seasons, coach locker"
+            whileHover={{ scale: 1.12, rotate: -3 }}
+            whileTap={tap}
+            className={`h-9 w-9 overflow-hidden border-4 border-black shadow-neo-sm transition-colors ${
+              tab === "awards" ? "bg-neo-accent" : "bg-white"
+            }`}
+          >
+            <img src={avatarUrl(avatar, 64)} alt="Your avatar" className="h-full w-full object-cover" />
+          </motion.button>
         </div>
       </header>
 
