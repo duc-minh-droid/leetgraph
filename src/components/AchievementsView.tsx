@@ -12,7 +12,6 @@ import {
   FaCalendarDays,
   FaCheck,
   FaGem,
-  FaFlask,
 } from "react-icons/fa6";
 import {
   ACHIEVEMENTS,
@@ -21,7 +20,8 @@ import {
   equipTitle,
 } from "../state/achievements";
 import { COACH_SKINS, isSkinUnlocked, equippedSkin, equipSkin } from "../state/coachSkins";
-import { relicById, potionById, relicForAchievement, type Rarity } from "../state/relics";
+import { relicForAchievement } from "../state/relics";
+import { ItemTile } from "./ItemTile";
 import { currentEngine, RANKS } from "../state/rating";
 import { currentStreak } from "../state/analytics";
 import { levelInfo } from "../state/xp";
@@ -31,12 +31,6 @@ import { sfx } from "../lib/sfx";
 import { emitCoach } from "../state/coachBus";
 import { CoachPreview } from "./Coach";
 import "../analytics.css";
-
-const RARITY_BG: Record<Rarity, string> = {
-  common: "bg-white",
-  rare: "bg-neo-muted",
-  legendary: "bg-neo-secondary",
-};
 
 // Unlocked achievements only, each with its reward chips + equippable title.
 function UnlockedAchievements({ rev, onChanged }: { rev: number; onChanged: () => void }) {
@@ -170,42 +164,24 @@ function AvatarCollection({ rev, onChanged }: { rev: number; onChanged: () => vo
   );
 }
 
-// Relics + potions you carry.
+// Relics + potions you carry, as proper item tiles.
 function Satchel({ rev }: { rev: number }) {
   const inv = useMemo(() => getInventory(), [rev]);
   if (inv.relics.length === 0 && inv.potions.length === 0) {
     return <p className="text-sm font-bold uppercase text-black/50">Empty — relics drop from boss/elite chests and achievements; potions come from events and the shop.</p>;
   }
+  const potionCounts = inv.potions.reduce<Record<string, number>>((acc, id) => {
+    acc[id] = (acc[id] ?? 0) + 1;
+    return acc;
+  }, {});
   return (
-    <div className="flex flex-wrap gap-2">
-      {inv.relics.map((id) => {
-        const r = relicById(id);
-        if (!r) return null;
-        return (
-          <motion.span
-            key={id}
-            whileHover={{ y: -3, rotate: -2 }}
-            title={r.desc}
-            className={`flex items-center gap-1.5 border-4 border-black px-2 py-1 text-[11px] font-black uppercase shadow-neo-sm ${RARITY_BG[r.rarity]}`}
-          >
-            <FaGem className={r.rarity === "legendary" ? "text-neo-accent" : ""} /> {r.name}
-          </motion.span>
-        );
-      })}
-      {inv.potions.map((id, i) => {
-        const p = potionById(id);
-        if (!p) return null;
-        return (
-          <motion.span
-            key={`${id}-${i}`}
-            whileHover={{ y: -3, rotate: 2 }}
-            title={p.desc}
-            className="flex items-center gap-1.5 border-4 border-black bg-neo-blue px-2 py-1 text-[11px] font-black uppercase text-white shadow-neo-sm"
-          >
-            <FaFlask /> {p.name}
-          </motion.span>
-        );
-      })}
+    <div className="flex flex-wrap gap-2.5">
+      {inv.relics.map((id) => (
+        <ItemTile key={id} id={id} size="md" tipSide="bottom" />
+      ))}
+      {Object.entries(potionCounts).map(([id, count]) => (
+        <ItemTile key={id} id={id} size="md" count={count} tipSide="bottom" tipExtra="Use it from the map belt" />
+      ))}
     </div>
   );
 }

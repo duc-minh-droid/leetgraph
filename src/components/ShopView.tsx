@@ -16,8 +16,9 @@ import {
 } from "react-icons/fa6";
 import { ACHIEVEMENTS, unlockedAchievements, equippedTitle, equipTitle } from "../state/achievements";
 import { COACH_SKINS } from "../state/coachSkins";
-import { POTIONS, potionById, relicForAchievement } from "../state/relics";
+import { POTIONS, relicForAchievement } from "../state/relics";
 import { getInventory } from "../state/inventory";
+import { ItemTile } from "./ItemTile";
 import {
   avatarUrl,
   shopOffers,
@@ -131,10 +132,11 @@ function PotionShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
               onChanged();
             }}
             title={affordable ? `Buy for ${price} coins` : `Need ${price - inv.coins} more coins`}
-            className={`flex flex-col items-start gap-1 border-4 border-black bg-white p-3 text-left shadow-neo-sm ${affordable ? "" : "grayscale opacity-70"}`}
+            className={`flex flex-col items-start gap-1.5 border-4 border-black bg-white p-3 text-left shadow-neo-sm ${affordable ? "" : "grayscale opacity-70"}`}
           >
             <span className="flex items-center gap-2 text-sm font-black uppercase">
-              <FaFlask className="text-neo-blue" /> {p.name}
+              <ItemTile id={p.id} size="sm" tipSide="top" />
+              {p.name}
               {owned > 0 && <span className="border-2 border-black bg-neo-bg px-1 text-[9px]">x{owned}</span>}
             </span>
             <span className="text-[10px] font-bold leading-snug text-black/70">{p.desc}</span>
@@ -222,20 +224,16 @@ function BundleShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
                   ))}
                 </span>
               )}
-              {b.relic && (
-                <span className="flex items-center gap-1 border-2 border-black bg-neo-muted px-1.5 py-0.5 text-[10px] font-black uppercase">
-                  <FaGem /> {b.relic.name} — {b.relic.desc}
-                </span>
-              )}
-              {b.potions.length > 0 && (
-                <span className="flex flex-wrap gap-1">
+              {(b.relic || b.potions.length > 0) && (
+                <span className="flex flex-wrap items-center gap-1.5">
+                  {b.relic && (
+                    <>
+                      <ItemTile id={b.relic.id} size="sm" tipSide="top" />
+                      <span className="text-[10px] font-black uppercase">{b.relic.name}</span>
+                    </>
+                  )}
                   {b.potions.map((p, j) => (
-                    <span
-                      key={`${p}-${j}`}
-                      className="flex items-center gap-1 border-2 border-black bg-neo-blue px-1.5 py-0.5 text-[10px] font-black uppercase text-white"
-                    >
-                      <FaFlask /> {potionById(p)?.name ?? p}
-                    </span>
+                    <ItemTile key={`${p}-${j}`} id={p} size="sm" tipSide="top" />
                   ))}
                 </span>
               )}

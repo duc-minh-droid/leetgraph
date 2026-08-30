@@ -3,8 +3,6 @@ import { motion } from "framer-motion";
 import {
   FaGift,
   FaSkullCrossbones,
-  FaFlask,
-  FaGem,
   FaQuestion,
   FaCoins,
   FaBoxOpen,
@@ -14,8 +12,9 @@ import {
 } from "react-icons/fa6";
 import { getInventory, updateInventory, type Inventory } from "../state/inventory";
 import { activeEffects, effectById } from "../state/effects";
+import { ItemTile } from "./ItemTile";
 import { eventFor, resolveEvent, type EventResolution } from "../state/events";
-import { draftRelics, relicById, curseById, potionById, type RelicDef, type Rarity } from "../state/relics";
+import { draftRelics, curseById, type RelicDef, type Rarity } from "../state/relics";
 import { RANKS, type Rank } from "../state/rating";
 import { emitCoach } from "../state/coachBus";
 import { sfx } from "../lib/sfx";
@@ -191,7 +190,7 @@ export function ChestModal({ onDone }: { onDone: (relic: RelicDef | null) => voi
                   onClick={() => take(r)}
                   className={`flex flex-col items-center gap-2 border-4 border-black p-3 text-center shadow-neo-sm ${RARITY_STYLE[r.rarity]}`}
                 >
-                  <FaGem className={r.rarity === "legendary" ? "text-2xl text-neo-accent" : "text-2xl"} />
+                  <ItemTile id={r.id} size="lg" tipSide="top" />
                   <span className="text-sm font-black uppercase leading-tight">{r.name}</span>
                   <span className="text-[10px] font-bold leading-snug text-black/70">{r.desc}</span>
                   <span className={`border-2 border-black px-1.5 text-[9px] font-black uppercase ${r.rarity === "legendary" ? "bg-black text-neo-secondary" : "bg-white"}`}>
@@ -326,38 +325,30 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
   if (inv.relics.length === 0 && inv.potions.length === 0 && !curse && inv.pendingBonus === 0 && effects.length === 0)
     return null;
 
+  const potionCounts = inv.potions.reduce<Record<string, number>>((acc, id) => {
+    acc[id] = (acc[id] ?? 0) + 1;
+    return acc;
+  }, {});
+
   return (
     <div className="pointer-events-none absolute left-2 top-2 z-20 flex max-w-[70%] flex-wrap items-center gap-1.5 md:left-4 md:top-4">
-      {inv.relics.map((id) => {
-        const r = relicById(id);
-        if (!r) return null;
-        return (
-          <motion.span
-            key={id}
-            whileHover={{ y: -3, rotate: -3, scale: 1.15 }}
-            title={`${r.name} — ${r.desc}`}
-            className={`pointer-events-auto grid h-8 w-8 place-items-center border-2 border-black text-sm shadow-neo-sm ${RARITY_STYLE[r.rarity]}`}
-          >
-            <FaGem className={r.rarity === "legendary" ? "text-neo-accent" : ""} />
-          </motion.span>
-        );
-      })}
-      {inv.potions.map((id, i) => {
-        const p = potionById(id);
-        if (!p) return null;
-        return (
-          <motion.button
-            key={`${id}-${i}`}
-            whileHover={{ y: -3, scale: 1.15 }}
-            whileTap={{ scale: 0.85 }}
-            onClick={() => usePotion(i)}
-            title={`${p.name} — ${p.desc}${id === "second-chance" ? " (arm it inside the report panel)" : " Click to use."}`}
-            className="pointer-events-auto grid h-8 w-8 place-items-center border-2 border-black bg-neo-blue text-sm text-white shadow-neo-sm"
-          >
-            <FaFlask />
-          </motion.button>
-        );
-      })}
+      {inv.relics.map((id) => (
+        <span key={id} className="pointer-events-auto">
+          <ItemTile id={id} size="sm" tipSide="bottom" />
+        </span>
+      ))}
+      {Object.entries(potionCounts).map(([id, count]) => (
+        <span key={id} className="pointer-events-auto">
+          <ItemTile
+            id={id}
+            size="sm"
+            count={count}
+            tipSide="bottom"
+            tipExtra={id === "second-chance" ? "Arm it inside the report panel" : "Click to use"}
+            onClick={() => usePotion(inv.potions.indexOf(id))}
+          />
+        </span>
+      ))}
       {inv.pendingBonus !== 0 && (
         <motion.span
           animate={{ scale: [1, 1.08, 1] }}
