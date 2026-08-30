@@ -42,7 +42,11 @@ export function ratingHistory(attempts?: EnrichedAttempt[]): RatingPoint[] {
   return data.map((a, i) => {
     const rematchWin = a.solved && lastFailed.get(a.slug) === true;
     const expected = 1 / (1 + Math.pow(10, (a.elo - rating) / 400));
-    const delta = Math.round(K * kMultiplier(a, rematchWin) * (scoreOf(a) - expected));
+    // Relic/curse/event effects were rolled at submit time and stamped on the
+    // attempt — apply them here so history replays identically forever.
+    const delta =
+      Math.round(K * kMultiplier(a, rematchWin) * (scoreOf(a) - expected) * a.ratingBonusMult) +
+      a.ratingBonusFlat;
     rating = Math.max(100, rating + delta);
     lastFailed.set(a.slug, !a.solved);
     return {

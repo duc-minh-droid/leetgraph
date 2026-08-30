@@ -294,6 +294,11 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
       ratingAfter: outcome.ratingAfter,
       achievements: outcome.newAchievements.map((x) => x.name),
       questCompleted: outcome.questJustCompleted,
+      crit: outcome.crit,
+      effectNotes: outcome.effectNotes,
+      curseGained: outcome.curseGained,
+      curseCleansed: outcome.curseCleansed,
+      combo: outcome.comboToday,
     });
     if (outcome.newAchievements.length > 0) {
       emitCoach({ type: "achievement", name: outcome.newAchievements[0].name });

@@ -38,6 +38,13 @@ export interface Attempt {
   timeComplexity?: string; // e.g. "O(n)"
   spaceComplexity?: string; // e.g. "O(n)"
   optimal?: boolean; // did the Big-O match the optimal solution?
+
+  // --- Roguelike effects, stamped at submit time so the rating replay stays
+  // a pure function of history (relics/curses/events roll once, here) ---
+  ratingBonusMult?: number; // multiplies the rating delta
+  ratingBonusFlat?: number; // added to the rating delta (solves only)
+  effectNotes?: string[]; // human-readable effect log
+  noRematch?: boolean; // Second Chance potion: fail skips the rematch queue
 }
 
 const KEY = "leegraph.attempts";

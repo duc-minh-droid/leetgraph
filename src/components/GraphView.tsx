@@ -34,6 +34,8 @@ import {
   FaStopwatch,
   FaBan,
   FaKhanda,
+  FaCrown,
+  FaQuestion,
 } from "react-icons/fa6";
 import { type MapData, type MapNode } from "../map";
 import { type Problem } from "../data/problems";
@@ -42,10 +44,14 @@ import { touchedSlugs, type Attempt, type AttemptResult, type FailureMode } from
 import { currentStreak } from "../state/analytics";
 import { submitAttempt } from "../state/progress";
 import { dueReviews, type ReviewItem } from "../state/reviews";
-import { modifierOf, timedLimit, MODIFIER_META, type Modifier } from "../state/modifiers";
+import { modifierOf, MODIFIER_META, type Modifier } from "../state/modifiers";
+import { effectiveTimedLimit } from "../state/relics";
 import { emitCoach } from "../state/coachBus";
+import { mysteryPending, isMysteryNode } from "../state/events";
+import { getInventory, type Inventory } from "../state/inventory";
 import type { MapMeta } from "../state/library";
 import { Celebration, type CelebrationData } from "./Celebration";
+import { EventModal, ChestModal, BossIntro, Belt } from "./Loot";
 
 const ROW_HEIGHT = 300;
 const COL_WIDTH = 300;
@@ -93,6 +99,8 @@ interface SquareData extends Record<string, unknown> {
   future: boolean;
   modifier: Modifier | null;
   rematchDue: boolean;
+  mystery: boolean; // unopened "?" node: contents hidden
+  boss: boolean; // act convergence node
 }
 
 const MODIFIER_ICON: Record<Modifier, ReactNode> = {
@@ -157,6 +165,47 @@ function SquareNode({ data }: NodeProps) {
   const diffCls = DIFF_STYLE[d.difficulty] ?? "bg-white text-black";
   const diffIcon = DIFF_ICON[d.difficulty] ?? <FaCircle />;
   const diffRibbon = DIFF_RIBBON[d.difficulty] ?? "bg-neo-blue";
+
+  // Unopened mystery node: face-down card, contents hidden.
+  if (d.mystery) {
+    return (
+      <motion.div
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        whileHover={{ scale: 1.08, y: -5, rotate: 2 }}
+        whileTap={{ scale: 0.92 }}
+        transition={{ type: "spring", stiffness: 420, damping: 20 }}
+        className={`group relative flex flex-col items-center justify-center gap-1 overflow-visible border-4 border-black bg-black p-2 shadow-neo-sm ${
+          d.available ? "cursor-pointer" : "cursor-default opacity-80"
+        }`}
+        style={{ width: SQ_W, height: SQ_H }}
+      >
+        {d.available && (
+          <motion.span
+            aria-hidden
+            className="pointer-events-none absolute -inset-2 z-0 border-4 border-neo-pink"
+            animate={{ opacity: [0.9, 0.15, 0.9], scale: [1, 1.06, 1] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+        <Handle id="top-0" type="source" position={Position.Top} isConnectable={false} style={{ left: "16.6%", opacity: 0, pointerEvents: "none" }} />
+        <Handle id="top-1" type="source" position={Position.Top} isConnectable={false} style={{ left: "50%", opacity: 0, pointerEvents: "none" }} />
+        <Handle id="top-2" type="source" position={Position.Top} isConnectable={false} style={{ left: "83.3%", opacity: 0, pointerEvents: "none" }} />
+        <Handle id="bottom-0" type="target" position={Position.Bottom} isConnectable={false} style={{ left: "16.6%", opacity: 0, pointerEvents: "none" }} />
+        <Handle id="bottom-1" type="target" position={Position.Bottom} isConnectable={false} style={{ left: "50%", opacity: 0, pointerEvents: "none" }} />
+        <Handle id="bottom-2" type="target" position={Position.Bottom} isConnectable={false} style={{ left: "83.3%", opacity: 0, pointerEvents: "none" }} />
+        <motion.span
+          animate={{ rotate: [-6, 6, -6] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          className="text-4xl text-neo-secondary"
+        >
+          <FaQuestion />
+        </motion.span>
+        <span className="text-[10px] font-black uppercase tracking-widest text-white/70">Mystery</span>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ scale: 0.6, opacity: 0 }}
@@ -233,6 +282,17 @@ function SquareNode({ data }: NodeProps) {
           <FaKhanda />
         </motion.div>
       )}
+
+      {d.boss && (
+        <motion.div
+          animate={{ y: [-2, 2, -2] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          title="Boss node — clear it to breach the next act (guaranteed relic chest)"
+          className="absolute -top-5 left-1/2 z-20 grid h-8 w-8 -translate-x-1/2 place-items-center border-4 border-black bg-black text-[14px] text-neo-secondary shadow-neo-sm"
+        >
+          <FaCrown />
+        </motion.div>
+      )}
     </motion.div>
   );
 }
@@ -276,15 +336,20 @@ function Legend() {
 function ReportPanel({
   problem,
   startTime,
+  blind = false,
+  canSecondChance = false,
   onClose,
   onSubmit,
 }: {
   problem: Problem;
   startTime: number;
+  blind?: boolean;
+  canSecondChance?: boolean;
   onClose: () => void;
-  onSubmit: (a: Attempt) => void;
+  onSubmit: (a: Attempt, opts: { secondChance: boolean }) => void;
 }) {
   const modifier = modifierOf(problem.slug);
+  const [secondChance, setSecondChance] = useState(false);
   const [result, setResult] = useState<AttemptResult>("solved");
   const [readTime, setReadTime] = useState(0);
   const [writeTime, setWriteTime] = useState(() =>
@@ -314,24 +379,41 @@ function ReportPanel({
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-xl font-black uppercase leading-none tracking-tight">
-            <FaBolt className="text-neo-accent" /> {problem.title}
+            {blind ? (
+              <>
+                <FaQuestion className="text-neo-pink" /> ??? Mystery Problem
+              </>
+            ) : (
+              <>
+                <FaBolt className="text-neo-accent" /> {problem.title}
+              </>
+            )}
           </div>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <span className={`neo-tag ${DIFF_STYLE[problem.difficulty] ?? "bg-neo-secondary text-black"}`}>
-              {problem.difficulty}
-            </span>
-            <span className="inline-flex items-stretch border-4 border-black bg-black shadow-neo-sm">
-              <span className="grid place-items-center bg-neo-secondary px-1.5">
-                <FaBolt className="text-[10px] text-black" />
-              </span>
-              <span className="px-2 py-0.5 text-xs font-black uppercase tracking-widest text-white">
-                Elo {problem.elo}
-              </span>
-            </span>
-          </div>
-          <div className="mt-2 flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-black/70">
-            <FaFire /> {problem.topics.join(", ")}
-          </div>
+          {!blind && (
+            <>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <span className={`neo-tag ${DIFF_STYLE[problem.difficulty] ?? "bg-neo-secondary text-black"}`}>
+                  {problem.difficulty}
+                </span>
+                <span className="inline-flex items-stretch border-4 border-black bg-black shadow-neo-sm">
+                  <span className="grid place-items-center bg-neo-secondary px-1.5">
+                    <FaBolt className="text-[10px] text-black" />
+                  </span>
+                  <span className="px-2 py-0.5 text-xs font-black uppercase tracking-widest text-white">
+                    Elo {problem.elo}
+                  </span>
+                </span>
+              </div>
+              <div className="mt-2 flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-black/70">
+                <FaFire /> {problem.topics.join(", ")}
+              </div>
+            </>
+          )}
+          {blind && (
+            <p className="mt-2 text-[11px] font-bold uppercase tracking-wide text-black/70">
+              Title, elo and topics stay hidden. The link works — solve blind for the bounty.
+            </p>
+          )}
         </div>
         <motion.button
           onClick={onClose}
@@ -359,9 +441,27 @@ function ReportPanel({
           {MODIFIER_ICON[modifier]}
           <span>
             {MODIFIER_META[modifier].label} node — {MODIFIER_META[modifier].desc}
-            {modifier === "timed" && ` Limit: ${Math.round(timedLimit(problem.difficulty) / 60)} min.`}
+            {modifier === "timed" && ` Limit: ${Math.round(effectiveTimedLimit(problem.slug, problem.difficulty) / 60)} min.`}
           </span>
         </div>
+      )}
+
+      {canSecondChance && (
+        <motion.button
+          type="button"
+          whileHover={{ y: -2 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setSecondChance((s) => !s)}
+          aria-pressed={secondChance}
+          className={`flex items-center gap-2 border-4 border-black p-2 text-[11px] font-black uppercase shadow-neo-sm transition-colors ${
+            secondChance ? "bg-neo-blue text-white" : "bg-white text-black/60 hover:text-black"
+          }`}
+        >
+          <FaShieldHalved />
+          {secondChance
+            ? "Second Chance ARMED — a fail costs nothing"
+            : "Arm Second Chance potion (fail = no rating loss)"}
+        </motion.button>
       )}
 
       <div className="flex flex-col gap-1.5 text-sm font-bold uppercase tracking-wide">
@@ -555,22 +655,25 @@ function ReportPanel({
         whileTap={{ scale: 0.96 }}
         className="neo-btn mt-auto w-full"
         onClick={() =>
-          onSubmit({
-            result,
-            time: total,
-            hints,
-            ai,
-            verified,
-            note,
-            at: Date.now(),
-            readTime,
-            writeTime,
-            debugTime,
-            failureMode: isFailure ? (failureMode || null) : null,
-            timeComplexity,
-            spaceComplexity,
-            optimal,
-          })
+          onSubmit(
+            {
+              result,
+              time: total,
+              hints,
+              ai,
+              verified,
+              note,
+              at: Date.now(),
+              readTime,
+              writeTime,
+              debugTime,
+              failureMode: isFailure ? (failureMode || null) : null,
+              timeComplexity,
+              spaceComplexity,
+              optimal,
+            },
+            { secondChance }
+          )
         }
       >
         <FaPaperPlane /> Submit report
@@ -612,6 +715,12 @@ export function GraphView({
   const [selected, setSelected] = useState<string | null>(null);
   const [startTime, setStartTime] = useState(0);
   const [celebration, setCelebration] = useState<CelebrationData | null>(null);
+  // Roguelike state: inventory mirror, mystery event flow, boss intro, shake.
+  const [inv, setInv] = useState<Inventory>(() => getInventory());
+  const [eventNode, setEventNode] = useState<string | null>(null);
+  const [blindAttempt, setBlindAttempt] = useState(false);
+  const [bossIntroFor, setBossIntroFor] = useState<string | null>(null);
+  const [shake, setShake] = useState(0);
   // Rematch (spaced-repetition) state.
   const [attemptsRev, setAttemptsRev] = useState(0);
   const [rematchSlug, setRematchSlug] = useState<string | null>(null);
@@ -763,10 +872,12 @@ export function GraphView({
               future: false,
               modifier: modifierOf(n.slug),
               rematchDue: dueSet.has(n.slug),
+              mystery: isMysteryNode(n.slug) && !inv.eventsSeen.includes(n.slug) && !visited.has(n.id),
+              boss: n.row === actInfo[n.act].endRow,
             } as SquareData,
           };
         }),
-    [data, pos, available, visited, current, viewAct, dueSet]
+    [data, pos, available, visited, current, viewAct, dueSet, inv, actInfo]
   );
 
   const rfEdges: Edge[] = useMemo(
@@ -793,25 +904,56 @@ export function GraphView({
     [data, pos, visited, current, viewAct]
   );
 
-  function open(id: string) {
-    if (!available.includes(id)) return;
+  const isBossId = (id: string): boolean => {
+    const n = data.find((x) => x.id === id);
+    return Boolean(n && n.row === actInfo[n.act].endRow);
+  };
+
+  function openPanel(id: string, blind = false) {
+    setBlindAttempt(blind);
     setSelected(id);
     setStartTime(Date.now());
     const slug = data.find((n) => n.id === id)?.slug;
-    emitCoach({ type: "opened", title: (slug && bySlug[slug]?.title) || "this one" });
+    emitCoach({
+      type: "opened",
+      title: blind ? "a mystery" : (slug && bySlug[slug]?.title) || "this one",
+    });
   }
 
-  function submitReport(a: Attempt) {
+  function open(id: string) {
+    if (!available.includes(id)) return;
+    const slug = data.find((n) => n.id === id)!.slug;
+    if (mysteryPending(slug)) {
+      setEventNode(id);
+    } else if (isBossId(id)) {
+      setBossIntroFor(id);
+      emitCoach({ type: "interview-start" });
+    } else {
+      openPanel(id);
+    }
+  }
+
+  function submitReport(a: Attempt, opts: { secondChance: boolean }) {
     const slug = rematchSlug ?? (selected ? data.find((n) => n.id === selected)!.slug : null);
     if (!slug) return;
-    const outcome = submitAttempt(slug, { ...a, at: Date.now() });
+    const boss = Boolean(selected && !rematchSlug && isBossId(selected));
+    const outcome = submitAttempt(
+      slug,
+      { ...a, at: Date.now() },
+      { secondChance: opts.secondChance, isBossNode: boss }
+    );
     if (selected && !rematchSlug) {
       setVisited((prev) => new Set(prev).add(selected));
       setCurrent(selected);
     }
     setSelected(null);
     setRematchSlug(null);
+    setBlindAttempt(false);
     setAttemptsRev((r) => r + 1);
+    setInv(getInventory());
+    if (outcome.crit || (boss && outcome.ratingDelta > 0)) {
+      setShake((s) => s + 1);
+    }
     const p = bySlug[slug];
     setCelebration({
       kind: a.result === "solved" ? "solved" : a.result === "solved_with_help" ? "assisted" : "logged",
@@ -823,6 +965,11 @@ export function GraphView({
       ratingAfter: outcome.ratingAfter,
       achievements: outcome.newAchievements.map((x) => x.name),
       questCompleted: outcome.questJustCompleted,
+      crit: outcome.crit,
+      effectNotes: outcome.effectNotes,
+      curseGained: outcome.curseGained,
+      curseCleansed: outcome.curseCleansed,
+      combo: outcome.comboToday,
     });
     if (outcome.newAchievements.length > 0) {
       emitCoach({ type: "achievement", name: outcome.newAchievements[0].name });
@@ -845,7 +992,10 @@ export function GraphView({
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col p-2 md:p-5">
-      <div
+      <motion.div
+        key={`shake-${shake}`}
+        animate={shake > 0 ? { x: [0, -10, 10, -8, 8, -4, 4, 0], y: [0, 5, -5, 4, -4, 2, 0] } : {}}
+        transition={{ duration: 0.5 }}
         className="relative min-h-0 flex-1 overflow-hidden border-4 border-black bg-neo-bg shadow-neo"
         ref={wrapRef}
       >
@@ -940,21 +1090,72 @@ export function GraphView({
           )}
         </AnimatePresence>
 
+        <Belt
+          inv={inv}
+          onChanged={() => {
+            setInv(getInventory());
+            onAttempt?.();
+          }}
+        />
+
+        <AnimatePresence>
+          {eventNode && (
+            <EventModal
+              slug={data.find((n) => n.id === eventNode)!.slug}
+              onProceed={(blind) => {
+                const id = eventNode;
+                setEventNode(null);
+                setInv(getInventory());
+                if (id) openPanel(id, blind);
+              }}
+              onClose={() => setEventNode(null)}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {bossIntroFor && (
+            <BossIntro
+              title={bySlug[data.find((n) => n.id === bossIntroFor)!.slug]?.title ?? "The Gatekeeper"}
+              onDone={() => {
+                const id = bossIntroFor;
+                setBossIntroFor(null);
+                if (id) openPanel(id);
+              }}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {inv.pendingChest && !celebration && (
+            <ChestModal
+              onDone={(relic) => {
+                setInv(getInventory());
+                if (relic) emitCoach({ type: "achievement", name: relic.name });
+                onAttempt?.();
+              }}
+            />
+          )}
+        </AnimatePresence>
+
         <AnimatePresence>
           {celebration && (
             <Celebration data={celebration} onDone={() => setCelebration(null)} />
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
 
       <AnimatePresence>
         {selectedProblem && (
           <ReportPanel
             problem={selectedProblem}
             startTime={startTime}
+            blind={blindAttempt}
+            canSecondChance={inv.potions.includes("second-chance")}
             onClose={() => {
               setSelected(null);
               setRematchSlug(null);
+              setBlindAttempt(false);
             }}
             onSubmit={submitReport}
           />

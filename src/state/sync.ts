@@ -10,17 +10,20 @@ import { getAllAttempts, replaceAttempts, type Attempt, type AttemptLog } from "
 import { listInterviews, replaceInterviews, type InterviewRecord } from "./interviews";
 import { setTitleLocal } from "./achievements";
 import { setSkinLocal } from "./coachSkins";
+import { setInventoryLocal, type Inventory } from "./inventory";
 
 type PersistDetail =
   | { kind: "attempt"; slug: string; attempt: Attempt }
   | { kind: "interview"; rec: InterviewRecord }
-  | { kind: "profile"; title?: string; coachSkin?: string };
+  | { kind: "profile"; title?: string; coachSkin?: string }
+  | { kind: "inventory"; inventory: Inventory };
 
 const MIRROR_KEYS = [
   "leegraph.attempts",
   "leetgraph.interviews",
   "leetgraph.title",
   "leetgraph.coachSkin",
+  "leetgraph.inventory",
 ];
 
 export function clearLocalMirror() {
@@ -33,7 +36,7 @@ export async function hydrateFromCloud(userId: string): Promise<void> {
   const [attemptsRes, interviewsRes, profileRes] = await Promise.all([
     supabase.from("attempts").select("slug, at, payload").order("at"),
     supabase.from("interviews").select("at, payload").order("at"),
-    supabase.from("profiles").select("title, coach_skin").maybeSingle(),
+    supabase.from("profiles").select("title, coach_skin, inventory").maybeSingle(),
   ]);
   if (attemptsRes.error) throw attemptsRes.error;
   if (interviewsRes.error) throw interviewsRes.error;
@@ -84,13 +87,18 @@ export async function hydrateFromCloud(userId: string): Promise<void> {
   const profile = profileRes.data;
   const localTitle = localStorage.getItem("leetgraph.title");
   const localSkin = localStorage.getItem("leetgraph.coachSkin");
+  const localInv = localStorage.getItem("leetgraph.inventory");
   setTitleLocal(profile?.title ?? localTitle);
   setSkinLocal(profile?.coach_skin ?? localSkin);
-  if (!profile?.title || !profile?.coach_skin) {
+  setInventoryLocal(
+    (profile?.inventory as Inventory | null) ?? (localInv ? (JSON.parse(localInv) as Inventory) : null)
+  );
+  if (!profile?.title || !profile?.coach_skin || !profile?.inventory) {
     await supabase.from("profiles").upsert({
       user_id: userId,
       title: profile?.title ?? localTitle,
       coach_skin: profile?.coach_skin ?? localSkin,
+      inventory: profile?.inventory ?? (localInv ? JSON.parse(localInv) : null),
     });
   }
 }
@@ -122,6 +130,11 @@ async function pushDetail(userId: string, d: PersistDetail) {
       const { error } = await supabase
         .from("interviews")
         .upsert({ user_id: userId, at: d.rec.at, payload: d.rec }, { onConflict: "user_id,at" });
+      if (error) throw error;
+    } else if (d.kind === "inventory") {
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({ user_id: userId, inventory: d.inventory });
       if (error) throw error;
     } else {
       const patch: Record<string, unknown> = { user_id: userId };

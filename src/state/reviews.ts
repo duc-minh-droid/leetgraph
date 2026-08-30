@@ -22,6 +22,7 @@ function isFail(a: Attempt): boolean {
 
 function dueAtFor(attempts: Attempt[]): number | null {
   const last = attempts[attempts.length - 1];
+  if (last.noRematch) return null; // Second Chance potion: fail is forgiven
   if (isFail(last)) {
     let failStreak = 0;
     for (let i = attempts.length - 1; i >= 0 && isFail(attempts[i]); i--) failStreak++;

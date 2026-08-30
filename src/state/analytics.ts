@@ -47,6 +47,10 @@ export interface EnrichedAttempt {
   timeComplexity: string;
   spaceComplexity: string;
 
+  // Roguelike effect stamps (see attempts.ts).
+  ratingBonusMult: number;
+  ratingBonusFlat: number;
+
   // --- Derived session context ---
   attemptIndex: number; // global chronological index (0-based)
   nodeOrdinal: number; // Nth attempt within its calendar day (fatigue signal)
@@ -143,6 +147,8 @@ export function getEnrichedAttempts(
       optimal: attempt.optimal ?? false,
       timeComplexity: attempt.timeComplexity ?? "",
       spaceComplexity: attempt.spaceComplexity ?? "",
+      ratingBonusMult: attempt.ratingBonusMult ?? 1,
+      ratingBonusFlat: attempt.ratingBonusFlat ?? 0,
       attemptIndex: i,
       nodeOrdinal,
       streakDay: streak,

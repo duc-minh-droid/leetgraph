@@ -1,6 +1,7 @@
-// One deterministic daily quest, seeded by the calendar date. Progress is
-// derived from today's attempts — nothing stored.
+// One deterministic daily quest, seeded by the calendar date (+ any Quest
+// Reroll potions used today). Progress is derived from today's attempts.
 import { getEnrichedAttempts, type EnrichedAttempt } from "./analytics";
+import { getInventory } from "./inventory";
 
 export interface Quest {
   id: string;
@@ -52,7 +53,8 @@ function dayKey(d: Date): string {
 }
 
 function questFor(day: string): QuestDef {
-  return POOL[hash("quest:" + day) % POOL.length];
+  const rerolls = getInventory().questRerolls[day] ?? 0;
+  return POOL[hash(`quest:${day}:${rerolls}`) % POOL.length];
 }
 
 function attemptsOn(day: string, data: EnrichedAttempt[]): EnrichedAttempt[] {

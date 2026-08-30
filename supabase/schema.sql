@@ -35,13 +35,16 @@ drop policy if exists "own interviews" on public.interviews;
 create policy "own interviews" on public.interviews
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
--- Player profile: equipped title + coach skin.
+-- Player profile: equipped title + coach skin + roguelike inventory
+-- (relics, potions, active curse, pending bonuses).
 create table if not exists public.profiles (
   user_id uuid primary key references auth.users (id) on delete cascade,
   title text,
   coach_skin text,
+  inventory jsonb,
   updated_at timestamptz not null default now()
 );
+alter table public.profiles add column if not exists inventory jsonb;
 
 alter table public.profiles enable row level security;
 drop policy if exists "own profile" on public.profiles;
