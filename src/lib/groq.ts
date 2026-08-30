@@ -37,6 +37,14 @@ async function chat(model: string, messages: Msg[], maxTokens = 1600): Promise<s
   return content.trim();
 }
 
+// Generic one-shot text completion for other features (quest board, coach).
+export async function askText(system: string, user: string, maxTokens = 600): Promise<string> {
+  return chat(TEXT_MODEL, [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ], maxTokens);
+}
+
 const STATEMENT_CACHE_PREFIX = "leetgraph.statement.v1.";
 
 // Models sneak markdown in despite instructions — strip it for plain rendering.

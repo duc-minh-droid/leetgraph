@@ -3,6 +3,7 @@
 import { getInventory, updateInventory } from "./inventory";
 import { modifierOf } from "./modifiers";
 import { POTIONS } from "./relics";
+import { grantEffect, randomEffect } from "./effects";
 
 function hash(s: string): number {
   let h = 2166136261;
@@ -27,11 +28,13 @@ export type MysteryEvent =
   | { type: "blind"; title: string; desc: string; bonus: number }
   | { type: "gamble"; title: string; desc: string; wager: number }
   | { type: "gift"; title: string; desc: string; bonus: number }
-  | { type: "potion"; title: string; desc: string; potionId: string };
+  | { type: "potion"; title: string; desc: string; potionId: string }
+  | { type: "blessing"; title: string; desc: string }
+  | { type: "hex"; title: string; desc: string; bonus: number };
 
 // The event a slug hides — deterministic per slug.
 export function eventFor(slug: string): MysteryEvent {
-  switch (hash("event:" + slug) % 4) {
+  switch (hash("event:" + slug) % 6) {
     case 0:
       return {
         type: "blind",
@@ -53,7 +56,7 @@ export function eventFor(slug: string): MysteryEvent {
         desc: "A stranger's leftover rating. +8 on your next attempt, no strings attached.",
         bonus: 8,
       };
-    default: {
+    case 3: {
       const potion = POTIONS[hash("potion:" + slug) % POTIONS.length];
       return {
         type: "potion",
@@ -62,6 +65,19 @@ export function eventFor(slug: string): MysteryEvent {
         potionId: potion.id,
       };
     }
+    case 4:
+      return {
+        type: "blessing",
+        title: "Wandering Sage",
+        desc: "A stranger offers a blessing — a random buff settles on you.",
+      };
+    default:
+      return {
+        type: "hex",
+        title: "The Pact",
+        desc: "A shady deal: +18 rating armed for your next attempt… but a random debuff comes with it.",
+        bonus: 18,
+      };
   }
 }
 
@@ -100,6 +116,19 @@ export function resolveEvent(slug: string): EventResolution {
       updateInventory((inv) => ({ potions: [...inv.potions, ev.potionId] }));
       res = { message: "Added to your potion belt.", blind: false };
       break;
+    case "blessing": {
+      const buff = randomEffect("buff");
+      grantEffect(buff.id);
+      res = { message: `Blessed: ${buff.name} — ${buff.desc}`, blind: false };
+      break;
+    }
+    case "hex": {
+      const debuff = randomEffect("debuff");
+      grantEffect(debuff.id);
+      updateInventory((inv) => ({ pendingBonus: inv.pendingBonus + ev.bonus }));
+      res = { message: `+${ev.bonus} armed… and ${debuff.name}: ${debuff.desc}`, blind: false };
+      break;
+    }
   }
   updateInventory((inv) => ({ eventsSeen: [...inv.eventsSeen, slug] }));
   return res;

@@ -20,6 +20,12 @@ export interface Inventory {
   // DiceBear avatar ids ("style:seed") you own + the one you wear.
   avatars: string[];
   avatar: string | null;
+  // Active buffs/debuffs (see state/effects.ts).
+  effects: { id: string; until?: number; uses?: number }[];
+  // Limited bundles already purchased, keyed by "window:bundleId".
+  bundlesBought: string[];
+  // AI quest board rewards already claimed, keyed by "day:questIdx".
+  questsClaimed: string[];
 }
 
 const KEY = "leetgraph.inventory";
@@ -35,6 +41,9 @@ const EMPTY: Inventory = {
   coins: 0,
   avatars: [],
   avatar: null,
+  effects: [],
+  bundlesBought: [],
+  questsClaimed: [],
 };
 
 export function getInventory(): Inventory {

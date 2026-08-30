@@ -12,6 +12,7 @@ import {
   FaGem,
   FaCrown,
   FaUserGroup,
+  FaGift,
 } from "react-icons/fa6";
 import { ACHIEVEMENTS, unlockedAchievements, equippedTitle, equipTitle } from "../state/achievements";
 import { COACH_SKINS } from "../state/coachSkins";
@@ -25,6 +26,11 @@ import {
   equipAvatar,
   POTION_PRICES,
   buyPotion,
+  bundleOffers,
+  buyBundle,
+  bundleKey,
+  msUntilBundleRestock,
+  BUNDLE_WINDOW_MS,
   type ShopOffer,
 } from "../lib/avatars";
 import { sfx } from "../lib/sfx";
@@ -142,6 +148,107 @@ function PotionShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
   );
 }
 
+// Limited bundles: two seeded offers, 30-minute rotation, one purchase each.
+function BundleShop({ rev, onChanged }: { rev: number; onChanged: () => void }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const windowKey = Math.floor(now / BUNDLE_WINDOW_MS);
+  const bundles = useMemo(() => bundleOffers(now), [windowKey]);
+  const inv = useMemo(() => getInventory(), [rev, windowKey]);
+  const remaining = msUntilBundleRestock(now);
+  const mm = Math.floor(remaining / 60000);
+  const ss = Math.floor((remaining % 60000) / 1000);
+
+  return (
+    <>
+      <div className="mb-2 flex items-center gap-2">
+        <motion.span
+          animate={{ rotate: [-2, 2, -2] }}
+          transition={{ duration: 1, repeat: Infinity }}
+          className="border-2 border-black bg-neo-accent px-2 py-0.5 text-xs font-black uppercase text-white shadow-neo-sm"
+        >
+          Limited!
+        </motion.span>
+        <span className="border-2 border-black bg-black px-2 py-0.5 text-xs font-black tabular-nums text-neo-secondary shadow-neo-sm">
+          Gone in {mm}:{ss.toString().padStart(2, "0")}
+        </span>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {bundles.map((b, i) => {
+          const bought = inv.bundlesBought.includes(bundleKey(b, now));
+          const relicOwned = Boolean(b.relic && inv.relics.includes(b.relic.id));
+          const affordable = inv.coins >= b.price;
+          const blocked = bought || relicOwned || !affordable;
+          return (
+            <motion.button
+              key={b.id}
+              initial={{ y: 20, opacity: 0, rotate: i % 2 ? 1 : -1 }}
+              animate={{ y: 0, opacity: 1 }}
+              whileHover={blocked ? {} : { y: -4, rotate: i % 2 ? 2 : -2 }}
+              whileTap={blocked ? {} : { scale: 0.95 }}
+              disabled={blocked}
+              onClick={() => {
+                if (buyBundle(b)) sfx("chestTake", 0.65);
+                else sfx("error", 0.4);
+                onChanged();
+              }}
+              title={
+                bought
+                  ? "Already grabbed this one"
+                  : relicOwned
+                    ? "You already own this relic — wait for the next rotation"
+                    : affordable
+                      ? `Buy for ${b.price} coins`
+                      : `Need ${b.price - inv.coins} more coins`
+              }
+              className={`relative flex flex-col gap-2 border-4 border-black bg-white p-3 text-left shadow-neo ${
+                blocked ? "opacity-60 grayscale" : ""
+              }`}
+            >
+              <span className="absolute -right-2 -top-3 rotate-6 border-2 border-black bg-neo-secondary px-1.5 py-0.5 text-[9px] font-black uppercase shadow-neo-sm">
+                −{Math.round((1 - b.price / b.fullPrice) * 100)}%
+              </span>
+              <span className="flex items-center gap-2 text-base font-black uppercase">
+                <FaGift className="text-neo-accent" /> {b.name}
+              </span>
+              <span className="text-[10px] font-bold uppercase leading-snug text-black/70">{b.desc}</span>
+              {b.avatars.length > 0 && (
+                <span className="flex gap-1.5">
+                  {b.avatars.map((a) => (
+                    <img key={a} src={avatarUrl(a, 64)} alt="Bundle avatar" className="h-12 w-12 border-2 border-black bg-neo-bg" loading="lazy" />
+                  ))}
+                </span>
+              )}
+              {b.relic && (
+                <span className="flex items-center gap-1 border-2 border-black bg-neo-muted px-1.5 py-0.5 text-[10px] font-black uppercase">
+                  <FaGem /> {b.relic.name} — {b.relic.desc}
+                </span>
+              )}
+              <span className="flex items-center gap-2 text-sm font-black tabular-nums">
+                <span className="text-black/40 line-through">{b.fullPrice}</span>
+                <span className={`flex items-center gap-1 border-2 border-black px-2 py-0.5 ${bought ? "bg-neo-ok" : "bg-neo-secondary"}`}>
+                  {bought ? (
+                    <>
+                      <FaCheck /> Grabbed
+                    </>
+                  ) : (
+                    <>
+                      <FaCoins /> {b.price}
+                    </>
+                  )}
+                </span>
+              </span>
+            </motion.button>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
 // Full catalog: every achievement + its reward (coach / relic / title).
 function AchievementCatalog({ rev, onChanged }: { rev: number; onChanged: () => void }) {
   const unlocked = useMemo(() => unlockedAchievements(), [rev]);
@@ -227,6 +334,12 @@ export function ShopView({ onChanged }: { onChanged?: () => void }) {
       </div>
 
       <div className="dash-grid">
+        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
+          <h3><FaGift className="mr-1 inline text-neo-accent" />Limited bundles</h3>
+          <p className="dash-sub">Deep discounts, 30-minute rotation, one grab each — the only way to buy relics outright.</p>
+          <BundleShop rev={rev} onChanged={changed} />
+        </motion.section>
+
         <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
           <h3><FaShop className="mr-1 inline text-neo-accent" />Avatar shop</h3>
           <p className="dash-sub">

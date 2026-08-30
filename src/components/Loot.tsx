@@ -9,8 +9,11 @@ import {
   FaCoins,
   FaBoxOpen,
   FaDiceD20,
+  FaArrowUp,
+  FaArrowDown,
 } from "react-icons/fa6";
 import { getInventory, updateInventory, type Inventory } from "../state/inventory";
+import { activeEffects, effectById } from "../state/effects";
 import { eventFor, resolveEvent, type EventResolution } from "../state/events";
 import { draftRelics, relicById, curseById, potionById, type RelicDef, type Rarity } from "../state/relics";
 import { RANKS, type Rank } from "../state/rating";
@@ -281,9 +284,21 @@ export function RankUpCeremony({ rankName, onDone }: { rankName: string; onDone:
   );
 }
 
-// ---------------- Belt: relics, potions, curse ----------------
+// ---------------- Belt: relics, potions, curse, buffs/debuffs ----------------
+function fmtLeft(ms: number): string {
+  const m = Math.ceil(ms / 60000);
+  return m >= 60 ? `${Math.round(m / 60)}h` : `${m}m`;
+}
+
 export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void }) {
   const curse = inv.curse ? curseById(inv.curse) : null;
+  // Tick so countdown chips stay honest (and expired effects vanish).
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 15000);
+    return () => clearInterval(t);
+  }, []);
+  const effects = activeEffects(inv, now);
   const usePotion = (idx: number) => {
     const id = inv.potions[idx];
     if (id !== "second-chance") sfx("potion", 0.55);
@@ -308,7 +323,8 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
     onChanged();
   };
 
-  if (inv.relics.length === 0 && inv.potions.length === 0 && !curse && inv.pendingBonus === 0) return null;
+  if (inv.relics.length === 0 && inv.potions.length === 0 && !curse && inv.pendingBonus === 0 && effects.length === 0)
+    return null;
 
   return (
     <div className="pointer-events-none absolute left-2 top-2 z-20 flex max-w-[70%] flex-wrap items-center gap-1.5 md:left-4 md:top-4">
@@ -365,6 +381,24 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
           <FaSkullCrossbones /> {curse.name}
         </motion.span>
       )}
+      {effects.map((e) => {
+        const def = effectById(e.id)!;
+        const left = e.until !== undefined ? fmtLeft(e.until - now) : `${e.uses} use${(e.uses ?? 0) > 1 ? "s" : ""}`;
+        return (
+          <motion.span
+            key={e.id}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            title={`${def.name} — ${def.desc}`}
+            className={`pointer-events-auto flex items-center gap-1 border-2 border-black px-1.5 py-1 text-[10px] font-black uppercase shadow-neo-sm ${
+              def.kind === "buff" ? "bg-neo-ok" : "bg-neo-accent text-white"
+            }`}
+          >
+            {def.kind === "buff" ? <FaArrowUp /> : <FaArrowDown />} {def.name}
+            <span className={`border-l-2 border-black pl-1 text-[9px] ${def.kind === "buff" ? "text-black/60" : "text-white/80"}`}>{left}</span>
+          </motion.span>
+        );
+      })}
     </div>
   );
 }

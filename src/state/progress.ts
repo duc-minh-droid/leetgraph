@@ -9,6 +9,8 @@ import { getInventory, updateInventory } from "./inventory";
 import { computeAttemptBonus, rollCurse, cleanseCheck, curseById, relicForAchievement } from "./relics";
 import { modifierOf, timedLimit } from "./modifiers";
 import { levelInfo } from "./xp";
+import { consumeAttemptEffects } from "./effects";
+import { auraOf, AURA_META } from "./auras";
 
 export interface SubmitOptions {
   secondChance?: boolean; // Second Chance potion armed for this attempt
@@ -100,11 +102,27 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
   if (inv0.relics.includes("xp-charm")) xp += 5;
   if (inv0.relics.includes("scholars-tome") && solved) xp = Math.round(xp * 1.5);
 
+  // ---- buffs/debuffs + today's node aura, folded into the same stamps ----
+  const eff = consumeAttemptEffects(solved);
+  const aura = auraOf(slug);
+  let ratingMult = bonus.mult * eff.ratingMult;
+  const ratingFlat = bonus.flat + eff.flat;
+  const notes = [...bonus.notes, ...eff.notes];
+  if (aura === "volatile") {
+    ratingMult *= 1.25;
+    notes.push(`${AURA_META.volatile.icon} Volatile ±25%`);
+  }
+  xp = Math.round(xp * eff.xpMult);
+  if (aura === "blessed") {
+    xp = Math.round(xp * 1.5);
+    notes.push(`${AURA_META.blessed.icon} Blessed XP +50%`);
+  }
+
   const stamped: Attempt = {
     ...attempt,
-    ratingBonusMult: bonus.mult,
-    ratingBonusFlat: bonus.flat,
-    effectNotes: bonus.notes.length ? bonus.notes : undefined,
+    ratingBonusMult: ratingMult,
+    ratingBonusFlat: ratingFlat,
+    effectNotes: notes.length ? notes : undefined,
     noRematch: bonus.secondChance || undefined,
     xp,
   };
@@ -123,6 +141,11 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
   let coins = solved ? (attempt.result === "solved" ? 15 : 10) : 5;
   if (opts.isBossNode && solved) coins += 25;
   if (bonus.crit) coins *= 2;
+  coins = Math.round(coins * eff.coinMult);
+  if (aura === "gilded" && solved) {
+    coins *= 2;
+    notes.push(`${AURA_META.gilded.icon} Gilded coins x2`);
+  }
 
   addAttempt(slug, stamped);
 
@@ -134,7 +157,12 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
     curseCleansed = curseById(inv.curse)?.name ?? inv.curse;
     updateInventory({ curse: null });
   } else {
-    const rolled = rollCurse(stamped, slug);
+    let rolled = rollCurse(stamped, slug);
+    // Haunted aura: failing here today is very likely to curse you.
+    if (!rolled && aura === "haunted" && !solved && !getInventory().curse && Math.random() < 0.6) {
+      rolled = Math.random() < 0.5 ? "brain-fog" : "gravity";
+      notes.push(`${AURA_META.haunted.icon} Haunted…`);
+    }
     if (rolled) {
       curseGained = curseById(rolled)?.name ?? rolled;
       updateInventory({ curse: rolled });
@@ -144,7 +172,11 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
   // Chests: boss nodes always drop on a solve; elites 30% of the time.
   let chestDropped = false;
   if (solved && !getInventory().pendingChest) {
-    if (opts.isBossNode || (modifierOf(slug) === "elite" && Math.random() < 0.3)) {
+    if (
+      opts.isBossNode ||
+      (modifierOf(slug) === "elite" && Math.random() < 0.3) ||
+      (aura === "lucky" && Math.random() < 0.15)
+    ) {
       chestDropped = true;
       updateInventory({
         pendingChest: { seed: (Date.now() % 2147483647) | 1, source: opts.isBossNode ? "boss" : "elite" },
@@ -188,7 +220,7 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
     newAchievements,
     questJustCompleted,
     crit: bonus.crit || ratingAfter - ratingBefore >= 25,
-    effectNotes: bonus.notes,
+    effectNotes: notes,
     curseGained,
     curseCleansed,
     chestDropped,

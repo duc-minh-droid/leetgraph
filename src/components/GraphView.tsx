@@ -38,6 +38,8 @@ import {
   FaQuestion,
   FaChevronLeft,
   FaChevronRight,
+  FaScroll,
+  FaCoins,
 } from "react-icons/fa6";
 import { type MapData, type MapNode } from "../map";
 import { type Problem } from "../data/problems";
@@ -51,6 +53,8 @@ import { effectiveTimedLimit } from "../state/relics";
 import { currentRating, farmCutoff, RANKS } from "../state/rating";
 import { emitCoach } from "../state/coachBus";
 import { mysteryPending, isMysteryNode } from "../state/events";
+import { auraOf, AURA_META, type Aura } from "../state/auras";
+import { getBoard, boardStatus, claimQuest, refreshBoardAI } from "../state/questBoard";
 import { getInventory, type Inventory } from "../state/inventory";
 import type { MapMeta } from "../state/library";
 import { Celebration, type CelebrationData } from "./Celebration";
@@ -106,6 +110,7 @@ interface SquareData extends Record<string, unknown> {
   rematchDue: boolean;
   mystery: boolean; // unopened "?" node: contents hidden
   boss: boolean; // act convergence node
+  aura: Aura | null; // today's RNG aura on this node
 }
 
 const MODIFIER_ICON: Record<Modifier, ReactNode> = {
@@ -296,6 +301,19 @@ function SquareNode({ data }: NodeProps) {
           className="absolute -top-5 left-1/2 z-20 grid h-8 w-8 -translate-x-1/2 place-items-center border-4 border-black bg-black text-[14px] text-neo-secondary shadow-neo-sm"
         >
           <FaCrown />
+        </motion.div>
+      )}
+
+      {d.aura && (
+        <motion.div
+          animate={{ scale: [1, 1.15, 1] }}
+          transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+          title={`${AURA_META[d.aura].label} — ${AURA_META[d.aura].desc} (rotates daily)`}
+          className="absolute -bottom-3 -right-2 z-20 flex items-center gap-0.5 border-2 border-black px-1 py-0.5 text-[10px] font-black shadow-neo-sm"
+          style={{ background: AURA_META[d.aura].color, color: AURA_META[d.aura].text }}
+        >
+          <span>{AURA_META[d.aura].icon}</span>
+          <span className="text-[8px] uppercase">{AURA_META[d.aura].label}</span>
         </motion.div>
       )}
     </motion.div>
@@ -699,19 +717,27 @@ function ReportPanel({
   );
 }
 
-// Act navigation + map progress, pinned to the map's top-right (like Legend).
+// Act navigation + map progress + quest board toggle, pinned top-right.
 function ActPanel({
   viewAct,
   maxAct,
   totalActs,
   progress,
   onViewAct,
+  questsDone,
+  questsTotal,
+  questsOpen,
+  onToggleQuests,
 }: {
   viewAct: number;
   maxAct: number;
   totalActs: number;
   progress: number;
   onViewAct: (a: number) => void;
+  questsDone: number;
+  questsTotal: number;
+  questsOpen: boolean;
+  onToggleQuests: () => void;
 }) {
   return (
     <motion.div
@@ -769,6 +795,101 @@ function ActPanel({
           {progress}%
         </motion.span>
       </div>
+      <motion.button
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={onToggleQuests}
+        aria-expanded={questsOpen}
+        className={`flex items-center justify-center gap-1.5 border-2 border-black px-2 py-1 text-[11px] font-black uppercase shadow-neo-sm transition-colors ${
+          questsOpen ? "bg-neo-accent text-white" : questsDone > 0 ? "bg-neo-secondary" : "bg-white hover:bg-neo-bg"
+        }`}
+      >
+        <FaScroll /> Quests {questsDone}/{questsTotal}
+        {questsDone > 0 && !questsOpen && (
+          <motion.span animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 1, repeat: Infinity }}>
+            !
+          </motion.span>
+        )}
+      </motion.button>
+    </motion.div>
+  );
+}
+
+// Daily AI quest board drawer: 3 quests from the Quest Master, coin rewards.
+function QuestDrawer({ rev, onClaim }: { rev: number; onClaim: () => void }) {
+  const [board, setBoard] = useState(() => getBoard());
+  const status = useMemo(() => {
+    void rev;
+    void board;
+    return boardStatus();
+  }, [rev, board]);
+  useEffect(() => {
+    // Ask the Quest Master (Groq) to tailor today's board; falls back silently.
+    void refreshBoardAI().then((b) => {
+      if (b) setBoard(b);
+    });
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ x: 40, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: 40, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 26 }}
+      className="absolute right-4 top-[168px] z-30 flex w-80 max-w-[85%] flex-col overflow-hidden border-4 border-black bg-white shadow-neo"
+    >
+      <div className="flex items-center justify-between border-b-4 border-black bg-neo-secondary px-3 py-2 text-xs font-black uppercase">
+        <span className="flex items-center gap-1.5">
+          <FaScroll /> Quest board
+        </span>
+        <span className="border-2 border-black bg-white px-1.5 text-[9px]">
+          {board.ai ? "BY THE QUEST MASTER" : "STANDARD ISSUE"}
+        </span>
+      </div>
+      <div className="flex flex-col gap-2 p-2.5">
+        {status.map((s, i) => (
+          <div
+            key={i}
+            className={`flex flex-col gap-1.5 border-2 border-black p-2 ${s.claimed ? "bg-neo-bg opacity-60" : s.done ? "bg-neo-ok/40" : "bg-white"}`}
+          >
+            <span className="text-[11px] font-black uppercase leading-tight">{s.quest.label}</span>
+            <div className="flex items-center gap-2">
+              <div className="h-2.5 flex-1 border-2 border-black bg-neo-bg">
+                <motion.div
+                  className="h-full bg-neo-blue"
+                  initial={false}
+                  animate={{ width: `${(s.progress / s.quest.count) * 100}%` }}
+                />
+              </div>
+              <span className="text-[10px] font-black tabular-nums">
+                {s.progress}/{s.quest.count}
+              </span>
+              {s.claimed ? (
+                <span className="border-2 border-black bg-neo-bg px-1.5 py-0.5 text-[9px] font-black uppercase">Claimed</span>
+              ) : (
+                <motion.button
+                  whileHover={s.done ? { scale: 1.08 } : {}}
+                  whileTap={s.done ? { scale: 0.9 } : {}}
+                  disabled={!s.done}
+                  onClick={() => {
+                    const coins = claimQuest(i);
+                    if (coins !== null) {
+                      sfx("coinFlip", 0.6);
+                      emitCoach({ type: "run-ok" });
+                    }
+                    onClaim();
+                  }}
+                  className={`flex items-center gap-1 border-2 border-black px-1.5 py-0.5 text-[9px] font-black uppercase shadow-neo-sm ${
+                    s.done ? "bg-neo-secondary" : "bg-white opacity-50"
+                  }`}
+                >
+                  <FaCoins /> {s.quest.reward}
+                </motion.button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </motion.div>
   );
 }
@@ -821,6 +942,9 @@ export function GraphView({
   const [bossIntroFor, setBossIntroFor] = useState<string | null>(null);
   const [rankUpTo, setRankUpTo] = useState<string | null>(null);
   const [shake, setShake] = useState(0);
+  // AI quest board (drawer under the act panel).
+  const [showQuests, setShowQuests] = useState(false);
+  const [questRev, setQuestRev] = useState(0);
   // Rematch (spaced-repetition) state.
   const [attemptsRev, setAttemptsRev] = useState(0);
   const [rematchSlug, setRematchSlug] = useState<string | null>(null);
@@ -831,6 +955,12 @@ export function GraphView({
     return dueReviews(mapSlugs);
   }, [mapSlugs, attemptsRev]);
   const dueSet = useMemo(() => new Set(due.map((r) => r.slug)), [due]);
+  // Quest board summary for the act panel badge.
+  const questStats = useMemo(() => {
+    void questRev;
+    const st = boardStatus();
+    return { done: st.filter((s) => s.done && !s.claimed).length, total: st.length };
+  }, [attemptsRev, questRev]);
   const rfRef = useRef<ReactFlowInstance | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
@@ -976,6 +1106,7 @@ export function GraphView({
               rematchDue: dueSet.has(n.slug),
               mystery: isMysteryNode(n.slug) && !inv.eventsSeen.includes(n.slug) && !visited.has(n.id),
               boss: n.row === actInfo[n.act].endRow,
+              aura: auraOf(n.slug),
             } as SquareData,
           };
         }),
@@ -1165,7 +1296,24 @@ export function GraphView({
           totalActs={totalActs}
           progress={progress}
           onViewAct={onViewAct}
+          questsDone={questStats.done}
+          questsTotal={questStats.total}
+          questsOpen={showQuests}
+          onToggleQuests={() => setShowQuests((s) => !s)}
         />
+
+        <AnimatePresence>
+          {showQuests && (
+            <QuestDrawer
+              rev={attemptsRev + questRev}
+              onClaim={() => {
+                setQuestRev((r) => r + 1);
+                setInv(getInventory());
+                onAttempt?.();
+              }}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Rematch queue badge + drawer */}
         {due.length > 0 && (
@@ -1174,7 +1322,7 @@ export function GraphView({
             animate={{ y: 0, opacity: 1 }}
             whileTap={{ scale: 0.93 }}
             onClick={() => setShowRematches((s) => !s)}
-            className="absolute right-4 top-[104px] z-20 flex rotate-1 items-center gap-2 border-4 border-black bg-neo-accent px-3 py-2 text-sm font-black uppercase text-white shadow-neo"
+            className="absolute right-4 top-[168px] z-20 flex rotate-1 items-center gap-2 border-4 border-black bg-neo-accent px-3 py-2 text-sm font-black uppercase text-white shadow-neo"
           >
             <motion.span animate={{ rotate: [-10, 10, -10] }} transition={{ duration: 1.2, repeat: Infinity }}>
               <FaKhanda />
@@ -1189,7 +1337,7 @@ export function GraphView({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 40, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 26 }}
-              className="absolute right-4 top-[156px] z-20 flex max-h-[55%] w-72 flex-col overflow-hidden border-4 border-black bg-white shadow-neo"
+              className="absolute right-4 top-[220px] z-20 flex max-h-[50%] w-72 flex-col overflow-hidden border-4 border-black bg-white shadow-neo"
             >
               <div className="border-b-4 border-black bg-neo-secondary px-3 py-2 text-xs font-black uppercase">
                 Beat them this time
