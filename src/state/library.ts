@@ -33,6 +33,7 @@ interface Descriptor {
   description: string;
   json: unknown;
   csv: string;
+  requiredLevel: number; // player level needed to enter this roadmap
 }
 
 // Every roadmap is built from the same pipeline: CSV (LeetCode export) ->
@@ -45,24 +46,28 @@ const DESCRIPTORS: Descriptor[] = [
     description: "The Amazon grind — arrays through DP, tuned to Amazon's most-asked sets.",
     json: amazonData,
     csv: amazonCsv,
+    requiredLevel: 1,
   },
   {
     id: "google",
     description: "Google's signal — heavy on graphs, trees, and system-style coding.",
     json: googleData,
     csv: googleCsv,
+    requiredLevel: 3,
   },
   {
     id: "apple",
     description: "Apple's loop — pragmatic, product-minded problem sets.",
     json: appleData,
     csv: appleCsv,
+    requiredLevel: 5,
   },
   {
     id: "meta",
     description: "Meta's bread and butter — trees, graphs, and classic FAANG rounds.",
     json: metaData,
     csv: metaCsv,
+    requiredLevel: 8,
   },
 ];
 
@@ -105,8 +110,13 @@ export function listMaps() {
       nodeCount: m.nodes.length,
       acts,
       progress: progressOf(m),
+      requiredLevel: d.requiredLevel,
     };
   });
+}
+
+export function requiredLevelFor(id?: string | null): number {
+  return DESCRIPTORS.find((d) => d.id === id)?.requiredLevel ?? 1;
 }
 
 export function getMap(id?: string | null): MapMeta {

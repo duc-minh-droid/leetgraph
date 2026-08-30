@@ -45,6 +45,7 @@ export interface Attempt {
   ratingBonusFlat?: number; // added to the rating delta (solves only)
   effectNotes?: string[]; // human-readable effect log
   noRematch?: boolean; // Second Chance potion: fail skips the rematch queue
+  xp?: number; // XP earned by this attempt (relic boosts included)
 }
 
 const KEY = "leegraph.attempts";

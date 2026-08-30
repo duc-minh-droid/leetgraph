@@ -12,8 +12,10 @@ import {
   FaScroll,
   FaCheck,
   FaCrown,
+  FaLock,
 } from "react-icons/fa6";
 import { listMaps } from "./state/library";
+import { currentLevel } from "./state/xp";
 import { currentRating, START_RATING } from "./state/rating";
 import { equippedTitle } from "./state/achievements";
 import { currentStreak, getEnrichedAttempts } from "./state/analytics";
@@ -95,6 +97,7 @@ export function Home() {
   const totalProblems = maps.reduce((s, m) => s + m.nodeCount, 0);
   const totalActs = Math.max(...maps.map((m) => m.acts));
   const hasHistory = useMemo(() => getEnrichedAttempts().length > 0, []);
+  const level = useMemo(() => currentLevel(), []);
 
   return (
     <div className="min-h-full overflow-y-auto bg-neo-bg bg-grid font-display text-neo-ink">
@@ -176,15 +179,28 @@ export function Home() {
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {maps.map((m, i) => (
+            {maps.map((m, i) => {
+              const locked = level < m.requiredLevel;
+              return (
               <motion.div
                 key={m.id}
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: i * 0.06, type: "spring", stiffness: 260, damping: 22 }}
-                whileHover={{ y: -8, rotate: i % 2 === 0 ? -1 : 1, boxShadow: "12px 12px 0px 0px #000" }}
-                className="group relative flex flex-col border-4 border-black bg-white shadow-neo"
+                whileHover={locked ? {} : { y: -8, rotate: i % 2 === 0 ? -1 : 1, boxShadow: "12px 12px 0px 0px #000" }}
+                className={`group relative flex flex-col border-4 border-black bg-white shadow-neo ${locked ? "grayscale" : ""}`}
               >
+                {locked && (
+                  <div className="absolute inset-0 z-20 grid place-items-center bg-black/55">
+                    <div className="flex rotate-[-3deg] flex-col items-center gap-1 border-4 border-black bg-neo-secondary px-4 py-2 shadow-neo">
+                      <FaLock className="text-xl" />
+                      <span className="text-sm font-black uppercase">Level {m.requiredLevel}</span>
+                      <span className="text-[9px] font-bold uppercase text-black/70">
+                        You're level {level} — keep grinding
+                      </span>
+                    </div>
+                  </div>
+                )}
                 {m.progress >= 100 && (
                   <span className="absolute -right-2 -top-3 z-10 rotate-6 border-2 border-black bg-neo-ok px-2 py-0.5 text-[10px] font-black uppercase shadow-neo-sm">
                     Mastered
@@ -234,7 +250,8 @@ export function Home() {
                   </Link>
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
         </section>
 

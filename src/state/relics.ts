@@ -5,6 +5,7 @@
 import type { Attempt } from "./attempts";
 import { getInventory } from "./inventory";
 import { modifierOf, timedLimit } from "./modifiers";
+import { currentLevel } from "./xp";
 
 export type Rarity = "common" | "rare" | "legendary";
 
@@ -13,6 +14,7 @@ export interface RelicDef {
   name: string;
   desc: string;
   rarity: Rarity;
+  minLevel?: number; // player level required before this can drop
 }
 
 export const RELICS: RelicDef[] = [
@@ -20,11 +22,13 @@ export const RELICS: RelicDef[] = [
   { id: "warm-coffee", name: "Warm Coffee", desc: "+2 flat rating on every solve.", rarity: "common" },
   { id: "espresso", name: "Espresso Shot", desc: "Timed nodes get +5 minutes.", rarity: "common" },
   { id: "sponge", name: "Sponge", desc: "Assisted solves lose 30% less rating potential.", rarity: "common" },
+  { id: "xp-charm", name: "XP Charm", desc: "+5 XP on every attempt.", rarity: "common" },
   { id: "lucky-coin", name: "Lucky Coin", desc: "15% chance any rating gain is doubled. CRIT!", rarity: "rare" },
   { id: "loaded-dice", name: "Loaded Dice", desc: "Every solve rolls +0 to +8 bonus rating.", rarity: "rare" },
   { id: "sturdy-helm", name: "Sturdy Helm", desc: "Rating losses are softened by 30%.", rarity: "rare" },
-  { id: "cursed-skull", name: "Cursed Skull", desc: "Elite gains ×2 — but elite losses ×2 too.", rarity: "legendary" },
-  { id: "crown", name: "Grinder's Crown", desc: "Clean first-try solves earn +15 flat rating.", rarity: "legendary" },
+  { id: "scholars-tome", name: "Scholar's Tome", desc: "Solves earn +50% XP.", rarity: "rare", minLevel: 3 },
+  { id: "cursed-skull", name: "Cursed Skull", desc: "Elite gains ×2 — but elite losses ×2 too.", rarity: "legendary", minLevel: 4 },
+  { id: "crown", name: "Grinder's Crown", desc: "Clean first-try solves earn +15 flat rating.", rarity: "legendary", minLevel: 6 },
 ];
 
 export interface CurseDef {
@@ -61,10 +65,12 @@ export function potionById(id: string): PotionDef | undefined {
   return POTIONS.find((p) => p.id === id);
 }
 
-// Rarity-weighted draft of `n` relics you don't own yet.
+// Rarity-weighted draft of `n` relics you don't own yet (level-gated relics
+// stay out of the pool until you've earned them).
 export function draftRelics(seed: number, n = 3): RelicDef[] {
   const owned = new Set(getInventory().relics);
-  const pool = RELICS.filter((r) => !owned.has(r.id));
+  const level = currentLevel();
+  const pool = RELICS.filter((r) => !owned.has(r.id) && (r.minLevel ?? 0) <= level);
   const weight = (r: RelicDef) => (r.rarity === "common" ? 6 : r.rarity === "rare" ? 3 : 1);
   let s = seed >>> 0 || 1;
   const rand = () => ((s = Math.imul(s, 48271) % 2147483647) >>> 0) / 2147483647;

@@ -22,6 +22,8 @@ export interface CelebrationData {
   promoNote?: string | null; // promo series status line
   rankDown?: string | null; // demoted to this rank
   farmed?: boolean; // farming cutoff hit — no rating earned
+  xpEarned?: number;
+  levelUp?: number | null; // new level, if this attempt leveled you up
 }
 
 interface Particle {
@@ -169,6 +171,26 @@ export function Celebration({ data, onDone }: { data: CelebrationData; onDone: (
           )}
         </div>
 
+        {(data.xpEarned ?? 0) > 0 && (
+          <motion.span
+            initial={{ scale: 0, y: 8 }}
+            animate={{ scale: 1, y: 0 }}
+            transition={{ delay: 0.25, type: "spring", stiffness: 400, damping: 16 }}
+            className="border-2 border-black bg-neo-blue px-2 py-0.5 text-[11px] font-black uppercase text-white shadow-neo-sm"
+          >
+            +{data.xpEarned} XP
+          </motion.span>
+        )}
+        {data.levelUp && (
+          <motion.span
+            initial={{ scale: 3, opacity: 0, rotate: -8 }}
+            animate={{ scale: 1, opacity: 1, rotate: 2 }}
+            transition={{ delay: 0.45, type: "spring", stiffness: 320, damping: 13 }}
+            className="border-4 border-black bg-neo-blue px-4 py-1 text-xl font-black uppercase text-white shadow-[4px_4px_0_0_#000]"
+          >
+            LEVEL UP → {data.levelUp}
+          </motion.span>
+        )}
         {data.farmed && (
           <motion.span
             initial={{ scale: 0 }}

@@ -11,15 +11,20 @@ import {
   FaUserTie,
   FaRankingStar,
   FaTrophy,
+  FaVolumeHigh,
+  FaVolumeXmark,
+  FaLock,
 } from "react-icons/fa6";
 import { GraphView } from "./components/GraphView";
 import { AnalyticsView } from "./components/AnalyticsView";
 import { AchievementsView } from "./components/AchievementsView";
 import { Coach } from "./components/Coach";
-import { getMap, listMaps, progressOf, currentActOf } from "./state/library";
+import { getMap, listMaps, progressOf, currentActOf, requiredLevelFor } from "./state/library";
 import { currentEngine, decayCountdown, RANKS } from "./state/rating";
 import { equippedTitle } from "./state/achievements";
 import { currentStreak } from "./state/analytics";
+import { levelInfo, currentLevel } from "./state/xp";
+import { AMBIENTS, playAmbient, stopAmbient, currentAmbient, onAmbientChange, sfx } from "./lib/sfx";
 
 // Heavy tab (CodeMirror + Excalidraw + ElevenLabs SDK) — loaded on demand.
 const InterviewView = lazy(() => import("./components/InterviewView"));
@@ -34,6 +39,7 @@ function PlayerStrip({ rev }: { rev: number }) {
   const engine = useMemo(() => currentEngine(), [rev]);
   const rating = engine.rating;
   const rank = RANKS[engine.rankIdx];
+  const lvl = useMemo(() => levelInfo(), [rev]);
   const decayIn = useMemo(() => decayCountdown(), [rev]);
   const title = useMemo(() => equippedTitle(), [rev]);
   const streak = useMemo(() => currentStreak(), [rev]);
@@ -101,6 +107,24 @@ function PlayerStrip({ rev }: { rev: number }) {
         </AnimatePresence>
       </motion.div>
 
+      <motion.div
+        whileHover={{ y: -2, rotate: 1 }}
+        title={`Level ${lvl.level} — ${lvl.into}/${lvl.needed} XP to level ${lvl.level + 1}. Every attempt earns XP.`}
+        className="flex items-center gap-1.5 border-4 border-black bg-white px-2 py-1 shadow-neo-sm"
+      >
+        <motion.span key={lvl.level} initial={{ scale: 1.4 }} animate={{ scale: 1 }} className="text-xs font-black uppercase">
+          Lv{lvl.level}
+        </motion.span>
+        <span className="h-2.5 w-10 border-2 border-black bg-neo-bg">
+          <motion.span
+            className="block h-full bg-neo-blue"
+            initial={false}
+            animate={{ width: `${Math.round(lvl.progress * 100)}%` }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+          />
+        </span>
+      </motion.div>
+
       {engine.promo && (
         <motion.span
           initial={{ scale: 0 }}
@@ -127,10 +151,83 @@ function PlayerStrip({ rev }: { rev: number }) {
   );
 }
 
+// Rank-gated ambient soundscapes — each promotion unlocks a new loop.
+function AmbientPicker({ rev }: { rev: number }) {
+  const [open, setOpen] = useState(false);
+  const [, force] = useState(0);
+  useEffect(() => onAmbientChange(() => force((n) => n + 1)), []);
+  const rankIdx = useMemo(() => currentEngine().rankIdx, [rev]);
+  const active = currentAmbient();
+
+  return (
+    <div className="relative">
+      <motion.button
+        whileHover={{ scale: 1.1, rotate: -3 }}
+        whileTap={tap}
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Ambient sounds"
+        title="Ambient soundscapes — unlock one with every rank"
+        className={`grid h-8 w-8 place-items-center border-4 border-black shadow-neo-sm transition-colors ${
+          active ? "bg-neo-blue text-white" : "bg-white hover:bg-neo-muted"
+        }`}
+      >
+        {active ? <FaVolumeHigh className="text-sm" /> : <FaVolumeXmark className="text-sm" />}
+      </motion.button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ y: -8, opacity: 0, scale: 0.9 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: -8, opacity: 0, scale: 0.9 }}
+            className="absolute right-0 top-11 z-50 w-48 border-4 border-black bg-white shadow-neo"
+          >
+            <div className="border-b-2 border-black bg-neo-secondary px-2 py-1 text-[10px] font-black uppercase tracking-widest">
+              Soundscapes
+            </div>
+            {AMBIENTS.map((a) => {
+              const unlocked = rankIdx >= a.rankIdx;
+              const playing = active === a.sound;
+              return (
+                <button
+                  key={a.sound}
+                  disabled={!unlocked}
+                  onClick={() => {
+                    if (playing) {
+                      stopAmbient();
+                      sfx("toggleOff", 0.4);
+                    } else {
+                      playAmbient(a.sound);
+                      sfx("toggleOn", 0.4);
+                    }
+                  }}
+                  title={unlocked ? a.label : `Reach ${RANKS[a.rankIdx].name} to unlock`}
+                  className={`flex w-full items-center justify-between border-b-2 border-black px-2 py-1.5 text-left text-[11px] font-black uppercase last:border-b-0 ${
+                    playing ? "bg-neo-blue text-white" : unlocked ? "hover:bg-neo-bg" : "text-black/35"
+                  }`}
+                >
+                  <span>{a.label}</span>
+                  {!unlocked ? (
+                    <span className="flex items-center gap-1 text-[9px]">
+                      <FaLock /> {RANKS[a.rankIdx].name}
+                    </span>
+                  ) : playing ? (
+                    <FaVolumeHigh className="text-[10px]" />
+                  ) : null}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function MapApp() {
   const { mapId } = useParams();
   const valid = listMaps().some((m) => m.id === mapId);
-  if (!valid) return <Navigate to="/" replace />;
+  // Level gate: locked roadmaps bounce back home.
+  if (!valid || currentLevel() < requiredLevelFor(mapId)) return <Navigate to="/" replace />;
 
   const map = getMap(mapId);
   // Tab is deep-linkable (?tab=interview) — also lets the boneyard capture
@@ -255,6 +352,8 @@ export function MapApp() {
               {progress}%
             </motion.span>
           </div>
+
+          <AmbientPicker rev={rev} />
         </div>
       </header>
 

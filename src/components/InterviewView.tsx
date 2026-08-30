@@ -267,7 +267,7 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
       spaceComplexity: "",
       optimal: v.optimal,
     };
-    const outcome = submitAttempt(problem.slug, attempt);
+    const outcome = submitAttempt(problem.slug, attempt, { difficulty: problem.difficulty });
     saveInterview({
       at: Date.now(),
       slug: problem.slug,
@@ -299,6 +299,9 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
       curseGained: outcome.curseGained,
       curseCleansed: outcome.curseCleansed,
       combo: outcome.comboToday,
+      xpEarned: outcome.xpEarned,
+      levelUp: outcome.leveledUp,
+      farmed: outcome.farmed,
     });
     if (outcome.newAchievements.length > 0) {
       emitCoach({ type: "achievement", name: outcome.newAchievements[0].name });

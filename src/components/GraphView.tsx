@@ -53,6 +53,7 @@ import { getInventory, type Inventory } from "../state/inventory";
 import type { MapMeta } from "../state/library";
 import { Celebration, type CelebrationData } from "./Celebration";
 import { EventModal, ChestModal, BossIntro, Belt, RankUpCeremony } from "./Loot";
+import { sfx } from "../lib/sfx";
 
 const ROW_HEIGHT = 300;
 const COL_WIDTH = 300;
@@ -954,8 +955,17 @@ export function GraphView({
     const outcome = submitAttempt(
       slug,
       { ...a, at: Date.now() },
-      { secondChance: opts.secondChance, isBossNode: boss }
+      { secondChance: opts.secondChance, isBossNode: boss, difficulty: bySlug[slug]?.difficulty }
     );
+    // Instant audio feedback, layered by significance.
+    if (a.result === "solved") sfx(outcome.crit ? "crit" : "solved");
+    else if (a.result === "solved_with_help") sfx("assisted");
+    else sfx("failed", 0.4);
+    if (outcome.curseGained) sfx("curse", 0.5);
+    if (outcome.leveledUp) setTimeout(() => sfx("levelUp", 0.6), 500);
+    if (outcome.newAchievements.length > 0) setTimeout(() => sfx("achievement", 0.5), 800);
+    if (outcome.questJustCompleted) setTimeout(() => sfx("quest", 0.5), 1100);
+    if (outcome.promoLost || outcome.rankDown) setTimeout(() => sfx("promoLost", 0.5), 700);
     if (selected && !rematchSlug) {
       setVisited((prev) => new Set(prev).add(selected));
       setCurrent(selected);
@@ -986,6 +996,8 @@ export function GraphView({
       combo: outcome.comboToday,
       farmed: outcome.farmed,
       rankDown: outcome.rankDown,
+      xpEarned: outcome.xpEarned,
+      levelUp: outcome.leveledUp,
       promoNote: outcome.promoLost
         ? "PROMO SERIES LOST — −10 rating"
         : outcome.promoArmed && outcome.promo

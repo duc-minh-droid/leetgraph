@@ -15,6 +15,8 @@ import { eventFor, resolveEvent, type EventResolution } from "../state/events";
 import { draftRelics, relicById, curseById, potionById, type RelicDef, type Rarity } from "../state/relics";
 import { RANKS, type Rank } from "../state/rating";
 import { emitCoach } from "../state/coachBus";
+import { sfx } from "../lib/sfx";
+import { useEffect } from "react";
 
 const RANKS_LOOKUP: Record<string, Rank> = Object.fromEntries(RANKS.map((r) => [r.name, r]));
 
@@ -105,6 +107,7 @@ export function EventModal({
                 onClick={() => {
                   const r = resolveEvent(slug);
                   setResult(r);
+                  sfx(r.coinResult ? "coinFlip" : ev.type === "potion" ? "potion" : "quest", 0.55);
                   emitCoach({ type: r.coinResult === "tails" ? "failed" : "opened", title: ev.title });
                 }}
                 className="neo-btn flex-1 !py-2.5 text-sm"
@@ -124,8 +127,10 @@ export function ChestModal({ onDone }: { onDone: (relic: RelicDef | null) => voi
   const chest = getInventory().pendingChest;
   const [open, setOpen] = useState(false);
   const [choices] = useState<RelicDef[]>(() => (chest ? draftRelics(chest.seed) : []));
+  useEffect(() => sfx("chestAppear", 0.45), []);
 
   const take = (relic: RelicDef | null) => {
+    sfx("chestTake", 0.6);
     updateInventory((inv) => ({
       pendingChest: null,
       relics: relic ? [...inv.relics, relic.id] : inv.relics,
@@ -201,6 +206,7 @@ export function ChestModal({ onDone }: { onDone: (relic: RelicDef | null) => voi
 
 // ---------------- Boss intro ----------------
 export function BossIntro({ title, onDone }: { title: string; onDone: () => void }) {
+  useEffect(() => sfx("boss", 0.5), []);
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -236,6 +242,7 @@ export function BossIntro({ title, onDone }: { title: string; onDone: () => void
 // ---------------- Rank-up ceremony ----------------
 export function RankUpCeremony({ rankName, onDone }: { rankName: string; onDone: () => void }) {
   const rank = RANKS_LOOKUP[rankName];
+  useEffect(() => sfx("rankUp", 0.65), []);
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -279,6 +286,7 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
   const curse = inv.curse ? curseById(inv.curse) : null;
   const usePotion = (idx: number) => {
     const id = inv.potions[idx];
+    if (id !== "second-chance") sfx("potion", 0.55);
     if (id === "quest-reroll") {
       const d = new Date();
       const day = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;

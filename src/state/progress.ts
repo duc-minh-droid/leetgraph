@@ -7,11 +7,13 @@ import { unlockedAchievements, ACHIEVEMENTS, type AchievementDef } from "./achie
 import { todaysQuest } from "./quests";
 import { getInventory, updateInventory } from "./inventory";
 import { computeAttemptBonus, rollCurse, cleanseCheck, curseById } from "./relics";
-import { modifierOf } from "./modifiers";
+import { modifierOf, timedLimit } from "./modifiers";
+import { levelInfo } from "./xp";
 
 export interface SubmitOptions {
   secondChance?: boolean; // Second Chance potion armed for this attempt
   isBossNode?: boolean; // act convergence node (guaranteed chest on solve)
+  difficulty?: string; // problem difficulty, for the timed-modifier XP check
 }
 
 export interface SubmitOutcome {
@@ -33,6 +35,10 @@ export interface SubmitOutcome {
   promoArmed: boolean; // promo just started
   promoLost: boolean; // promo series just failed
   farmed: boolean; // hit the farming cutoff — earned nothing
+  // XP track.
+  xpEarned: number;
+  level: number;
+  leveledUp: number | null; // the new level, when this attempt leveled you up
 }
 
 function dayKey(ms: number): string {
@@ -63,12 +69,42 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
     firstSolveToday,
     secondChanceArmed: Boolean(opts.secondChance),
   });
+  // ---- XP: every attempt pays; skill/effort multipliers and relics on top ----
+  const levelBefore = levelInfo().level;
+  const prevOnNode = getAttempts(slug);
+  const rematchWinXp =
+    solved &&
+    prevOnNode.length > 0 &&
+    prevOnNode[prevOnNode.length - 1].result !== "solved" &&
+    prevOnNode[prevOnNode.length - 1].result !== "solved_with_help";
+  const mod = modifierOf(slug);
+  const modifierHonored =
+    solved &&
+    (mod === "elite" ||
+      (mod === "timed" &&
+        opts.difficulty !== undefined &&
+        attempt.time > 0 &&
+        attempt.time <= timedLimit(opts.difficulty)) ||
+      (mod === "purist" && clean));
+  let xp = 10;
+  if (solved) xp += 15;
+  if (solved && clean) xp += 5;
+  if (modifierHonored) xp += 10;
+  if (opts.isBossNode && solved) xp += 25;
+  if (firstSolveToday && solved) xp += 10;
+  if (rematchWinXp) xp += 15;
+  if (attempt.note?.startsWith("[Interview]")) xp += 10;
+  const inv0 = getInventory();
+  if (inv0.relics.includes("xp-charm")) xp += 5;
+  if (inv0.relics.includes("scholars-tome") && solved) xp = Math.round(xp * 1.5);
+
   const stamped: Attempt = {
     ...attempt,
     ratingBonusMult: bonus.mult,
     ratingBonusFlat: bonus.flat,
     effectNotes: bonus.notes.length ? bonus.notes : undefined,
     noRematch: bonus.secondChance || undefined,
+    xp,
   };
 
   // Consume one-shot state: pending event bonus + armed potion.
@@ -144,5 +180,8 @@ export function submitAttempt(slug: string, attempt: Attempt, opts: SubmitOption
     promoLost:
       Boolean(engineBefore.promo) && !engineAfter.promo && engineAfter.rankIdx === engineBefore.rankIdx,
     farmed,
+    xpEarned: xp,
+    level: levelInfo().level,
+    leveledUp: levelInfo().level > levelBefore ? levelInfo().level : null,
   };
 }
