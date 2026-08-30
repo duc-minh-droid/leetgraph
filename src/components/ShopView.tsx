@@ -9,7 +9,6 @@ import {
   FaTrophy,
   FaLock,
   FaFlask,
-  FaGem,
   FaCrown,
   FaUserGroup,
   FaGift,
@@ -88,12 +87,15 @@ function AvatarShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
               disabled={owned || !affordable}
               onClick={() => buy(o)}
               title={owned ? "Already owned" : affordable ? `Buy for ${o.price} coins` : `Need ${o.price - inv.coins} more coins`}
-              className={`flex flex-col items-center gap-1.5 border-4 border-black bg-white p-2 shadow-neo-sm ${
-                owned ? "opacity-50" : affordable ? "" : "grayscale"
-              }`}
+              className="flex flex-col items-center gap-1.5 border-4 border-black bg-white p-2 shadow-neo-sm"
+              style={{ outline: owned ? "3px solid #4ADE80" : undefined, outlineOffset: "2px" }}
             >
               <img src={avatarUrl(o.id, 80)} alt="Avatar for sale" className="h-16 w-16 border-2 border-black bg-neo-bg" loading="lazy" />
-              <span className={`flex items-center gap-1 border-2 border-black px-1.5 text-[10px] font-black tabular-nums ${owned ? "bg-neo-ok" : "bg-neo-secondary"}`}>
+              <span
+                className={`flex items-center gap-1 border-2 border-black px-1.5 text-[10px] font-black tabular-nums ${
+                  owned ? "bg-neo-ok" : affordable ? "bg-neo-secondary" : "bg-neo-accent text-white"
+                }`}
+              >
                 {owned ? (
                   <>
                     <FaCheck /> Owned
@@ -132,7 +134,7 @@ function PotionShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
               onChanged();
             }}
             title={affordable ? `Buy for ${price} coins` : `Need ${price - inv.coins} more coins`}
-            className={`flex flex-col items-start gap-1.5 border-4 border-black bg-white p-3 text-left shadow-neo-sm ${affordable ? "" : "grayscale opacity-70"}`}
+            className="flex flex-col items-start gap-1.5 border-4 border-black bg-white p-3 text-left shadow-neo-sm"
           >
             <span className="flex items-center gap-2 text-sm font-black uppercase">
               <ItemTile id={p.id} size="sm" tipSide="top" />
@@ -140,7 +142,12 @@ function PotionShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
               {owned > 0 && <span className="border-2 border-black bg-neo-bg px-1 text-[9px]">x{owned}</span>}
             </span>
             <span className="text-[10px] font-bold leading-snug text-black/70">{p.desc}</span>
-            <span className="mt-1 flex items-center gap-1 border-2 border-black bg-neo-secondary px-1.5 text-[10px] font-black tabular-nums">
+            <span
+              className={`mt-1 flex items-center gap-1 border-2 border-black px-1.5 text-[10px] font-black tabular-nums ${
+                affordable ? "bg-neo-secondary" : "bg-neo-accent text-white"
+              }`}
+              title={affordable ? undefined : `Need ${price - inv.coins} more coins`}
+            >
               <FaCoins /> {price}
             </span>
           </motion.button>
@@ -178,7 +185,7 @@ function BundleShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
           Gone in {mm}:{ss.toString().padStart(2, "0")}
         </span>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="flex flex-wrap items-start gap-3">
         {bundles.map((b, i) => {
           const bought = inv.bundlesBought.includes(bundleKey(b, now));
           const relicOwned = Boolean(b.relic && inv.relics.includes(b.relic.id));
@@ -206,40 +213,44 @@ function BundleShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
                       ? `Buy for ${b.price} coins`
                       : `Need ${b.price - inv.coins} more coins`
               }
-              className={`relative flex flex-col gap-2 border-4 border-black bg-white p-3 text-left shadow-neo ${
-                blocked ? "opacity-60 grayscale" : ""
-              }`}
+              className="relative flex w-fit max-w-[280px] flex-col gap-2 self-start border-4 border-black bg-white p-3 text-left shadow-neo"
+              style={{
+                outline: bought ? "3px solid #4ADE80" : relicOwned ? "3px dashed #C4B5FD" : undefined,
+                outlineOffset: "2px",
+              }}
             >
               <span className="absolute -right-2 -top-3 rotate-6 border-2 border-black bg-neo-secondary px-1.5 py-0.5 text-[9px] font-black uppercase shadow-neo-sm">
                 −{Math.round((1 - b.price / b.fullPrice) * 100)}%
               </span>
+              {(bought || relicOwned) && (
+                <span
+                  className={`absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rotate-[-8deg] border-4 border-black px-3 py-1 text-lg font-black uppercase shadow-neo ${
+                    bought ? "bg-neo-ok" : "bg-neo-muted"
+                  }`}
+                >
+                  {bought ? "Grabbed!" : "Relic owned"}
+                </span>
+              )}
               <span className="flex items-center gap-2 text-base font-black uppercase">
                 <FaGift className="text-neo-accent" /> {b.name}
               </span>
               <span className="text-[10px] font-bold uppercase leading-snug text-black/70">{b.desc}</span>
-              {b.avatars.length > 0 && (
-                <span className="flex gap-1.5">
-                  {b.avatars.map((a) => (
-                    <img key={a} src={avatarUrl(a, 64)} alt="Bundle avatar" className="h-12 w-12 border-2 border-black bg-neo-bg" loading="lazy" />
-                  ))}
-                </span>
-              )}
-              {(b.relic || b.potions.length > 0) && (
-                <span className="flex flex-wrap items-center gap-1.5">
-                  {b.relic && (
-                    <>
-                      <ItemTile id={b.relic.id} size="sm" tipSide="top" />
-                      <span className="text-[10px] font-black uppercase">{b.relic.name}</span>
-                    </>
-                  )}
-                  {b.potions.map((p, j) => (
-                    <ItemTile key={`${p}-${j}`} id={p} size="sm" tipSide="top" />
-                  ))}
-                </span>
-              )}
+              <span className="flex flex-wrap items-center gap-2">
+                {b.avatars.map((a) => (
+                  <img key={a} src={avatarUrl(a, 64)} alt="Bundle avatar" className="h-11 w-11 border-2 border-black bg-neo-bg" loading="lazy" />
+                ))}
+                {b.relic && <ItemTile id={b.relic.id} size="md" tipSide="top" />}
+                {b.potions.map((p, j) => (
+                  <ItemTile key={`${p}-${j}`} id={p} size="md" tipSide="top" />
+                ))}
+              </span>
               <span className="flex items-center gap-2 text-sm font-black tabular-nums">
                 <span className="text-black/40 line-through">{b.fullPrice}</span>
-                <span className={`flex items-center gap-1 border-2 border-black px-2 py-0.5 ${bought ? "bg-neo-ok" : "bg-neo-secondary"}`}>
+                <span
+                  className={`flex items-center gap-1 border-2 border-black px-2 py-0.5 ${
+                    bought ? "bg-neo-ok" : affordable ? "bg-neo-secondary" : "bg-neo-accent text-white"
+                  }`}
+                >
                   {bought ? (
                     <>
                       <FaCheck /> Grabbed
@@ -287,11 +298,7 @@ function AchievementCatalog({ rev, onChanged }: { rev: number; onChanged: () => 
                   <FaUserGroup /> Coach: {coach.name}
                 </span>
               )}
-              {relic && (
-                <span className="flex items-center gap-1 border-2 border-black bg-neo-muted px-1.5 py-0.5 text-[9px] font-black uppercase">
-                  <FaGem /> Relic: {relic.name}
-                </span>
-              )}
+              {relic && <ItemTile id={relic.id} size="sm" tipSide="top" tipExtra="Reward relic" />}
               {a.title && (
                 <motion.button
                   whileHover={isUnlocked ? { scale: 1.08, rotate: -2 } : {}}

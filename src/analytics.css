@@ -265,10 +265,19 @@
   line-height: 1.35;
 }
 
+/* Locked achievements keep their color — dashed violet outline marks them as
+   "still to earn" instead of washing them out. */
 .ach-card.locked {
-  background: #f1ede2;
+  background: #fffdf5;
   box-shadow: none;
-  opacity: 0.65;
+  border-style: dashed;
+  outline: 2px dashed #c4b5fd;
+  outline-offset: 2px;
+}
+
+.ach-card.locked strong,
+.ach-card.locked p {
+  opacity: 0.85;
 }
 
 .ach-title {

@@ -59,11 +59,7 @@ function UnlockedAchievements({ rev, onChanged }: { rev: number; onChanged: () =
                   <FaUserGroup /> {coach.name}
                 </span>
               )}
-              {relic && (
-                <span className="flex items-center gap-1 border-2 border-black bg-neo-muted px-1.5 py-0.5 text-[9px] font-black uppercase">
-                  <FaGem /> {relic.name}
-                </span>
-              )}
+              {relic && <ItemTile id={relic.id} size="sm" tipSide="top" tipExtra="Reward relic" />}
               {a.title && (
                 <motion.button
                   whileHover={{ scale: 1.08, rotate: -2 }}

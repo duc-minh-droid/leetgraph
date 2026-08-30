@@ -85,6 +85,9 @@ export function ItemTile({
   const art = ART[id] ?? FALLBACK;
   const s = SIZE[size];
   const Wrapper = onClick ? motion.button : motion.div;
+  // Shape + colored ring tell relics and consumables apart at a glance:
+  // relics = square with a rarity-colored ring, potions = round with blue.
+  const ring = relic ? RARITY_PIP[relic.rarity] : "#4D96FF";
 
   return (
     <div className="group relative inline-block">
@@ -94,20 +97,18 @@ export function ItemTile({
         onClick={onClick}
         aria-label={name}
         className={`relative grid ${s.box} place-items-center border-2 border-black shadow-neo-sm ${
-          dim ? "grayscale opacity-50" : ""
-        } ${onClick ? "cursor-pointer" : ""}`}
-        style={{ background: art.bg, color: art.fg }}
+          potion ? "rounded-full" : ""
+        } ${relic?.rarity === "legendary" ? "animate-pulse" : ""} ${dim ? "opacity-60" : ""} ${
+          onClick ? "cursor-pointer" : ""
+        }`}
+        style={{
+          background: art.bg,
+          color: art.fg,
+          outline: `2.5px solid ${ring}`,
+          outlineOffset: "1.5px",
+        }}
       >
         <art.Icon className={s.icon} />
-        {relic && (
-          <span
-            aria-hidden
-            className={`absolute right-0.5 top-0.5 h-2 w-2 border border-black ${
-              relic.rarity === "legendary" ? "animate-pulse" : ""
-            }`}
-            style={{ background: RARITY_PIP[relic.rarity] }}
-          />
-        )}
         {count !== undefined && count > 1 && (
           <span className="absolute -bottom-1.5 -right-1.5 grid min-w-[16px] place-items-center border-2 border-black bg-white px-0.5 text-[9px] font-black leading-none text-black">
             x{count}
