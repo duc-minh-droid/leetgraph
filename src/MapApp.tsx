@@ -5,8 +5,6 @@ import { Link, useParams, useSearchParams, Navigate } from "react-router-dom";
 import {
   FaMap,
   FaChartLine,
-  FaChevronLeft,
-  FaChevronRight,
   FaFire,
   FaUserTie,
   FaRankingStar,
@@ -311,60 +309,6 @@ export function MapApp() {
         <div className="flex shrink-0 items-center gap-2">
           <PlayerStrip rev={rev} />
 
-          {tab === "map" && (
-            <div className="flex items-center gap-1.5">
-              <motion.button
-                onClick={() => setViewAct((a) => Math.max(0, a - 1))}
-                disabled={viewAct === 0}
-                aria-label="Previous act"
-                whileHover={{ scale: 1.15, x: -2 }}
-                whileTap={tap}
-                className="grid h-8 w-8 place-items-center border-4 border-black bg-white text-sm font-black shadow-neo-sm transition-colors hover:enabled:bg-neo-muted disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
-              >
-                <FaChevronLeft />
-              </motion.button>
-              <motion.span
-                key={viewAct}
-                initial={{ rotate: -3, scale: 0.9 }}
-                animate={{ rotate: 1, scale: 1 }}
-                className="whitespace-nowrap border-4 border-black bg-neo-muted px-2 py-1 text-center text-xs font-black uppercase tracking-wide shadow-neo-sm"
-              >
-                Act {viewAct + 1}/{totalActs}
-              </motion.span>
-              <motion.button
-                onClick={() => setViewAct((a) => Math.min(act, a + 1))}
-                disabled={viewAct >= act}
-                aria-label="Next act"
-                whileHover={{ scale: 1.15, x: 2 }}
-                whileTap={tap}
-                className="grid h-8 w-8 place-items-center border-4 border-black bg-white text-sm font-black shadow-neo-sm transition-colors hover:enabled:bg-neo-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
-              >
-                <FaChevronRight />
-              </motion.button>
-
-              <div className="flex items-center gap-1.5 border-4 border-black bg-white px-2 py-1 shadow-neo-sm">
-                <FaFire className="text-neo-accent" />
-                <div className="hidden h-3.5 w-24 border-2 border-black bg-neo-bg md:block">
-                  <motion.div
-                    className="h-full bg-neo-accent"
-                    initial={false}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ type: "spring", stiffness: 120, damping: 20 }}
-                  />
-                </div>
-                <motion.span
-                  key={progress}
-                  initial={{ scale: 1.4 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                  className="text-xs font-black tabular-nums"
-                >
-                  {progress}%
-                </motion.span>
-              </div>
-            </div>
-          )}
-
           <motion.span
             whileHover={{ y: -2, rotate: 2 }}
             title={`${coins} coins — earn by solving, spend in the avatar shop (Profile)`}
@@ -393,7 +337,15 @@ export function MapApp() {
 
       <main className="flex min-h-0 flex-1 flex-col">
         {tab === "map" ? (
-          <GraphView map={map} viewAct={viewAct} onAttempt={() => setRev((r) => r + 1)} />
+          <GraphView
+            map={map}
+            viewAct={viewAct}
+            maxAct={act}
+            totalActs={totalActs}
+            progress={progress}
+            onViewAct={setViewAct}
+            onAttempt={() => setRev((r) => r + 1)}
+          />
         ) : tab === "analytics" ? (
           <AnalyticsView map={map} />
         ) : tab === "awards" ? (

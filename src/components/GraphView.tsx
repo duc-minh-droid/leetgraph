@@ -36,6 +36,8 @@ import {
   FaKhanda,
   FaCrown,
   FaQuestion,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa6";
 import { type MapData, type MapNode } from "../map";
 import { type Problem } from "../data/problems";
@@ -697,13 +699,95 @@ function ReportPanel({
   );
 }
 
+// Act navigation + map progress, pinned to the map's top-right (like Legend).
+function ActPanel({
+  viewAct,
+  maxAct,
+  totalActs,
+  progress,
+  onViewAct,
+}: {
+  viewAct: number;
+  maxAct: number;
+  totalActs: number;
+  progress: number;
+  onViewAct: (a: number) => void;
+}) {
+  return (
+    <motion.div
+      initial={{ x: 30, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 24 }}
+      className="absolute right-4 top-4 z-20 flex rotate-1 flex-col gap-1.5 border-4 border-black bg-white p-2 shadow-neo"
+    >
+      <div className="flex items-center gap-1.5">
+        <motion.button
+          onClick={() => onViewAct(Math.max(0, viewAct - 1))}
+          disabled={viewAct === 0}
+          aria-label="Previous act"
+          whileHover={{ scale: 1.15, x: -2 }}
+          whileTap={{ scale: 0.9 }}
+          className="grid h-7 w-7 place-items-center border-2 border-black bg-white text-xs font-black shadow-neo-sm transition-colors hover:enabled:bg-neo-muted disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+        >
+          <FaChevronLeft />
+        </motion.button>
+        <motion.span
+          key={viewAct}
+          initial={{ rotate: -3, scale: 0.9 }}
+          animate={{ rotate: 0, scale: 1 }}
+          className="flex-1 whitespace-nowrap border-2 border-black bg-neo-muted px-2 py-0.5 text-center text-[11px] font-black uppercase tracking-wide"
+        >
+          Act {viewAct + 1}/{totalActs}
+        </motion.span>
+        <motion.button
+          onClick={() => onViewAct(Math.min(maxAct, viewAct + 1))}
+          disabled={viewAct >= maxAct}
+          aria-label="Next act"
+          whileHover={{ scale: 1.15, x: 2 }}
+          whileTap={{ scale: 0.9 }}
+          className="grid h-7 w-7 place-items-center border-2 border-black bg-white text-xs font-black shadow-neo-sm transition-colors hover:enabled:bg-neo-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+        >
+          <FaChevronRight />
+        </motion.button>
+      </div>
+      <div className="flex items-center gap-1.5" title={`Map progress: ${progress}%`}>
+        <FaFire className="text-sm text-neo-accent" />
+        <div className="h-3 flex-1 border-2 border-black bg-neo-bg">
+          <motion.div
+            className="h-full bg-neo-accent"
+            initial={false}
+            animate={{ width: `${progress}%` }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+          />
+        </div>
+        <motion.span
+          key={progress}
+          initial={{ scale: 1.4 }}
+          animate={{ scale: 1 }}
+          className="text-[11px] font-black tabular-nums"
+        >
+          {progress}%
+        </motion.span>
+      </div>
+    </motion.div>
+  );
+}
+
 export function GraphView({
   map,
   viewAct,
+  maxAct,
+  totalActs,
+  progress,
+  onViewAct,
   onAttempt,
 }: {
   map: MapMeta;
   viewAct: number;
+  maxAct: number;
+  totalActs: number;
+  progress: number;
+  onViewAct: (a: number) => void;
   onAttempt?: () => void;
 }) {
   const data: MapData = map.nodes;
@@ -786,7 +870,9 @@ export function GraphView({
     // Vertical: keep the visible top at/below the current act's top so future
     // acts stay hidden; allow scrolling down to reveal previous (completed) acts.
     const yMax = -lockTopY;
-    const yMin = vh - height;
+    // Guard the short-graph case (content smaller than viewport) so the
+    // bounds never invert and the map can't be flung past its edges.
+    const yMin = Math.min(vh - height, yMax);
     const y = Math.min(yMax, Math.max(yMin, vp.y));
     // Horizontal: if the graph fits the viewport, lock it centered (no drift /
     // no snap). If it's wider, clamp to its edges so you can scroll but not
@@ -1073,6 +1159,14 @@ export function GraphView({
 
         <Legend />
 
+        <ActPanel
+          viewAct={viewAct}
+          maxAct={maxAct}
+          totalActs={totalActs}
+          progress={progress}
+          onViewAct={onViewAct}
+        />
+
         {/* Rematch queue badge + drawer */}
         {due.length > 0 && (
           <motion.button
@@ -1080,7 +1174,7 @@ export function GraphView({
             animate={{ y: 0, opacity: 1 }}
             whileTap={{ scale: 0.93 }}
             onClick={() => setShowRematches((s) => !s)}
-            className="absolute right-4 top-4 z-20 flex rotate-1 items-center gap-2 border-4 border-black bg-neo-accent px-3 py-2 text-sm font-black uppercase text-white shadow-neo"
+            className="absolute right-4 top-[104px] z-20 flex rotate-1 items-center gap-2 border-4 border-black bg-neo-accent px-3 py-2 text-sm font-black uppercase text-white shadow-neo"
           >
             <motion.span animate={{ rotate: [-10, 10, -10] }} transition={{ duration: 1.2, repeat: Infinity }}>
               <FaKhanda />
@@ -1095,7 +1189,7 @@ export function GraphView({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 40, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 26 }}
-              className="absolute right-4 top-16 z-20 flex max-h-[60%] w-72 flex-col overflow-hidden border-4 border-black bg-white shadow-neo"
+              className="absolute right-4 top-[156px] z-20 flex max-h-[55%] w-72 flex-col overflow-hidden border-4 border-black bg-white shadow-neo"
             >
               <div className="border-b-4 border-black bg-neo-secondary px-3 py-2 text-xs font-black uppercase">
                 Beat them this time
