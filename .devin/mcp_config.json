@@ -3,6 +3,10 @@
     "vercel": {
       "url": "https://mcp.vercel.com",
       "transport": "http"
+    },
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp",
+      "transport": "http"
     }
   }
 }

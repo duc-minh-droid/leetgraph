@@ -228,7 +228,7 @@ export function Coach() {
   }, []);
 
   return (
-    <div className="pointer-events-none fixed bottom-4 right-4 z-40 flex flex-col items-end gap-1.5">
+    <div className="pointer-events-none fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 z-40 flex origin-bottom-right scale-[0.7] flex-col items-end gap-1.5 md:bottom-4 md:right-4 md:scale-100">
       <AnimatePresence>
         {line && (
           <motion.div

@@ -13,6 +13,15 @@
     height: 100%;
   }
 
+  /* Mobile browsers: track the dynamic viewport (URL bar show/hide). */
+  @supports (height: 100dvh) {
+    html,
+    body,
+    #root {
+      height: 100dvh;
+    }
+  }
+
   body {
     margin: 0;
     font-family: "Space Grotesk", system-ui, sans-serif;

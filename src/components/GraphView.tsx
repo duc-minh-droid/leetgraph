@@ -256,7 +256,7 @@ function Legend() {
       initial={{ x: -30, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 24 }}
-      className="pointer-events-none absolute bottom-4 left-4 z-20 rotate-[-1deg] border-4 border-black bg-white p-3 shadow-neo"
+      className="pointer-events-none absolute bottom-16 left-4 z-20 hidden rotate-[-1deg] border-4 border-black bg-white p-3 shadow-neo md:block"
     >
       <div className="mb-2 flex items-center gap-1 text-xs font-black uppercase tracking-widest">
         <FaFire className="text-neo-accent" /> Legend
@@ -844,7 +844,7 @@ export function GraphView({
       : null;
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col p-3 md:p-5">
+    <div className="relative flex min-h-0 flex-1 flex-col p-2 md:p-5">
       <div
         className="relative min-h-0 flex-1 overflow-hidden border-4 border-black bg-neo-bg shadow-neo"
         ref={wrapRef}

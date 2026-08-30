@@ -142,7 +142,7 @@ function LoadingScreen({ label }: { label: string }) {
 // Small floating account chip (email + sign out) shown while signed in.
 function AccountChip({ user }: { user: User }) {
   return (
-    <div className="pointer-events-none fixed bottom-4 left-4 z-40">
+    <div className="pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-40">
       <motion.button
         initial={{ y: 16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

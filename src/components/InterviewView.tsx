@@ -325,10 +325,10 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
   }
 
   return (
-    <div className="relative flex min-h-0 flex-1 flex-col gap-3 p-3 md:p-5">
-      <div className="flex min-h-0 flex-1 gap-3">
-        {/* Left: problem */}
-        <div className="flex w-[340px] shrink-0 flex-col overflow-hidden border-4 border-black bg-white shadow-neo">
+    <div className="relative flex min-h-0 flex-1 flex-col gap-3 p-2 md:p-5">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 lg:flex-row">
+        {/* Left: problem (stacks on top on mobile, capped height) */}
+        <div className="flex max-h-[34dvh] w-full shrink-0 flex-col overflow-hidden border-4 border-black bg-white shadow-neo lg:max-h-none lg:w-[340px]">
           {available.length > 1 && (
             <div className="flex flex-wrap gap-1 border-b-4 border-black bg-neo-bg p-2">
               {available.map((n) => (
@@ -349,7 +349,7 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
         </div>
 
         {/* Right: editor / whiteboard */}
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden border-4 border-black bg-white shadow-neo">
+        <div className="flex min-h-[45dvh] min-w-0 flex-1 flex-col overflow-hidden border-4 border-black bg-white shadow-neo lg:min-h-0">
           <div className="flex border-b-4 border-black bg-neo-bg">
             {(
               [

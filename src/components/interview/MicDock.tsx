@@ -63,7 +63,7 @@ export function MicDock({
   }, [transcript]);
 
   return (
-    <div className="flex items-stretch gap-3 border-4 border-black bg-white p-2.5 shadow-neo">
+    <div className="flex flex-wrap items-stretch gap-2 border-4 border-black bg-white p-2 shadow-neo md:gap-3 md:p-2.5">
       {/* Interviewer avatar */}
       <div className="flex flex-col items-center justify-center gap-1 px-1">
         <motion.div
@@ -87,7 +87,7 @@ export function MicDock({
       {/* Transcript strip */}
       <div
         ref={scrollRef}
-        className="min-w-0 flex-1 overflow-y-auto border-2 border-black bg-neo-bg p-2"
+        className="min-w-[180px] flex-1 overflow-y-auto border-2 border-black bg-neo-bg p-2"
         style={{ maxHeight: 84 }}
       >
         {error && (
@@ -118,7 +118,7 @@ export function MicDock({
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <span className={`border-2 border-black px-2 py-1 text-xs font-black tabular-nums ${live ? "bg-neo-secondary" : "bg-neo-bg"}`}>
           {fmtClock(elapsed)}
         </span>
