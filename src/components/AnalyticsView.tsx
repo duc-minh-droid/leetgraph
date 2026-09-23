@@ -87,7 +87,7 @@ function Stat({ value, label, delay = 0 }: { value: string | number; label: stri
       whileHover={{ y: -4, rotate: -1 }}
       className="stat"
     >
-      <strong>{typeof value === "number" ? <NumberTicker value={value} /> : value}</strong>
+      <strong>{typeof value === "number" && Number.isInteger(value) ? <NumberTicker value={value} /> : value}</strong>
       <span>{label}</span>
     </motion.div>
   );
@@ -140,7 +140,14 @@ const AXIS_LINE = { stroke: "#000", strokeWidth: 2 } as const;
 const LEGEND = { fontWeight: 900, fontSize: 12, color: "#000", textTransform: "uppercase" } as const;
 
 function Heatmap({ data }: { data: EnrichedAttempt[] }) {
-  const { rows, cells } = useMemo(() => patternHeatmap(data), [data]);
+  const { rows, cells } = useMemo(() => {
+    const h = patternHeatmap(data);
+    // Top 10 most-attempted patterns — a 25-row wall stops being readable.
+    const volume = new Map<string, number>();
+    h.cells.forEach((c) => volume.set(c.topic, (volume.get(c.topic) ?? 0) + c.attempts));
+    const top = [...h.rows].sort((a, b) => (volume.get(b) ?? 0) - (volume.get(a) ?? 0)).slice(0, 10);
+    return { rows: h.rows.filter((r) => top.includes(r)), cells: h.cells };
+  }, [data]);
   if (rows.length === 0) return <Empty />;
   const cellW = 96;
   const cellH = 30;
@@ -157,7 +164,8 @@ function Heatmap({ data }: { data: EnrichedAttempt[] }) {
         {rows.map((topic, r) => (
           <g key={topic}>
             <text x={labelW - 6} y={r * cellH + 28 + cellH / 2} className="hm-row">
-              {topic}
+              <title>{topic}</title>
+              {topic.length > 20 ? `${topic.slice(0, 19)}…` : topic}
             </text>
             {ELO_BANDS.map((b, i) => {
               const c = cellMap.get(`${topic}|${b.label}`);
@@ -316,7 +324,14 @@ export function AnalyticsView({ map, rev = 0, onChanged }: { map: MapMeta; rev?:
     void data;
     return currentRating();
   }, [data]);
-  const radar = useMemo(() => patternRadar(data), [data]);
+  // Radar reads only with a handful of spokes: keep the most-practiced patterns.
+  const radar = useMemo(
+    () =>
+      patternRadar(data)
+        .sort((a, b) => b.attempts - a.attempts)
+        .slice(0, 8),
+    [data]
+  );
   const failures = useMemo(() => failureOverTime(data), [data]);
   const phases = useMemo(() => timePhases(data), [data]);
   const scatter = useMemo(() => hintsVsElo(data), [data]);
@@ -500,8 +515,8 @@ export function AnalyticsView({ map, rev = 0, onChanged }: { map: MapMeta; rev?:
                       <td>{r.title}</td>
                       <td>{r.elo}</td>
                       <td>{r.attempts}</td>
-                      <td><span className={`r-tag ${r.firstResult}`}>{r.firstResult}</span></td>
-                      <td><span className={`r-tag ${r.lastResult}`}>{r.lastResult}</span></td>
+                      <td><span className={`r-tag ${r.firstResult}`}>{r.firstResult.replace(/_/g, " ")}</span></td>
+                      <td><span className={`r-tag ${r.lastResult}`}>{r.lastResult.replace(/_/g, " ")}</span></td>
                       <td>{fmtTime(r.timeDelta)}</td>
                       <td>{r.hintsDelta > 0 ? "+" : ""}{r.hintsDelta}</td>
                       <td>{r.verdict}</td>

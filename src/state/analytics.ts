@@ -314,12 +314,30 @@ export interface FailureBucket {
 
 // Stacked failure-mode counts over time. Buckets by day when there's more than
 // one active day, otherwise by attempt.
-export function failureOverTime(data: EnrichedAttempt[]): FailureBucket[] {
+// Time buckets for the over-time charts: chronological (numeric key, not a
+// string sort), daily for short histories, weekly once it spans 3+ weeks.
+function bucketer(data: EnrichedAttempt[]) {
+  const times = data.map((d) => d.at);
+  const span = times.length ? Math.max(...times) - Math.min(...times) : 0;
   const days = new Set(data.map((d) => dayKey(d.at)));
-  const byDay = days.size > 1;
-  const buckets = new Map<string, FailureBucket>();
-  const ensure = (label: string) =>
-    buckets.get(label) ?? {
+  const mode: "attempt" | "day" | "week" = days.size <= 1 ? "attempt" : span > 21 * 86400000 ? "week" : "day";
+  return (d: EnrichedAttempt): { key: number; label: string } => {
+    if (mode === "attempt") return { key: d.attemptIndex, label: `Attempt ${d.attemptIndex + 1}` };
+    const t = new Date(d.at);
+    t.setHours(0, 0, 0, 0);
+    if (mode === "week") t.setDate(t.getDate() - t.getDay());
+    const label = t.toLocaleString("en", { month: "short", day: "numeric" });
+    return { key: t.getTime(), label: mode === "week" ? `Wk ${label}` : label };
+  };
+}
+
+export function failureOverTime(data: EnrichedAttempt[]): FailureBucket[] {
+  const bucketOf = bucketer(data);
+  const buckets = new Map<number, FailureBucket>();
+  for (const d of data) {
+    if (d.solved) continue;
+    const { key, label } = bucketOf(d);
+    const b = buckets.get(key) ?? {
       label,
       "wrong-answer": 0,
       tle: 0,
@@ -328,17 +346,12 @@ export function failureOverTime(data: EnrichedAttempt[]): FailureBucket[] {
       gave_up: 0,
       abandoned: 0,
     };
-  for (const d of data) {
-    if (d.solved) continue;
-    const key = byDay ? dayKey(d.at) : `${d.attemptIndex + 1}`;
-    const label = byDay ? key : `Attempt ${d.attemptIndex + 1}`;
-    const b = ensure(label);
     if (d.failureMode) b[d.failureMode] += 1;
     else if (d.result === "gave_up") b.gave_up += 1;
     else if (d.result === "abandoned") b.abandoned += 1;
     buckets.set(key, b);
   }
-  return [...buckets.values()].sort((a, b) => a.label.localeCompare(b.label));
+  return [...buckets.entries()].sort((x, y) => x[0] - y[0]).map(([, b]) => b);
 }
 
 export interface TimeBucket {
@@ -350,12 +363,11 @@ export interface TimeBucket {
 
 // Stacked read/write/debug time per week (day when only one week of data).
 export function timePhases(data: EnrichedAttempt[]): TimeBucket[] {
-  const days = new Set(data.map((d) => dayKey(d.at)));
-  const byDay = days.size > 1;
-  const buckets = new Map<string, { read: number; write: number; debug: number; n: number }>();
+  const bucketOf = bucketer(data);
+  const buckets = new Map<number, { label: string; read: number; write: number; debug: number; n: number }>();
   for (const d of data) {
-    const key = byDay ? dayKey(d.at) : `${d.attemptIndex + 1}`;
-    const b = buckets.get(key) ?? { read: 0, write: 0, debug: 0, n: 0 };
+    const { key, label } = bucketOf(d);
+    const b = buckets.get(key) ?? { label, read: 0, write: 0, debug: 0, n: 0 };
     b.read += d.readTime;
     b.write += d.writeTime;
     b.debug += d.debugTime;
@@ -363,9 +375,9 @@ export function timePhases(data: EnrichedAttempt[]): TimeBucket[] {
     buckets.set(key, b);
   }
   return [...buckets.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([label, b]) => ({
-      label: byDay ? label : `Attempt ${label}`,
+    .sort((x, y) => x[0] - y[0])
+    .map(([, b]) => ({
+      label: b.label,
       read: Math.round(b.read / b.n),
       write: Math.round(b.write / b.n),
       debug: Math.round(b.debug / b.n),

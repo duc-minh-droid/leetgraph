@@ -9,6 +9,9 @@ import {
   FaDiceD20,
   FaArrowUp,
   FaArrowDown,
+  FaGem,
+  FaFlask,
+  FaXmark,
 } from "react-icons/fa6";
 import { getInventory, updateInventory, type Inventory } from "../state/inventory";
 import { activeEffects, effectById } from "../state/effects";
@@ -18,6 +21,7 @@ import { draftRelics, curseById, type RelicDef, type Rarity } from "../state/rel
 import { RANKS, type Rank } from "../state/rating";
 import { emitCoach } from "../state/coachBus";
 import { sfx } from "../lib/sfx";
+import { useIsMobile } from "../lib/useMedia";
 import { burst, confettiRain, ring, shake, blink, pointOf } from "../lib/juice";
 import { useEffect } from "react";
 
@@ -370,6 +374,8 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
     return () => clearInterval(t);
   }, []);
   const effects = activeEffects(inv, now);
+  const mobile = useIsMobile();
+  const [open, setOpen] = useState(false);
   const usePotion = (idx: number) => {
     const id = inv.potions[idx];
     if (id !== "second-chance") sfx("potion", 0.55);
@@ -405,8 +411,37 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
   const shownRelics = inv.relics.slice(0, 4);
   const extraRelics = inv.relics.slice(4);
 
+  // Phones: one compact chip; tap to unfold the full belt.
+  if (mobile && !open) {
+    return (
+      <motion.button
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        whileTap={{ scale: 0.92 }}
+        onClick={() => setOpen(true)}
+        aria-label="Open belt"
+        className="absolute left-3 top-16 z-20 flex items-center gap-2 border-4 border-black bg-white px-2 py-1.5 text-[11px] font-black uppercase shadow-neo-sm"
+      >
+        <FaGem className="text-neo-muted" /> {inv.relics.length}
+        <FaFlask className="text-neo-accent" /> {inv.potions.length}
+        {(effects.length > 0 || curse) && <span className="h-2.5 w-2.5 border-2 border-black bg-neo-ok" />}
+      </motion.button>
+    );
+  }
+
   return (
-    <div className="pointer-events-none absolute left-3 top-16 z-20 flex max-w-[calc(100%-5rem)] flex-wrap items-center gap-1.5 md:left-4 md:top-4 md:max-w-[30%]">
+    <div
+      onClick={(e) => mobile && e.target === e.currentTarget && setOpen(false)}
+      className="pointer-events-auto absolute left-3 top-16 z-20 flex w-fit max-w-[calc(100%-5rem)] flex-wrap items-center gap-1.5 border-4 border-black bg-white/90 p-1.5 shadow-neo-sm backdrop-blur-sm md:left-4 md:top-4 md:max-w-none md:flex-nowrap">
+      {mobile && (
+        <button
+          onClick={() => setOpen(false)}
+          aria-label="Collapse belt"
+          className="grid h-7 w-7 place-items-center border-2 border-black bg-neo-bg text-[10px]"
+        >
+          <FaXmark />
+        </button>
+      )}
       {shownRelics.map((id) => (
         <span key={id} className="pointer-events-auto">
           <ItemTile id={id} size="sm" tipSide="bottom" />
