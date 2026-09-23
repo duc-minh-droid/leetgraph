@@ -1,8 +1,23 @@
-import { useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
-import { FaBolt, FaFire, FaCircleCheck, FaCheckDouble, FaFlag, FaTrophy, FaScroll, FaArrowTrendUp, FaArrowTrendDown, FaSkullCrossbones, FaHandSparkles, FaCoins } from "react-icons/fa6";
-
-const COLORS = ["#FF6B6B", "#FFD93D", "#C4B5FD", "#4ADE80", "#4D96FF", "#FF6FB5"];
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FaBolt,
+  FaFire,
+  FaCircleCheck,
+  FaCheckDouble,
+  FaFlag,
+  FaTrophy,
+  FaScroll,
+  FaSkullCrossbones,
+  FaHandSparkles,
+  FaCoins,
+  FaGem,
+  FaArrowTrendDown,
+  FaBan,
+} from "react-icons/fa6";
+import { NumberTicker } from "./ui/NumberTicker";
+import { burst, pointOf } from "../lib/juice";
+import { spring } from "../lib/motion";
 
 export interface CelebrationData {
   kind: "solved" | "assisted" | "logged";
@@ -28,295 +43,178 @@ export interface CelebrationData {
   relicsGained?: string[]; // relics granted by achievement unlocks
 }
 
-interface Particle {
-  x: number;
-  y: number;
-  rotate: number;
-  size: number;
-  color: string;
-  delay: number;
-  round: boolean;
-}
-
-function makeParticles(n: number): Particle[] {
-  return Array.from({ length: n }, (_, i) => {
-    const angle = (i / n) * Math.PI * 2 + Math.random() * 0.6;
-    const dist = 120 + Math.random() * 220;
-    return {
-      x: Math.cos(angle) * dist,
-      y: Math.sin(angle) * dist - 60,
-      rotate: (Math.random() - 0.5) * 540,
-      size: 8 + Math.random() * 10,
-      color: COLORS[i % COLORS.length],
-      delay: Math.random() * 0.12,
-      round: Math.random() > 0.6,
-    };
-  });
-}
-
 const KIND_META = {
   solved: { label: "Solved!", icon: <FaCircleCheck />, bg: "bg-neo-ok" },
   assisted: { label: "Solved (assisted)", icon: <FaCheckDouble />, bg: "bg-neo-muted" },
-  logged: { label: "Logged. Come back stronger", icon: <FaFlag />, bg: "bg-neo-secondary" },
+  logged: { label: "Logged — come back stronger", icon: <FaFlag />, bg: "bg-neo-secondary" },
 } as const;
 
+interface Chip {
+  key: string;
+  node: ReactNode;
+  cls: string;
+}
+
+// Ranked by importance: the first MAX_CHIPS show, the rest fold into "+N".
+function chipsOf(d: CelebrationData): Chip[] {
+  const c: Chip[] = [];
+  d.achievements?.forEach((n) => c.push({ key: `a-${n}`, node: <><FaTrophy className="text-neo-orange" /> {n}</>, cls: "bg-neo-secondary" }));
+  d.relicsGained?.forEach((r) => c.push({ key: `r-${r}`, node: <><FaGem /> Relic: {r}</>, cls: "bg-neo-muted" }));
+  if (d.rankDown) c.push({ key: "down", node: <><FaArrowTrendDown /> Demoted: {d.rankDown}</>, cls: "bg-neo-accent text-white" });
+  if (d.promoNote) c.push({ key: "promo", node: <>{d.promoNote}</>, cls: "bg-black text-neo-secondary" });
+  if (d.curseGained) c.push({ key: "curse", node: <><FaSkullCrossbones /> Cursed: {d.curseGained}</>, cls: "bg-black text-neo-accent" });
+  if (d.curseCleansed) c.push({ key: "cleanse", node: <><FaHandSparkles /> Cleansed: {d.curseCleansed}</>, cls: "bg-neo-ok" });
+  if (d.questCompleted) c.push({ key: "quest", node: <><FaScroll /> Daily quest done</>, cls: "bg-neo-muted" });
+  if ((d.xpEarned ?? 0) > 0) c.push({ key: "xp", node: <>+{d.xpEarned} XP</>, cls: "bg-neo-blue text-white" });
+  if ((d.coinsEarned ?? 0) > 0) c.push({ key: "coins", node: <><FaCoins /> +{d.coinsEarned}</>, cls: "bg-neo-secondary" });
+  if (d.streak >= 2) c.push({ key: "streak", node: <><FaFire className="text-neo-orange" /> {d.streak}-day streak</>, cls: "bg-white" });
+  if (d.farmed) c.push({ key: "farm", node: <><FaBan /> Beneath you — no rating</>, cls: "bg-white text-black/60" });
+  d.effectNotes?.forEach((n, i) => c.push({ key: `e-${i}`, node: <>{n}</>, cls: "bg-white" }));
+  return c;
+}
+
+const MAX_CHIPS = 4;
+
 export function Celebration({ data, onDone }: { data: CelebrationData; onDone: () => void }) {
-  const confetti = data.kind !== "logged";
-  const crit = Boolean(data.crit && confetti);
-  const particles = useMemo(
-    () => (confetti ? makeParticles(crit ? 48 : 26) : []),
-    [data.seq, confetti, crit]
-  );
-
-  const hasExtras = Boolean(
-    data.achievements?.length ||
-      data.questCompleted ||
-      data.effectNotes?.length ||
-      data.curseGained ||
-      data.curseCleansed ||
-      data.promoNote ||
-      data.rankDown
-  );
-  useEffect(() => {
-    const t = setTimeout(onDone, (confetti ? 2000 : 1400) + (hasExtras ? 1200 : 0));
-    return () => clearTimeout(t);
-  }, [data.seq, confetti, hasExtras, onDone]);
-
+  const [expanded, setExpanded] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
   const meta = KIND_META[data.kind];
+  const good = data.kind !== "logged";
+  const crit = Boolean(data.crit && good);
+  const chips = chipsOf(data);
+  const shown = expanded ? chips : chips.slice(0, MAX_CHIPS);
+  const hidden = chips.length - shown.length;
+  const delta = data.ratingDelta ?? 0;
+
+  // Auto-dismiss, longer when there's more to read; paused once expanded.
+  useEffect(() => {
+    if (expanded) return;
+    const t = setTimeout(onDone, (good ? 2200 : 1600) + Math.min(chips.length, 6) * 250);
+    return () => clearTimeout(t);
+  }, [data.seq, expanded, good, chips.length, onDone]);
+
+  // Space / Enter / Esc skips.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === " " || e.key === "Enter" || e.key === "Escape") {
+        e.preventDefault();
+        onDone();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onDone]);
+
+  // Confetti from the card itself once it lands.
+  useEffect(() => {
+    if (!good) return;
+    const t = setTimeout(() => {
+      const p = pointOf(cardRef.current);
+      burst(p.x, p.y, { count: crit ? 70 : 36, speed: crit ? 900 : 620 });
+    }, 120);
+    return () => clearTimeout(t);
+  }, [data.seq, good, crit]);
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-40 grid place-items-center overflow-hidden">
-      {particles.map((p, i) => (
-        <motion.span
-          key={`${data.seq}-${i}`}
-          className="absolute border-2 border-black"
-          style={{
-            width: p.size,
-            height: p.size,
-            background: p.color,
-            borderRadius: p.round ? "50%" : 0,
-          }}
-          initial={{ x: 0, y: 0, opacity: 1, rotate: 0, scale: 1 }}
-          animate={{ x: p.x, y: p.y + 120, opacity: 0, rotate: p.rotate, scale: 0.6 }}
-          transition={{ duration: 1.4, delay: p.delay, ease: [0.15, 0.85, 0.4, 1] }}
-        />
-      ))}
-
+    <div className="pointer-events-none absolute inset-0 z-40 grid place-items-center p-4">
       <motion.div
+        ref={cardRef}
         key={data.seq}
-        initial={{ scale: 0.4, rotate: -10, opacity: 0, y: 20 }}
+        initial={{ scale: 0.3, rotate: -12, opacity: 0, y: 30 }}
         animate={{ scale: 1, rotate: -2, opacity: 1, y: 0 }}
-        exit={{ scale: 0.85, opacity: 0, y: -16 }}
-        transition={{ type: "spring", stiffness: 380, damping: 20 }}
-        className={`flex flex-col items-center gap-2 border-4 border-black px-8 py-5 shadow-neo-lg ${meta.bg}`}
+        exit={{ scale: 0.8, opacity: 0, y: -24, transition: { duration: 0.15 } }}
+        transition={spring.slam}
+        onClick={() => (hidden > 0 && !expanded ? setExpanded(true) : onDone())}
+        className={`pointer-events-auto flex max-w-[92vw] cursor-pointer flex-col items-center gap-2.5 border-4 border-black px-7 py-5 shadow-neo-lg ${meta.bg}`}
       >
         {crit && (
           <motion.div
-            initial={{ scale: 3, opacity: 0, rotate: 8 }}
+            initial={{ scale: 3.5, opacity: 0, rotate: 10 }}
             animate={{ scale: 1, opacity: 1, rotate: -3 }}
-            transition={{ type: "spring", stiffness: 400, damping: 12 }}
+            transition={{ type: "spring", stiffness: 420, damping: 11 }}
             className="border-4 border-black bg-neo-accent px-4 py-1 text-2xl font-black uppercase tracking-tight text-white shadow-[4px_4px_0_0_#FFD93D] md:text-4xl"
           >
             CRITICAL!
           </motion.div>
         )}
+
         <div className="flex items-center gap-2 text-2xl font-black uppercase tracking-tight md:text-3xl">
           {meta.icon} {meta.label}
           {(data.combo ?? 0) >= 2 && (
             <motion.span
-              initial={{ scale: 0, rotate: -15 }}
+              initial={{ scale: 0, rotate: -20 }}
               animate={{ scale: 1, rotate: 6 }}
-              transition={{ delay: 0.3, type: "spring", stiffness: 400, damping: 12 }}
-              className="border-2 border-black bg-neo-orange px-1.5 text-base font-black shadow-neo-sm"
+              transition={{ ...spring.bouncy, delay: 0.25 }}
+              className="border-2 border-black bg-neo-orange px-1.5 text-base shadow-neo-sm"
             >
-              x{data.combo} COMBO
+              x{data.combo}
             </motion.span>
           )}
         </div>
-        <div className="max-w-[280px] truncate text-sm font-bold uppercase tracking-wide text-black/80">
-          {data.title}
-        </div>
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          {confetti && (
-            <motion.span
-              initial={{ scale: 0, rotate: 12 }}
-              animate={{ scale: 1, rotate: -3 }}
-              transition={{ delay: 0.25, type: "spring", stiffness: 400, damping: 15 }}
-              className="flex items-center gap-1 border-4 border-black bg-white px-2 py-0.5 text-sm font-black shadow-neo-sm"
-            >
-              <FaBolt className="text-neo-accent" /> {data.elo} elo
-            </motion.span>
-          )}
-          {data.ratingDelta !== undefined && data.ratingDelta !== 0 && (
-            <motion.span
-              initial={{ scale: 0, y: 10 }}
-              animate={{ scale: 1, y: 0, rotate: data.ratingDelta > 0 ? -3 : 3 }}
-              transition={{ delay: 0.32, type: "spring", stiffness: 400, damping: 14 }}
-              className={`flex items-center gap-1 border-4 border-black px-2 py-0.5 text-sm font-black shadow-neo-sm ${
-                data.ratingDelta > 0 ? "bg-neo-ok" : "bg-white"
-              }`}
-            >
-              {data.ratingDelta > 0 ? <FaArrowTrendUp /> : <FaArrowTrendDown className="text-neo-accent" />}
-              {data.ratingDelta > 0 ? "+" : ""}
-              {data.ratingDelta} → {data.ratingAfter}
-            </motion.span>
-          )}
-          {data.streak >= 2 && (
-            <motion.span
-              initial={{ scale: 0, rotate: -12 }}
-              animate={{ scale: 1, rotate: 3 }}
-              transition={{ delay: 0.4, type: "spring", stiffness: 400, damping: 15 }}
-              className="flex items-center gap-1 border-4 border-black bg-white px-2 py-0.5 text-sm font-black shadow-neo-sm"
-            >
-              <FaFire className="text-neo-orange" /> {data.streak}-day streak
-            </motion.span>
-          )}
+        <div className="max-w-[300px] truncate text-xs font-bold uppercase tracking-wide text-black/70">
+          {data.title} · <FaBolt className="inline text-[10px]" /> {data.elo}
         </div>
 
-        {((data.xpEarned ?? 0) > 0 || (data.coinsEarned ?? 0) > 0) && (
-          <div className="flex items-center gap-1.5">
-            {(data.xpEarned ?? 0) > 0 && (
-              <motion.span
-                initial={{ scale: 0, y: 8 }}
-                animate={{ scale: 1, y: 0 }}
-                transition={{ delay: 0.25, type: "spring", stiffness: 400, damping: 16 }}
-                className="border-2 border-black bg-neo-blue px-2 py-0.5 text-[11px] font-black uppercase text-white shadow-neo-sm"
-              >
-                +{data.xpEarned} XP
-              </motion.span>
-            )}
-            {(data.coinsEarned ?? 0) > 0 && (
-              <motion.span
-                initial={{ scale: 0, y: 8 }}
-                animate={{ scale: 1, y: 0 }}
-                transition={{ delay: 0.32, type: "spring", stiffness: 400, damping: 16 }}
-                className="flex items-center gap-1 border-2 border-black bg-neo-secondary px-2 py-0.5 text-[11px] font-black uppercase shadow-neo-sm"
-              >
-                <FaCoins /> +{data.coinsEarned}
-              </motion.span>
-            )}
-          </div>
+        {/* Headline number: rating delta ticker */}
+        {delta !== 0 && data.ratingAfter !== undefined && (
+          <motion.div
+            initial={{ scale: 0, y: 10 }}
+            animate={{ scale: 1, y: 0 }}
+            transition={{ ...spring.bouncy, delay: 0.2 }}
+            className={`flex items-center gap-2 border-4 border-black px-3 py-1 text-xl font-black shadow-neo-sm ${
+              delta > 0 ? "bg-white" : "bg-black text-white"
+            }`}
+          >
+            <span className={delta > 0 ? "text-green-600" : "text-neo-accent"}>
+              {delta > 0 ? "+" : ""}
+              {delta}
+            </span>
+            <span className="text-black/30">→</span>
+            <NumberTicker value={data.ratingAfter} />
+          </motion.div>
         )}
+
         {data.levelUp && (
           <motion.span
             initial={{ scale: 3, opacity: 0, rotate: -8 }}
             animate={{ scale: 1, opacity: 1, rotate: 2 }}
-            transition={{ delay: 0.45, type: "spring", stiffness: 320, damping: 13 }}
-            className="border-4 border-black bg-neo-blue px-4 py-1 text-xl font-black uppercase text-white shadow-[4px_4px_0_0_#000]"
+            transition={{ ...spring.slam, delay: 0.4 }}
+            className="border-4 border-black bg-neo-blue px-4 py-1 text-lg font-black uppercase text-white shadow-[4px_4px_0_0_#000]"
           >
-            LEVEL UP → {data.levelUp}
-          </motion.span>
-        )}
-        {data.farmed && (
-          <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1, rotate: -2 }}
-            transition={{ delay: 0.35, type: "spring", stiffness: 380, damping: 14 }}
-            className="border-2 border-black bg-white px-2 py-0.5 text-[11px] font-black uppercase text-black/70 shadow-neo-sm"
-          >
-            Beneath you — no rating earned
-          </motion.span>
-        )}
-        {data.promoNote && (
-          <motion.span
-            initial={{ scale: 0, rotate: 8 }}
-            animate={{ scale: 1, rotate: -2 }}
-            transition={{ delay: 0.4, type: "spring", stiffness: 380, damping: 14 }}
-            className="border-4 border-black bg-black px-3 py-1 text-sm font-black uppercase text-neo-secondary shadow-neo-sm"
-          >
-            {data.promoNote}
-          </motion.span>
-        )}
-        {data.rankDown && (
-          <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1, rotate: 2 }}
-            transition={{ delay: 0.4, type: "spring", stiffness: 380, damping: 14 }}
-            className="border-4 border-black bg-neo-accent px-3 py-1 text-sm font-black uppercase text-white shadow-neo-sm"
-          >
-            DEMOTED to {data.rankDown}
+            Level up → {data.levelUp}
           </motion.span>
         )}
 
-        {(data.effectNotes?.length ?? 0) > 0 && (
-          <div className="flex max-w-[300px] flex-wrap items-center justify-center gap-1">
-            {data.effectNotes!.map((n, i) => (
+        {chips.length > 0 && (
+          <div className="flex max-w-[340px] flex-wrap items-center justify-center gap-1.5">
+            <AnimatePresence initial>
+              {shown.map((c, i) => (
+                <motion.span
+                  key={c.key}
+                  initial={{ scale: 0, y: 8 }}
+                  animate={{ scale: 1, y: 0, rotate: i % 2 ? 1.5 : -1.5 }}
+                  transition={{ ...spring.bouncy, delay: expanded ? i * 0.03 : 0.35 + i * 0.08 }}
+                  className={`flex items-center gap-1 border-2 border-black px-2 py-0.5 text-[11px] font-black uppercase shadow-neo-sm ${c.cls}`}
+                >
+                  {c.node}
+                </motion.span>
+              ))}
+            </AnimatePresence>
+            {hidden > 0 && (
               <motion.span
-                key={n + i}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.45 + i * 0.1, type: "spring", stiffness: 400, damping: 16 }}
-                className="border-2 border-black bg-white px-1.5 py-0.5 text-[10px] font-black uppercase shadow-neo-sm"
+                transition={{ delay: 0.7 }}
+                className="border-2 border-dashed border-black bg-white/70 px-2 py-0.5 text-[11px] font-black uppercase"
               >
-                {n}
-              </motion.span>
-            ))}
-          </div>
-        )}
-
-        {(data.achievements?.length || data.questCompleted || data.curseGained || data.curseCleansed) && (
-          <div className="flex flex-col items-center gap-1.5">
-            {data.curseGained && (
-              <motion.span
-                initial={{ scale: 0, rotate: 8 }}
-                animate={{ scale: 1, rotate: -2 }}
-                transition={{ delay: 0.5, type: "spring", stiffness: 380, damping: 14 }}
-                className="flex items-center gap-1.5 border-4 border-black bg-black px-3 py-1 text-sm font-black uppercase text-neo-accent shadow-neo-sm"
-              >
-                <FaSkullCrossbones /> CURSED: {data.curseGained}
-              </motion.span>
-            )}
-            {data.curseCleansed && (
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1, rotate: 2 }}
-                transition={{ delay: 0.5, type: "spring", stiffness: 380, damping: 14 }}
-                className="flex items-center gap-1.5 border-4 border-black bg-neo-ok px-3 py-1 text-sm font-black uppercase shadow-neo-sm"
-              >
-                <FaHandSparkles /> Curse cleansed: {data.curseCleansed}
+                +{hidden} more
               </motion.span>
             )}
           </div>
         )}
-
-        {(data.relicsGained?.length ?? 0) > 0 &&
-          data.relicsGained!.map((r, i) => (
-            <motion.span
-              key={r}
-              initial={{ scale: 0, rotate: -10 }}
-              animate={{ scale: 1, rotate: 2 }}
-              transition={{ delay: 0.55 + i * 0.15, type: "spring", stiffness: 360, damping: 13 }}
-              className="border-4 border-black bg-neo-muted px-3 py-1 text-sm font-black uppercase shadow-neo-sm"
-            >
-              💎 RELIC GAINED: {r}
-            </motion.span>
-          ))}
-
-        {(data.achievements?.length || data.questCompleted) && (
-          <div className="flex flex-col items-center gap-1.5">
-            {data.achievements?.map((name, i) => (
-              <motion.span
-                key={name}
-                initial={{ scale: 0, x: -30 }}
-                animate={{ scale: 1, x: 0, rotate: i % 2 ? 2 : -2 }}
-                transition={{ delay: 0.6 + i * 0.15, type: "spring", stiffness: 380, damping: 14 }}
-                className="flex items-center gap-1.5 border-4 border-black bg-neo-secondary px-3 py-1 text-sm font-black uppercase shadow-neo-sm"
-              >
-                <FaTrophy className="text-neo-orange" /> Unlocked: {name}
-              </motion.span>
-            ))}
-            {data.questCompleted && (
-              <motion.span
-                initial={{ scale: 0, x: 30 }}
-                animate={{ scale: 1, x: 0, rotate: -2 }}
-                transition={{ delay: 0.6 + (data.achievements?.length ?? 0) * 0.15, type: "spring", stiffness: 380, damping: 14 }}
-                className="flex items-center gap-1.5 border-4 border-black bg-neo-muted px-3 py-1 text-sm font-black uppercase shadow-neo-sm"
-              >
-                <FaScroll /> Daily quest complete
-              </motion.span>
-            )}
-          </div>
-        )}
+        <span className="text-[9px] font-black uppercase tracking-widest text-black/40">
+          {hidden > 0 && !expanded ? "tap for more · space to skip" : "tap or space to continue"}
+        </span>
       </motion.div>
     </div>
   );

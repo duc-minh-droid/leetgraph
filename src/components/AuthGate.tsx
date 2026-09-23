@@ -140,10 +140,12 @@ function LoadingScreen({ label }: { label: string }) {
   );
 }
 
-// Small floating account chip (email + sign out) shown while signed in.
-function AccountChip({ user }: { user: User }) {
+// Account chip (email + sign out) — rendered by Home and the Profile drawer.
+export function AccountChip() {
+  const user = useAuthUser();
+  if (!user) return null;
   return (
-    <div className="pointer-events-none fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 z-40">
+    <div className="pointer-events-none">
       <motion.button
         initial={{ y: 16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -209,7 +211,6 @@ export function AuthGate({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={user}>
       {children}
-      {user && <AccountChip user={user} />}
     </AuthContext.Provider>
   );
 }

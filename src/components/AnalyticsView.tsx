@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   FaChartLine,
@@ -10,6 +10,7 @@ import {
   FaRotate,
   FaMap,
   FaCalendarDays,
+  FaTrophy,
 } from "react-icons/fa6";
 import {
   ResponsiveContainer,
@@ -49,6 +50,10 @@ import {
 import { ratingHistory, currentRating, START_RATING } from "../state/rating";
 import type { MapMeta } from "../state/library";
 import "../analytics.css";
+import { AchievementCatalog } from "./ShopView";
+import { ACHIEVEMENTS, unlockedAchievements } from "../state/achievements";
+import { NumberTicker } from "./ui/NumberTicker";
+import { fadeUp, stagger } from "../lib/motion";
 
 function fmtTime(s: number): string {
   const sign = s < 0 ? "-" : "";
@@ -82,7 +87,7 @@ function Stat({ value, label, delay = 0 }: { value: string | number; label: stri
       whileHover={{ y: -4, rotate: -1 }}
       className="stat"
     >
-      <strong>{value}</strong>
+      <strong>{typeof value === "number" ? <NumberTicker value={value} /> : value}</strong>
       <span>{label}</span>
     </motion.div>
   );
@@ -260,7 +265,43 @@ function Calendar({ data }: { data: EnrichedAttempt[] }) {
   );
 }
 
-export function AnalyticsView({ map }: { map: MapMeta }) {
+// Achievements: the single catalog (locked + unlocked, rewards, title equip).
+function Achievements({ rev, onChanged }: { rev: number; onChanged?: () => void }) {
+  const [local, setLocal] = useState(0);
+  const unlocked = useMemo(() => unlockedAchievements().size, [rev, local]);
+  const pct = Math.round((unlocked / ACHIEVEMENTS.length) * 100);
+  return (
+    <motion.section variants={fadeUp} className="card-dash span-3 mt-[18px]">
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="!mb-0">
+          <FaTrophy className="mr-1 inline text-neo-orange" />
+          Achievements
+        </h3>
+        <div className="flex items-center gap-2 text-xs font-black uppercase">
+          <div className="h-3 w-40 border-2 border-black bg-neo-bg">
+            <motion.div
+              className="h-full bg-neo-secondary"
+              initial={{ width: 0 }}
+              animate={{ width: `${pct}%` }}
+              transition={{ type: "spring", stiffness: 120, damping: 20 }}
+            />
+          </div>
+          {unlocked}/{ACHIEVEMENTS.length}
+        </div>
+      </div>
+      <p className="dash-sub">Every achievement pays out — a coach or a relic, plus a title you can wear.</p>
+      <AchievementCatalog
+        rev={rev + local}
+        onChanged={() => {
+          setLocal((n) => n + 1);
+          onChanged?.();
+        }}
+      />
+    </motion.section>
+  );
+}
+
+export function AnalyticsView({ map, rev = 0, onChanged }: { map: MapMeta; rev?: number; onChanged?: () => void }) {
   const data = useMemo(
     () => getEnrichedAttempts(new Set(map.nodes.map((n) => n.slug)), map.problems),
     [map]
@@ -284,14 +325,15 @@ export function AnalyticsView({ map }: { map: MapMeta }) {
 
   if (data.length === 0) {
     return (
-      <div className="analytics">
+      <motion.div className="analytics" variants={stagger(0.05)} initial="hidden" animate="show">
         <Empty />
-      </div>
+        <Achievements rev={rev} onChanged={onChanged} />
+      </motion.div>
     );
   }
 
   return (
-    <div className="analytics">
+    <motion.div className="analytics" variants={stagger(0.05)} initial="hidden" animate="show">
       <div className="stat-row">
         <Stat value={playerRating} label="Player rating" delay={0} />
         <Stat value={streak} label="Day streak" delay={0.03} />
@@ -303,8 +345,8 @@ export function AnalyticsView({ map }: { map: MapMeta }) {
         <Stat value={summary.retryNodes} label="Re-attempted nodes" delay={0.21} />
       </div>
 
-      <div className="dash-grid">
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-2">
+      <motion.div className="dash-grid" variants={stagger(0.06)}>
+        <motion.section variants={fadeUp} whileHover={{ y: -3 }} className="card-dash span-2">
           <h3><FaChartLine className="mr-1 inline text-neo-accent" />1 · Player rating</h3>
           <p className="dash-sub">Your chess-style rating across all maps — every attempt moves it. Violet dots are the problems' elo.</p>
           <ResponsiveContainer width="100%" height="100%">
@@ -361,7 +403,7 @@ export function AnalyticsView({ map }: { map: MapMeta }) {
           </ResponsiveContainer>
         </motion.section>
 
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash">
+        <motion.section variants={fadeUp} whileHover={{ y: -3 }} className="card-dash">
           <h3><FaBullseye className="mr-1 inline text-neo-muted" />2 · Pattern radar</h3>
           <p className="dash-sub">Solve rate per pattern/tag. Shows your weak spike vs strong spike at a glance.</p>
           <ResponsiveContainer width="100%" height="100%">
@@ -375,13 +417,13 @@ export function AnalyticsView({ map }: { map: MapMeta }) {
           </ResponsiveContainer>
         </motion.section>
 
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-2">
+        <motion.section variants={fadeUp} whileHover={{ y: -3 }} className="card-dash span-2">
           <h3><FaFire className="mr-1 inline text-neo-orange" />3 · Pattern × elo-band heatmap</h3>
           <p className="dash-sub">Solve rate where each pattern breaks down across the difficulty curve. Only patterns with ≥2 attempts shown.</p>
           <Heatmap data={data} />
         </motion.section>
 
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash">
+        <motion.section variants={fadeUp} whileHover={{ y: -3 }} className="card-dash">
           <h3><FaLightbulb className="mr-1 inline text-neo-pink" />4 · Hints vs elo</h3>
           <p className="dash-sub">Colored by AI use. Flat hints/AI as elo rises = solving harder but not more independently.</p>
           <ResponsiveContainer width="100%" height="100%">
@@ -398,7 +440,7 @@ export function AnalyticsView({ map }: { map: MapMeta }) {
           </ResponsiveContainer>
         </motion.section>
 
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-2">
+        <motion.section variants={fadeUp} whileHover={{ y: -3 }} className="card-dash span-2">
           <h3><FaBolt className="mr-1 inline text-neo-accent" />5 · Failure mode over time</h3>
           <p className="dash-sub">Watch the TLE slice shrink vs wrong-answer as you move from "doesn't get it" to "gets it, needs to optimize".</p>
           <ResponsiveContainer width="100%" height="100%">
@@ -415,7 +457,7 @@ export function AnalyticsView({ map }: { map: MapMeta }) {
           </ResponsiveContainer>
         </motion.section>
 
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash">
+        <motion.section variants={fadeUp} whileHover={{ y: -3 }} className="card-dash">
           <h3><FaRegClock className="mr-1 inline text-neo-blue" />6 · Time phases</h3>
           <p className="dash-sub">Read/think vs write vs debug per bucket. Shrinking debug time is your most honest skill signal.</p>
           <ResponsiveContainer width="100%" height="100%">
@@ -432,7 +474,7 @@ export function AnalyticsView({ map }: { map: MapMeta }) {
           </ResponsiveContainer>
         </motion.section>
 
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
+        <motion.section variants={fadeUp} whileHover={{ y: -3 }} className="card-dash span-3">
           <h3><FaRotate className="mr-1 inline text-neo-ok" />7 · Retry improvement</h3>
           <p className="dash-sub">Nodes attempted 2+ times. Stop re-grinding rows that show zero delta — they're not teaching you anything.</p>
           {retries.length === 0 ? (
@@ -471,14 +513,15 @@ export function AnalyticsView({ map }: { map: MapMeta }) {
           )}
         </motion.section>
 
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
+        <motion.section variants={fadeUp} whileHover={{ y: -3 }} className="card-dash span-3">
           <h3><FaCalendarDays className="mr-1 inline text-neo-blue" />8 · Activity</h3>
           <p className="dash-sub">Attempts per day on this map. Don't break the chain.</p>
           <Calendar data={data} />
         </motion.section>
+      </motion.div>
 
-      </div>
-    </div>
+      <Achievements rev={rev} onChanged={onChanged} />
+    </motion.div>
   );
 }
 

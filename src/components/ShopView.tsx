@@ -1,5 +1,5 @@
-// Shop tab: rotating avatar stock, potions, and the full achievements catalog
-// (every achievement shows its reward — coach skin, relic, and title).
+// Shop (Profile drawer): limited bundles, rotating avatar stock, potions.
+// Also exports the achievement catalog, which lives on the Stats tab.
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -36,6 +36,9 @@ import {
 import { sfx } from "../lib/sfx";
 import { emitCoach } from "../state/coachBus";
 import "../analytics.css";
+import { Section } from "./ui/Section";
+import { stagger } from "../lib/motion";
+import { burst, pointOf } from "../lib/juice";
 
 function AvatarShop({ rev, onChanged }: { rev: number; onChanged: () => void }) {
   const [now, setNow] = useState(Date.now());
@@ -72,7 +75,7 @@ function AvatarShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
           Restock {mm}:{ss.toString().padStart(2, "0")}
         </motion.span>
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
         {offers.map((o, i) => {
           const owned = inv.avatars.includes(o.id);
           const affordable = inv.coins >= o.price;
@@ -174,13 +177,9 @@ function BundleShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
   return (
     <>
       <div className="mb-2 flex items-center gap-2">
-        <motion.span
-          animate={{ rotate: [-2, 2, -2] }}
-          transition={{ duration: 1, repeat: Infinity }}
-          className="border-2 border-black bg-neo-accent px-2 py-0.5 text-xs font-black uppercase text-white shadow-neo-sm"
-        >
+        <span className="-rotate-2 border-2 border-black bg-neo-accent px-2 py-0.5 text-xs font-black uppercase text-white shadow-neo-sm">
           Limited!
-        </motion.span>
+        </span>
         <span className="border-2 border-black bg-black px-2 py-0.5 text-xs font-black tabular-nums text-neo-secondary shadow-neo-sm">
           Gone in {mm}:{ss.toString().padStart(2, "0")}
         </span>
@@ -271,7 +270,7 @@ function BundleShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
 }
 
 // Full catalog: every achievement + its reward (coach / relic / title).
-function AchievementCatalog({ rev, onChanged }: { rev: number; onChanged: () => void }) {
+export function AchievementCatalog({ rev, onChanged }: { rev: number; onChanged: () => void }) {
   const unlocked = useMemo(() => unlockedAchievements(), [rev]);
   const equipped = useMemo(() => equippedTitle(), [rev]);
   return (
@@ -323,62 +322,31 @@ function AchievementCatalog({ rev, onChanged }: { rev: number; onChanged: () => 
   );
 }
 
-export function ShopView({ onChanged }: { onChanged?: () => void }) {
-  const [rev, setRev] = useState(0);
-  const changed = () => {
-    setRev((r) => r + 1);
-    onChanged?.();
-  };
-  const coins = useMemo(() => getInventory().coins, [rev]);
-  const unlockedCount = useMemo(() => unlockedAchievements().size, [rev]);
-
+export function ShopSection({ rev, onChanged }: { rev: number; onChanged: () => void }) {
   return (
-    <div className="analytics">
-      <div className="stat-row">
-        <motion.div initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="stat">
-          <strong>
-            <FaCoins className="mr-1 inline text-neo-orange" />
-            {coins}
-          </strong>
-          <span>Coins</span>
-        </motion.div>
-        <motion.div initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.05 }} className="stat">
-          <strong>
-            {unlockedCount}/{ACHIEVEMENTS.length}
-          </strong>
-          <span>Achievements</span>
-        </motion.div>
-      </div>
-
-      <div className="dash-grid">
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
-          <h3><FaGift className="mr-1 inline text-neo-accent" />Limited bundles</h3>
-          <p className="dash-sub">Deep discounts, 30-minute rotation, one grab each — the only way to buy relics outright.</p>
-          <BundleShop rev={rev} onChanged={changed} />
-        </motion.section>
-
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
-          <h3><FaShop className="mr-1 inline text-neo-accent" />Avatar shop</h3>
-          <p className="dash-sub">
-            Earn coins by solving (crits pay double, bosses +25, quests +20). Stock rotates every 5 minutes — same for everyone, so grab the good ones first.
-          </p>
-          <AvatarShop rev={rev} onChanged={changed} />
-        </motion.section>
-
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
-          <h3><FaFlask className="mr-1 inline text-neo-blue" />Potions</h3>
-          <p className="dash-sub">One-use consumables — they land on your belt on the map.</p>
-          <PotionShop rev={rev} onChanged={changed} />
-        </motion.section>
-
-        <motion.section whileHover={{ y: -6 }} transition={{ type: "spring", stiffness: 300, damping: 20 }} className="card-dash span-3">
-          <h3><FaTrophy className="mr-1 inline text-neo-orange" />All achievements</h3>
-          <p className="dash-sub">
-            Every achievement pays out — a coach skin or a relic, plus an equippable title.
-          </p>
-          <AchievementCatalog rev={rev} onChanged={changed} />
-        </motion.section>
-      </div>
-    </div>
+    <motion.div
+      variants={stagger(0.06)}
+      initial="hidden"
+      animate="show"
+      className="flex flex-col gap-5"
+      onClickCapture={(e) => {
+        // Purchase juice: any enabled buy button pops confetti where you clicked.
+        const btn = (e.target as HTMLElement).closest("button:not(:disabled)");
+        if (btn) {
+          const p = pointOf(btn);
+          burst(p.x, p.y, { count: 16, speed: 360, colors: ["#FFD93D", "#FF9F45", "#4ADE80"] });
+        }
+      }}
+    >
+      <Section icon={<FaGift />} title="Limited bundles" color="accent" sub="Deep discounts, 30-minute rotation, one grab each — the only way to buy relics outright.">
+        <BundleShop rev={rev} onChanged={onChanged} />
+      </Section>
+      <Section icon={<FaShop />} title="Avatar shop" color="yellow" sub="Stock rotates every 5 minutes — same for everyone. Crits pay double, bosses +25, quests +20.">
+        <AvatarShop rev={rev} onChanged={onChanged} />
+      </Section>
+      <Section icon={<FaFlask />} title="Potions" color="blue" sub="One-use consumables — they land on your belt on the map.">
+        <PotionShop rev={rev} onChanged={onChanged} />
+      </Section>
+    </motion.div>
   );
 }

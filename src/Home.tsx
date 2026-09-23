@@ -9,22 +9,20 @@ import {
   FaLayerGroup,
   FaRankingStar,
   FaKhanda,
-  FaScroll,
-  FaCheck,
-  FaCrown,
   FaLock,
-  FaCoins,
 } from "react-icons/fa6";
 import { listMaps } from "./state/library";
 import { currentLevel, levelInfo } from "./state/xp";
-import { getInventory } from "./state/inventory";
 import { currentRating, START_RATING } from "./state/rating";
 import { equippedTitle } from "./state/achievements";
 import { currentStreak, getEnrichedAttempts } from "./state/analytics";
-import { todaysQuest } from "./state/quests";
 import { dueReviews } from "./state/reviews";
 import { equippedSkin } from "./state/coachSkins";
 import { CoachPreview } from "./components/Coach";
+import { AccountChip } from "./components/AuthGate";
+import { Tilt } from "./components/ui/Tilt";
+import { spring } from "./lib/motion";
+import { sfx } from "./lib/sfx";
 
 const CARD_COLORS = [
   "bg-neo-accent",
@@ -33,69 +31,55 @@ const CARD_COLORS = [
   "bg-neo-pink",
 ];
 
-// Player card shown once there's any history — your run so far, at a glance.
-function PlayerCard() {
+// Shown once there's history: one glance + one button back into your run.
+function ContinueCard() {
   const rating = useMemo(() => currentRating(), []);
   const title = useMemo(() => equippedTitle(), []);
   const streak = useMemo(() => currentStreak(), []);
-  const quest = useMemo(() => todaysQuest(), []);
   const due = useMemo(() => dueReviews().length, []);
   const skin = useMemo(() => equippedSkin(), []);
   const lvl = useMemo(() => levelInfo(), []);
-  const coins = useMemo(() => getInventory().coins, []);
+  const last = useMemo(() => {
+    const maps = listMaps().filter((m) => m.progress > 0);
+    return maps.sort((x, y) => y.progress - x.progress)[0] ?? listMaps()[0];
+  }, []);
 
   return (
     <motion.div
       initial={{ x: 30, opacity: 0, rotate: 3 }}
       animate={{ x: 0, opacity: 1, rotate: 1 }}
-      whileHover={{ rotate: 0, y: -4 }}
-      transition={{ type: "spring", stiffness: 260, damping: 22 }}
-      className="hidden w-[270px] shrink-0 border-4 border-black bg-white shadow-neo lg:block"
+      transition={spring.soft}
+      className="w-full shrink-0 border-4 border-black bg-white shadow-neo md:w-[290px]"
     >
-      <div className="flex items-center justify-between border-b-4 border-black bg-neo-secondary px-3 py-1.5">
-        <span className="text-xs font-black uppercase tracking-widest">Your run</span>
-        <FaCrown className="text-neo-accent" />
-      </div>
       <div className="flex items-center gap-3 p-3">
-        <motion.div
-          animate={{ y: [0, -3, 0], rotate: [-2, 2, -2] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="shrink-0 border-4 border-black bg-neo-bg shadow-neo-sm"
-        >
-          <CoachPreview skinId={skin.id} size={72} />
-        </motion.div>
+        <div className="shrink-0 border-4 border-black bg-neo-bg shadow-neo-sm">
+          <CoachPreview skinId={skin.id} size={64} />
+        </div>
         <div className="min-w-0">
-          <div className="flex items-stretch border-2 border-black bg-black">
-            <span className="flex items-center gap-1 bg-neo-secondary px-1.5 text-[9px] font-black uppercase">
-              <FaRankingStar /> Elo
+          <div className="truncate text-sm font-black uppercase">"{title}"</div>
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] font-black uppercase">
+            <span className="flex items-center gap-1 border-2 border-black bg-black px-1.5 text-white">
+              <FaRankingStar className="text-neo-secondary" /> {rating}
             </span>
-            <span className="px-2 py-0.5 text-sm font-black tabular-nums text-white">{rating}</span>
-          </div>
-          <div className="mt-1 truncate text-[10px] font-black uppercase text-black/60">"{title}"</div>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-black uppercase">
-            <span className="border-2 border-black bg-neo-blue px-1 text-[9px] text-white">Lv{lvl.level}</span>
-            <span className="flex items-center gap-1">
-              <FaCoins className="text-neo-orange" /> {coins}
-            </span>
-            <span className="flex items-center gap-1">
+            <span className="border-2 border-black bg-neo-blue px-1.5 text-white">Lv {lvl.level}</span>
+            <span className="flex items-center gap-0.5">
               <FaFire className="text-neo-orange" /> {streak}d
             </span>
             {due > 0 && (
-              <span className="flex items-center gap-1 text-neo-accent">
+              <span className="flex items-center gap-0.5 text-neo-accent">
                 <FaKhanda /> {due} due
               </span>
             )}
           </div>
         </div>
       </div>
-      <div
-        className={`flex items-center gap-1.5 border-t-2 border-black px-3 py-1.5 text-[10px] font-black uppercase ${
-          quest.done ? "bg-neo-ok" : "bg-neo-bg"
-        }`}
+      <Link
+        to={`/map/${last.id}`}
+        className="group flex items-center justify-between border-t-4 border-black bg-neo-accent px-3 py-2.5 text-sm font-black uppercase transition-colors hover:bg-neo-secondary"
       >
-        {quest.done ? <FaCheck /> : <FaScroll className="text-neo-muted" />}
-        <span className="truncate">{quest.done ? "Quest complete!" : quest.label}</span>
-      </div>
+        <span>Continue · {last.name}</span>
+        <FaArrowRight className="transition-transform group-hover:translate-x-1" />
+      </Link>
     </motion.div>
   );
 }
@@ -109,7 +93,10 @@ export function Home() {
 
   return (
     <div className="min-h-full overflow-y-auto bg-neo-bg bg-grid font-display text-neo-ink">
-      <div className="mx-auto max-w-6xl px-5 py-10 md:py-16">
+      <div className="relative mx-auto max-w-6xl px-5 py-10 md:py-14">
+        <div className="absolute right-5 top-4">
+          <AccountChip />
+        </div>
         {/* Hero */}
         <motion.header
           initial={{ y: 24, opacity: 0 }}
@@ -176,7 +163,7 @@ export function Home() {
             </div>
           </div>
 
-          {hasHistory && <PlayerCard />}
+          {hasHistory && <ContinueCard />}
         </motion.header>
 
         {/* Map selection */}
@@ -195,11 +182,30 @@ export function Home() {
                 initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: i * 0.06, type: "spring", stiffness: 260, damping: 22 }}
-                whileHover={locked ? {} : { y: -8, rotate: i % 2 === 0 ? -1 : 1, boxShadow: "12px 12px 0px 0px #000" }}
-                className={`group relative flex flex-col border-4 border-black bg-white shadow-neo ${locked ? "grayscale" : ""}`}
+              >
+              <Tilt disabled={locked} max={6}>
+              <motion.div
+                whileHover={locked ? {} : { y: -8, boxShadow: "12px 12px 0px 0px #000" }}
+                transition={spring.snappy}
+                className={`group relative flex h-full flex-col border-4 border-black bg-white shadow-neo ${locked ? "grayscale" : ""}`}
               >
                 {locked && (
-                  <div className="absolute inset-0 z-20 grid place-items-center bg-black/55">
+                  <div
+                    className="absolute inset-0 z-20 grid cursor-not-allowed place-items-center bg-black/55"
+                    onClick={(e) => {
+                      sfx("error", 0.3);
+                      (e.currentTarget.firstElementChild as HTMLElement | null)?.animate(
+                        [
+                          { transform: "rotate(-3deg) translateX(0)" },
+                          { transform: "rotate(-3deg) translateX(-10px)" },
+                          { transform: "rotate(-3deg) translateX(10px)" },
+                          { transform: "rotate(-3deg) translateX(-6px)" },
+                          { transform: "rotate(-3deg) translateX(0)" },
+                        ],
+                        { duration: 320 }
+                      );
+                    }}
+                  >
                     <div className="flex rotate-[-3deg] flex-col items-center gap-1 border-4 border-black bg-neo-secondary px-4 py-2 shadow-neo">
                       <FaLock className="text-xl" />
                       <span className="text-sm font-black uppercase">Level {m.requiredLevel}</span>
@@ -257,6 +263,8 @@ export function Home() {
                     <FaArrowRight className="transition-transform duration-150 group-hover:translate-x-1" />
                   </Link>
                 </div>
+              </motion.div>
+              </Tilt>
               </motion.div>
               );
             })}

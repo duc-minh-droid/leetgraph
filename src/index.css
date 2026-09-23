@@ -97,17 +97,41 @@
 
 /* ---- react-flow brutalist overrides ---- */
 .react-flow__edge-path {
-  stroke: #000 !important;
-  stroke-width: 3 !important;
+  stroke: #000;
+  stroke-width: 3;
+  transition: stroke 0.3s, opacity 0.3s;
 }
-.react-flow__edge.active .react-flow__edge-path {
-  stroke: #ff6b6b !important;
-  stroke-width: 5 !important;
+/* Walked path: thick accent. */
+.react-flow__edge.solved .react-flow__edge-path {
+  stroke: #ff6b6b;
+  stroke-width: 6;
 }
-.react-flow__edge.future .react-flow__edge-path {
-  stroke: #000 !important;
-  stroke-dasharray: 4 6;
-  opacity: 0.35;
+/* Reachable next step: marching dashes pull the eye forward. */
+.react-flow__edge.open .react-flow__edge-path {
+  stroke: #000;
+  stroke-width: 4;
+  stroke-dasharray: 10 8;
+  animation: edge-flow 0.7s linear infinite;
+}
+/* Just unlocked: the line draws itself in, then starts flowing. */
+.react-flow__edge.open.fresh .react-flow__edge-path {
+  stroke: #ff6b6b;
+  stroke-dasharray: 2000;
+  stroke-dashoffset: 2000;
+  animation: edge-draw 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s forwards;
+}
+.react-flow__edge.locked .react-flow__edge-path {
+  opacity: 0.22;
+}
+@keyframes edge-flow {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+@keyframes edge-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 .react-flow__attribution {
   display: none;
@@ -125,10 +149,81 @@
   opacity: 0 !important;
   pointer-events: none;
 }
+.react-flow__pane {
+  cursor: grab;
+}
+.react-flow__pane.dragging {
+  cursor: grabbing;
+}
+
+/* Minimap in neo chrome. */
+.neo-minimap {
+  border: 4px solid #000;
+  box-shadow: 4px 4px 0 0 #000;
+  background: #fff !important;
+}
+.neo-minimap svg {
+  display: block;
+}
+
+/* ---- node states ---- */
+/* Available: one soft breathing outline. */
+.node-glow {
+  animation: node-glow 1.8s ease-in-out infinite;
+}
+@keyframes node-glow {
+  0%,
+  100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.15;
+    transform: scale(1.05);
+  }
+}
+/* Current: marching-ants frame. */
+.node-ants {
+  background:
+    linear-gradient(90deg, #000 50%, transparent 0) repeat-x top / 16px 4px,
+    linear-gradient(90deg, #000 50%, transparent 0) repeat-x bottom / 16px 4px,
+    linear-gradient(0deg, #000 50%, transparent 0) repeat-y left / 4px 16px,
+    linear-gradient(0deg, #000 50%, transparent 0) repeat-y right / 4px 16px;
+  animation: ants 0.6s linear infinite;
+}
+@keyframes ants {
+  to {
+    background-position:
+      16px top,
+      -16px bottom,
+      left -16px,
+      right 16px;
+  }
+}
+.node-bob {
+  display: inline-block;
+  animation: node-bob 1.6s ease-in-out infinite;
+}
+@keyframes node-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(4deg);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .animate-spin-slow,
-  .animate-pop-in {
+  .animate-pop-in,
+  .node-glow,
+  .node-ants,
+  .node-bob,
+  .react-flow__edge.open .react-flow__edge-path {
     animation: none !important;
+  }
+  .react-flow__edge.open.fresh .react-flow__edge-path {
+    stroke-dashoffset: 0;
   }
 }

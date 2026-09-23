@@ -172,6 +172,35 @@ function reaction(e: CoachEvent): { anim: CoachAnim; line: string } {
   }
 }
 
+// Coach hides (slides off-screen) while any registered surface is open —
+// report panel, drawers — so it never covers a primary action.
+const hiders = new Set<string>();
+const hideListeners = new Set<() => void>();
+function setHidden(key: string, on: boolean) {
+  const had = hiders.has(key);
+  if (on === had) return;
+  if (on) hiders.add(key);
+  else hiders.delete(key);
+  hideListeners.forEach((l) => l());
+}
+export function useCoachHidden(key: string, on: boolean) {
+  useEffect(() => {
+    setHidden(key, on);
+    return () => setHidden(key, false);
+  }, [key, on]);
+}
+function useIsHidden(): boolean {
+  const [h, setH] = useState(hiders.size > 0);
+  useEffect(() => {
+    const l = () => setH(hiders.size > 0);
+    hideListeners.add(l);
+    return () => {
+      hideListeners.delete(l);
+    };
+  }, []);
+  return h;
+}
+
 const SLEEP_AFTER_MS = 120000;
 const REACTION_MS = 4800;
 
@@ -185,6 +214,7 @@ export function Coach() {
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const CoachAvatar = useMemo(() => skinComponent(skinId), [skinId]);
+  const hidden = useIsHidden();
 
   const say = (text: string) => {
     setLine(text);
@@ -228,7 +258,14 @@ export function Coach() {
   }, []);
 
   return (
-    <div className="pointer-events-none fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-3 z-40 flex origin-bottom-right scale-[0.7] flex-col items-end gap-1.5 md:bottom-4 md:right-4 md:scale-100">
+    <motion.div
+      initial={false}
+      animate={hidden ? { x: 160, opacity: 0 } : { x: 0, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 28 }}
+      className="pointer-events-none fixed bottom-[calc(68px+env(safe-area-inset-bottom))] right-3 z-20 md:bottom-4 md:right-4"
+    >
+      {/* Scale lives on an inner box: framer owns the outer transform. */}
+      <div className="flex origin-bottom-right scale-[0.5] flex-col items-end gap-1.5 md:scale-[0.8]">
       <AnimatePresence>
         {line && (
           <motion.div
@@ -264,7 +301,8 @@ export function Coach() {
           />
         </motion.div>
       </motion.button>
-    </div>
+      </div>
+    </motion.div>
   );
 }
 

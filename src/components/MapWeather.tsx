@@ -174,7 +174,7 @@ export function MapWeather({ mapId }: { mapId: string }) {
     <canvas
       ref={ref}
       aria-hidden
-      className="pointer-events-none absolute inset-0 z-[5]"
+      className="pointer-events-none absolute inset-0 z-[5] opacity-50"
       style={{ imageRendering: "pixelated" }}
     />
   );

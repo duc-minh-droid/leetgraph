@@ -18,6 +18,7 @@ import { draftRelics, curseById, type RelicDef, type Rarity } from "../state/rel
 import { RANKS, type Rank } from "../state/rating";
 import { emitCoach } from "../state/coachBus";
 import { sfx } from "../lib/sfx";
+import { burst, confettiRain, ring, shake, blink, pointOf } from "../lib/juice";
 import { useEffect } from "react";
 
 const RANKS_LOOKUP: Record<string, Rank> = Object.fromEntries(RANKS.map((r) => [r.name, r]));
@@ -133,6 +134,7 @@ export function ChestModal({ onDone }: { onDone: (relic: RelicDef | null) => voi
 
   const take = (relic: RelicDef | null) => {
     sfx("chestTake", 0.6);
+    confettiRain(40);
     updateInventory((inv) => ({
       pendingChest: null,
       relics: relic ? [...inv.relics, relic.id] : inv.relics,
@@ -154,7 +156,13 @@ export function ChestModal({ onDone }: { onDone: (relic: RelicDef | null) => voi
           animate={{ y: 0, rotate: [-3, 3, -3] }}
           transition={{ y: { type: "spring", stiffness: 260, damping: 14 }, rotate: { duration: 0.5, repeat: Infinity } }}
           whileTap={{ scale: 0.9 }}
-          onClick={() => setOpen(true)}
+          onClick={(e) => {
+            const p = pointOf(e.currentTarget);
+            burst(p.x, p.y, { count: 40, speed: 700, colors: ["#FFD93D", "#FF9F45", "#C4B5FD", "#fff"] });
+            ring(p.x, p.y, "#FFD93D", 320);
+            shake(0.8);
+            setOpen(true);
+          }}
           className="flex flex-col items-center gap-3 border-4 border-black bg-neo-secondary p-8 shadow-neo-lg"
         >
           <FaGift className="text-6xl" />
@@ -208,7 +216,14 @@ export function ChestModal({ onDone }: { onDone: (relic: RelicDef | null) => voi
 
 // ---------------- Boss intro ----------------
 export function BossIntro({ title, onDone }: { title: string; onDone: () => void }) {
-  useEffect(() => sfx("boss", 0.5), []);
+  useEffect(() => {
+    sfx("boss", 0.5);
+    const t = setTimeout(() => {
+      shake(1.4);
+      blink("#FF6B6B", 0.35);
+    }, 220);
+    return () => clearTimeout(t);
+  }, []);
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -244,7 +259,19 @@ export function BossIntro({ title, onDone }: { title: string; onDone: () => void
 // ---------------- Rank-up ceremony ----------------
 export function RankUpCeremony({ rankName, onDone }: { rankName: string; onDone: () => void }) {
   const rank = RANKS_LOOKUP[rankName];
-  useEffect(() => sfx("rankUp", 0.65), []);
+  useEffect(() => {
+    sfx("rankUp", 0.65);
+    const t = setTimeout(() => {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      blink(rank?.color ?? "#FFD93D", 0.6);
+      ring(cx, cy, rank?.color ?? "#FFD93D", 520);
+      burst(cx, cy, { count: 70, speed: 900, colors: [rank?.color ?? "#FFD93D", "#fff", "#000", "#FF6B6B"] });
+      confettiRain(80);
+      shake(1.6);
+    }, 350);
+    return () => clearTimeout(t);
+  }, [rank]);
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -277,6 +304,51 @@ export function RankUpCeremony({ rankName, onDone }: { rankName: string; onDone:
           className="border-2 border-black bg-white px-3 py-1 text-xs font-black uppercase shadow-neo-sm"
         >
           Defend it. Decay is watching.
+        </motion.span>
+      </div>
+    </motion.div>
+  );
+}
+
+// ---------------- Act cleared ----------------
+export function ActClearBanner({ act, final = false, onDone }: { act: number; final?: boolean; onDone: () => void }) {
+  useEffect(() => {
+    sfx("levelUp", 0.6);
+    confettiRain(110);
+    const t = setTimeout(onDone, 2600);
+    return () => clearTimeout(t);
+  }, [onDone]);
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onDone}
+      className="absolute inset-0 z-50 grid cursor-pointer place-items-center bg-black/70"
+    >
+      <div className="flex flex-col items-center gap-3">
+        <motion.span
+          initial={{ y: -30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="text-sm font-black uppercase tracking-[0.35em] text-neo-secondary"
+        >
+          Boss down
+        </motion.span>
+        <motion.div
+          initial={{ scaleX: 0, rotate: -4 }}
+          animate={{ scaleX: 1, rotate: -2 }}
+          transition={{ type: "spring", stiffness: 260, damping: 16, delay: 0.1 }}
+          className="border-4 border-black bg-neo-ok px-10 py-5 shadow-[10px_10px_0_0_#FFD93D]"
+        >
+          <span className="text-4xl font-black uppercase tracking-tight md:text-6xl">{final ? "Map conquered" : `Act ${act + 1} cleared`}</span>
+        </motion.div>
+        <motion.span
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.7, type: "spring", stiffness: 300, damping: 14 }}
+          className="border-2 border-black bg-white px-3 py-1 text-xs font-black uppercase shadow-neo-sm"
+        >
+          {final ? "Every act down. Legend." : `Act ${act + 2} unlocked →`}
         </motion.span>
       </div>
     </motion.div>
@@ -330,13 +402,24 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
     return acc;
   }, {});
 
+  const shownRelics = inv.relics.slice(0, 4);
+  const extraRelics = inv.relics.slice(4);
+
   return (
-    <div className="pointer-events-none absolute left-2 top-2 z-20 flex max-w-[70%] flex-wrap items-center gap-1.5 md:left-4 md:top-4">
-      {inv.relics.map((id) => (
+    <div className="pointer-events-none absolute left-3 top-16 z-20 flex max-w-[calc(100%-5rem)] flex-wrap items-center gap-1.5 md:left-4 md:top-4 md:max-w-[30%]">
+      {shownRelics.map((id) => (
         <span key={id} className="pointer-events-auto">
           <ItemTile id={id} size="sm" tipSide="bottom" />
         </span>
       ))}
+      {extraRelics.length > 0 && (
+        <span
+          className="pointer-events-auto border-2 border-black bg-white px-1.5 py-1 text-[10px] font-black shadow-neo-sm"
+          title={`${extraRelics.length} more relics — see Profile → Collection`}
+        >
+          +{extraRelics.length}
+        </span>
+      )}
       {Object.entries(potionCounts).map(([id, count]) => (
         <span key={id} className="pointer-events-auto">
           <ItemTile
@@ -351,8 +434,8 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
       ))}
       {inv.pendingBonus !== 0 && (
         <motion.span
-          animate={{ scale: [1, 1.08, 1] }}
-          transition={{ duration: 1.2, repeat: Infinity }}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
           title="Armed event bonus — applies to your next attempt"
           className={`pointer-events-auto border-2 border-black px-1.5 py-1 text-[10px] font-black shadow-neo-sm ${
             inv.pendingBonus > 0 ? "bg-neo-ok" : "bg-neo-accent text-white"
@@ -364,8 +447,8 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
       )}
       {curse && (
         <motion.span
-          animate={{ rotate: [-2, 2, -2] }}
-          transition={{ duration: 0.8, repeat: Infinity }}
+          initial={{ scale: 0, rotate: -20 }}
+          animate={{ scale: 1, rotate: -2 }}
           title={`${curse.name} — ${curse.desc} ${curse.cleanse}`}
           className="pointer-events-auto flex items-center gap-1 border-2 border-black bg-black px-2 py-1 text-[10px] font-black uppercase text-neo-accent shadow-neo-sm"
         >
