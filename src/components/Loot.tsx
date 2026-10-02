@@ -9,7 +9,6 @@ import {
   FaDiceD20,
   FaArrowUp,
   FaArrowDown,
-  FaGem,
   FaFlask,
   FaXmark,
 } from "react-icons/fa6";
@@ -400,16 +399,13 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
     onChanged();
   };
 
-  if (inv.relics.length === 0 && inv.potions.length === 0 && !curse && inv.pendingBonus === 0 && effects.length === 0)
+  if (inv.potions.length === 0 && !curse && inv.pendingBonus === 0 && effects.length === 0)
     return null;
 
   const potionCounts = inv.potions.reduce<Record<string, number>>((acc, id) => {
     acc[id] = (acc[id] ?? 0) + 1;
     return acc;
   }, {});
-
-  const shownRelics = inv.relics.slice(0, 4);
-  const extraRelics = inv.relics.slice(4);
 
   // Phones: one compact chip; tap to unfold the full belt.
   if (mobile && !open) {
@@ -422,7 +418,6 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
         aria-label="Open belt"
         className="absolute left-3 top-16 z-20 flex items-center gap-2 border-4 border-black bg-white px-2 py-1.5 text-[11px] font-black uppercase shadow-neo-sm"
       >
-        <FaGem className="text-neo-muted" /> {inv.relics.length}
         <FaFlask className="text-neo-accent" /> {inv.potions.length}
         {(effects.length > 0 || curse) && <span className="h-2.5 w-2.5 border-2 border-black bg-neo-ok" />}
       </motion.button>
@@ -441,19 +436,6 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
         >
           <FaXmark />
         </button>
-      )}
-      {shownRelics.map((id) => (
-        <span key={id} className="pointer-events-auto">
-          <ItemTile id={id} size="sm" tipSide="bottom" />
-        </span>
-      ))}
-      {extraRelics.length > 0 && (
-        <span
-          className="pointer-events-auto border-2 border-black bg-white px-1.5 py-1 text-[10px] font-black shadow-neo-sm"
-          title={`${extraRelics.length} more relics — see Profile → Collection`}
-        >
-          +{extraRelics.length}
-        </span>
       )}
       {Object.entries(potionCounts).map(([id, count]) => (
         <span key={id} className="pointer-events-auto">

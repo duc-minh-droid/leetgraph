@@ -1,14 +1,13 @@
-// Bottom-left cluster: minimap + zoom / fit / jump-to-next / legend.
+// Bottom-left cluster: zoom / fit / jump-to-next / legend + relic row.
 import { useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { MiniMap, useReactFlow, type Node } from "@xyflow/react";
+import { useReactFlow } from "@xyflow/react";
 import {
   FaPlus,
   FaMinus,
   FaExpand,
   FaLocationCrosshairs,
   FaQuestion,
-  FaMap,
   FaArrowRight,
   FaStar,
   FaCircleCheck,
@@ -21,7 +20,7 @@ import {
   FaCrown,
 } from "react-icons/fa6";
 import { Popover } from "../ui/Popover";
-import { STATUS_HEX, type SquareData } from "./SquareNode";
+import { ItemTile } from "../ItemTile";
 import { useIsMobile } from "../../lib/useMedia";
 
 function CtlButton({
@@ -103,10 +102,9 @@ function Legend() {
   );
 }
 
-export function MapControls({ onFit, onNext }: { onFit: () => void; onNext: () => void }) {
+export function MapControls({ onFit, onNext, relics }: { onFit: () => void; onNext: () => void; relics: string[] }) {
   const rf = useReactFlow();
   const mobile = useIsMobile();
-  const [mapOpen, setMapOpen] = useState(!mobile);
   const [legend, setLegend] = useState(false);
   const legendRef = useRef<HTMLButtonElement>(null);
 
@@ -129,38 +127,20 @@ export function MapControls({ onFit, onNext }: { onFit: () => void; onNext: () =
         <CtlButton onClick={onFit} label="Fit act (F)">
           <FaExpand />
         </CtlButton>
-        <CtlButton onClick={() => setMapOpen((o) => !o)} label="Toggle minimap" active={mapOpen}>
-          <FaMap />
-        </CtlButton>
         <CtlButton btnRef={legendRef} onClick={() => setLegend((o) => !o)} label="Legend & controls" active={legend}>
           <FaQuestion />
         </CtlButton>
       </div>
 
-      {mapOpen && (
+      {relics.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.8, x: -20 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          className="pointer-events-auto"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="pointer-events-auto flex max-w-[calc(100vw-5.5rem)] flex-wrap items-center gap-2 border-4 border-black bg-white/90 p-2 shadow-neo-sm backdrop-blur-sm md:max-w-md"
         >
-          <MiniMap
-            pannable
-            zoomable
-            nodeColor={(n: Node) => {
-              const d = n.data as SquareData;
-              if (d.current) return "#FF6B6B";
-              if (d.mystery) return "#000";
-              return STATUS_HEX[d.status];
-            }}
-            nodeStrokeColor="#000"
-            nodeStrokeWidth={10}
-            nodeBorderRadius={0}
-            maskColor="rgba(255,253,245,0.72)"
-            maskStrokeColor="#FF6B6B"
-            maskStrokeWidth={6}
-            className="neo-minimap"
-            style={{ position: "relative", margin: 0, width: mobile ? 130 : 180, height: mobile ? 100 : 140 }}
-          />
+          {relics.map((id) => (
+            <ItemTile key={id} id={id} size="sm" tipSide="top" />
+          ))}
         </motion.div>
       )}
 

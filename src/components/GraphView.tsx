@@ -637,7 +637,7 @@ function GraphInner({ map, viewAct, maxAct, totalActs, progress, onViewAct, onAt
           proOptions={{ hideAttribution: true }}
         >
           <Background variant={BackgroundVariant.Lines} gap={40} color="rgba(0,0,0,0.08)" />
-          <MapControls onFit={() => fitAct()} onNext={jumpNext} />
+          <MapControls onFit={() => fitAct()} onNext={jumpNext} relics={inv.relics} />
         </ReactFlow>
 
         {!reduceFx() && <MapWeather mapId={map.id} />}

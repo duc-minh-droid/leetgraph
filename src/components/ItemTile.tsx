@@ -20,6 +20,7 @@ import {
   GiAngelWings,
   GiSwapBag,
 } from "react-icons/gi";
+import { HoverCard } from "./ui/Popover";
 import { relicById, potionById, type Rarity } from "../state/relics";
 
 interface Art {
@@ -90,7 +91,26 @@ export function ItemTile({
   const ring = relic ? RARITY_PIP[relic.rarity] : "#4D96FF";
 
   return (
-    <div className="group relative inline-block">
+    <HoverCard
+      side={tipSide}
+      align="center"
+      cardClassName="!border-2 !bg-black !shadow-neo-sm"
+      content={
+        <div role="tooltip" className="flex w-44 max-w-[calc(100vw-1rem)] flex-col gap-0.5 p-2">
+          <span className="flex items-center justify-between gap-2 text-[10px] font-black uppercase text-white">
+            {name}
+            {relic && (
+              <span className="border border-black px-1 text-[8px] text-black" style={{ background: RARITY_PIP[relic.rarity] }}>
+                {relic.rarity}
+              </span>
+            )}
+            {potion && <span className="border border-white/40 px-1 text-[8px] text-white/70">potion</span>}
+          </span>
+          <span className="text-[9px] font-bold leading-snug text-white/80">{desc}</span>
+          {tipExtra && <span className="text-[9px] font-black uppercase text-neo-secondary">{tipExtra}</span>}
+        </div>
+      }
+    >
       <Wrapper
         whileHover={{ y: -3, rotate: -3, scale: 1.08 }}
         whileTap={onClick ? { scale: 0.88 } : undefined}
@@ -116,25 +136,6 @@ export function ItemTile({
         )}
       </Wrapper>
 
-      {/* tooltip */}
-      <div
-        role="tooltip"
-        className={`pointer-events-none absolute left-1/2 z-50 hidden w-44 -translate-x-1/2 flex-col gap-0.5 border-2 border-black bg-black p-2 shadow-neo-sm group-hover:flex ${
-          tipSide === "bottom" ? "top-[calc(100%+6px)]" : "bottom-[calc(100%+6px)]"
-        }`}
-      >
-        <span className="flex items-center justify-between gap-2 text-[10px] font-black uppercase text-white">
-          {name}
-          {relic && (
-            <span className="border border-black px-1 text-[8px] text-black" style={{ background: RARITY_PIP[relic.rarity] }}>
-              {relic.rarity}
-            </span>
-          )}
-          {potion && <span className="border border-white/40 px-1 text-[8px] text-white/70">potion</span>}
-        </span>
-        <span className="text-[9px] font-bold leading-snug text-white/80">{desc}</span>
-        {tipExtra && <span className="text-[9px] font-black uppercase text-neo-secondary">{tipExtra}</span>}
-      </div>
-    </div>
+    </HoverCard>
   );
 }
