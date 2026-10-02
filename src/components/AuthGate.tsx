@@ -85,7 +85,7 @@ function LoginScreen() {
             <FaGoogle /> Continue with Google
           </motion.button>
 
-          <div className="flex items-center gap-2 text-[10px] font-black uppercase text-black/50">
+          <div className="flex items-center gap-2 text-[10px] font-black uppercase text-black/60">
             <span className="h-0.5 flex-1 bg-black/20" /> or <span className="h-0.5 flex-1 bg-black/20" />
           </div>
 

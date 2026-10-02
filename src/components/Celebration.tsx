@@ -169,7 +169,7 @@ export function Celebration({ data, onDone }: { data: CelebrationData; onDone: (
               {delta > 0 ? "+" : ""}
               {delta}
             </span>
-            <span className="text-black/30">→</span>
+            <span className="text-black/60">→</span>
             <NumberTicker value={data.ratingAfter} />
           </motion.div>
         )}
@@ -212,7 +212,7 @@ export function Celebration({ data, onDone }: { data: CelebrationData; onDone: (
             )}
           </div>
         )}
-        <span className="text-[9px] font-black uppercase tracking-widest text-black/40">
+        <span className="text-[10px] font-black uppercase tracking-widest text-black/60">
           {hidden > 0 && !expanded ? "tap for more · space to skip" : "tap or space to continue"}
         </span>
       </motion.div>

@@ -104,7 +104,7 @@ export function ProfileDrawer({
                   {s.icon}
                   <NumberTicker value={s.v} />
                 </span>
-                <span className="text-[9px] font-black uppercase text-black/60">{s.label}</span>
+                <span className="text-[10px] font-black uppercase text-black/60">{s.label}</span>
               </div>
             ))}
           </div>

@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ConversationProvider,
   useConversation,
   useConversationClientTool,
 } from "@elevenlabs/react";
-import { exportToBlob } from "@excalidraw/excalidraw";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import { FaCode, FaChalkboard, FaCircleCheck, FaCheckDouble, FaXmark, FaPaperPlane, FaClockRotateLeft, FaChevronDown, FaChevronUp } from "react-icons/fa6";
 import type { MapMeta } from "../state/library";
@@ -25,7 +24,7 @@ import { AGENT_ID, buildInterviewPrompt, buildFirstMessage } from "../lib/interv
 import { Celebration, type CelebrationData } from "./Celebration";
 import { ProblemPane, type StatementState } from "./interview/ProblemPane";
 import { EditorPane, type SpecState } from "./interview/EditorPane";
-import { BoardPane } from "./interview/BoardPane";
+const BoardPane = lazy(() => import("./interview/BoardPane").then((m) => ({ default: m.BoardPane })));
 import { MicDock, type TranscriptLine } from "./interview/MicDock";
 
 interface Verdict {
@@ -84,6 +83,11 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
   const [code, setCode] = useState("");
   const [cases, setCases] = useState<string[][]>([]);
   const [pane, setPane] = useState<"code" | "board">("code");
+  // Excalidraw is heavy: mount it the first time the tab is opened, then keep it (and its scene) alive.
+  const [boardSeen, setBoardSeen] = useState(false);
+  useEffect(() => {
+    if (pane === "board") setBoardSeen(true);
+  }, [pane]);
   const excalRef = useRef<ExcalidrawImperativeAPI | null>(null);
   const boardDirty = useRef(false);
   const [sharingBoard, setSharingBoard] = useState(false);
@@ -118,7 +122,6 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
   const run = async () => {
     if (busy || !lc) return;
     setBusy("run");
-    sfx("runStart", 0.5);
     try {
       if (spec) {
         const parsed: unknown[][] = [];
@@ -247,6 +250,7 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
     setSharingBoard(true);
     boardDirty.current = false;
     try {
+      const { exportToBlob } = await import("@excalidraw/excalidraw");
       const blob = await exportToBlob({
         elements,
         appState: { ...api.getAppState(), exportWithDarkMode: false },
@@ -422,7 +426,7 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
                 key={t.id}
                 onClick={() => setPane(t.id)}
                 className={`flex items-center gap-2 border-r-4 border-black px-4 py-2 text-xs font-black uppercase transition-colors ${
-                  pane === t.id ? "bg-neo-secondary" : "bg-white text-black/50 hover:text-black"
+                  pane === t.id ? "bg-neo-secondary" : "bg-white text-black/60 hover:text-black"
                 }`}
               >
                 {t.icon} {t.label}
@@ -432,7 +436,7 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
               <button
                 onClick={() => setShowHistory((s) => !s)}
                 className={`ml-auto flex items-center gap-2 border-l-4 border-black px-4 py-2 text-xs font-black uppercase transition-colors ${
-                  showHistory ? "bg-neo-muted" : "bg-white text-black/50 hover:text-black"
+                  showHistory ? "bg-neo-muted" : "bg-white text-black/60 hover:text-black"
                 }`}
               >
                 <FaClockRotateLeft /> History ({history.length})
@@ -461,10 +465,20 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
               />
             </div>
             <div className={`absolute inset-0 ${pane === "board" ? "" : "invisible"}`}>
-              <BoardPane
-                onApiReady={(api) => (excalRef.current = api)}
-                onSceneChange={() => (boardDirty.current = true)}
-              />
+              {boardSeen && (
+                <Suspense
+                  fallback={
+                    <div className="grid h-full place-items-center">
+                      <div className="border-4 border-black bg-neo-secondary px-4 py-2 text-xs font-black uppercase shadow-neo-sm">Opening whiteboard…</div>
+                    </div>
+                  }
+                >
+                  <BoardPane
+                    onApiReady={(api) => (excalRef.current = api)}
+                    onSceneChange={() => (boardDirty.current = true)}
+                  />
+                </Suspense>
+              )}
             </div>
 
             <AnimatePresence>
@@ -567,7 +581,7 @@ function HistoryCard({ rec }: { rec: InterviewRecord }) {
           <div className="flex max-h-48 flex-col gap-1 overflow-y-auto">
             {rec.transcript.map((l, i) => (
               <p key={i} className="text-[11px] font-bold leading-snug">
-                <span className={`mr-1 uppercase ${l.role === "agent" ? "text-neo-accent" : "text-black/50"}`}>
+                <span className={`mr-1 uppercase ${l.role === "agent" ? "text-neo-accent" : "text-black/60"}`}>
                   {l.role === "agent" ? "Interviewer" : "You"}:
                 </span>
                 {l.message}
@@ -629,7 +643,7 @@ function LogModal({
               key={o.val}
               onClick={() => setResult(o.val)}
               className={`flex items-center justify-center gap-1 border-4 border-black px-2 py-2 text-[11px] font-black uppercase ${
-                result === o.val ? `${o.cls} shadow-neo-sm` : "bg-white text-black/50"
+                result === o.val ? `${o.cls} shadow-neo-sm` : "bg-white text-black/60"
               }`}
             >
               {o.icon} {o.label}
@@ -648,7 +662,7 @@ function LogModal({
               key={o.label}
               onClick={() => o.set(!o.val)}
               className={`border-4 border-black px-2 py-2 text-[11px] font-black uppercase ${
-                o.val ? "bg-neo-secondary shadow-neo-sm" : "bg-white text-black/50"
+                o.val ? "bg-neo-secondary shadow-neo-sm" : "bg-white text-black/60"
               }`}
             >
               {o.label}

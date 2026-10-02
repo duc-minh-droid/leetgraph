@@ -204,7 +204,7 @@ export function ChestModal({ onDone }: { onDone: (relic: RelicDef | null) => voi
                   <ItemTile id={r.id} size="lg" tipSide="top" />
                   <span className="text-sm font-black uppercase leading-tight">{r.name}</span>
                   <span className="text-[10px] font-bold leading-snug text-black/70">{r.desc}</span>
-                  <span className={`border-2 border-black px-1.5 text-[9px] font-black uppercase ${r.rarity === "legendary" ? "bg-black text-neo-secondary" : "bg-white"}`}>
+                  <span className={`border-2 border-black px-1.5 text-[10px] font-black uppercase ${r.rarity === "legendary" ? "bg-black text-neo-secondary" : "bg-white"}`}>
                     {RARITY_LABEL[r.rarity]}
                   </span>
                 </motion.button>
@@ -486,7 +486,7 @@ export function Belt({ inv, onChanged }: { inv: Inventory; onChanged: () => void
             }`}
           >
             {def.kind === "buff" ? <FaArrowUp /> : <FaArrowDown />} {def.name}
-            <span className={`border-l-2 border-black pl-1 text-[9px] ${def.kind === "buff" ? "text-black/60" : "text-white/80"}`}>{left}</span>
+            <span className={`border-l-2 border-black pl-1 text-[10px] ${def.kind === "buff" ? "text-black/60" : "text-white/80"}`}>{left}</span>
           </motion.span>
         );
       })}

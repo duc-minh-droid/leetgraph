@@ -50,7 +50,7 @@ export function ActBar({
               aria-current={active ? "true" : undefined}
               title={locked ? `Act ${a + 1} — clear the boss of act ${a} to unlock` : `Act ${a + 1} · ${Math.round(p * 100)}%`}
               className={`relative flex min-w-[64px] items-center justify-center gap-1 overflow-hidden border-r-4 border-black px-3 py-1.5 text-[11px] font-black uppercase ${
-                locked ? "cursor-not-allowed bg-neo-bg text-black/35" : active ? "" : "hover:bg-neo-bg"
+                locked ? "cursor-not-allowed bg-neo-bg text-black/60" : active ? "" : "hover:bg-neo-bg"
               }`}
             >
               {active && <motion.span layoutId="act-seg" transition={spring.snappy} className="absolute inset-0 bg-neo-secondary" />}
@@ -64,7 +64,7 @@ export function ActBar({
                 />
               )}
               <span className="relative flex items-center gap-1">
-                {locked ? <FaLock className="text-[9px]" /> : done ? <FaCrown className="text-[10px] text-neo-orange" /> : null}
+                {locked ? <FaLock className="text-[10px]" /> : done ? <FaCrown className="text-[10px] text-neo-orange" /> : null}
                 <span className="hidden sm:inline">Act</span> {a + 1}
               </span>
             </button>

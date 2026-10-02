@@ -100,14 +100,14 @@ export function ItemTile({
           <span className="flex items-center justify-between gap-2 text-[10px] font-black uppercase text-white">
             {name}
             {relic && (
-              <span className="border border-black px-1 text-[8px] text-black" style={{ background: RARITY_PIP[relic.rarity] }}>
+              <span className="border border-black px-1 text-[10px] text-black" style={{ background: RARITY_PIP[relic.rarity] }}>
                 {relic.rarity}
               </span>
             )}
-            {potion && <span className="border border-white/40 px-1 text-[8px] text-white/70">potion</span>}
+            {potion && <span className="border border-white/40 px-1 text-[10px] text-white/70">potion</span>}
           </span>
-          <span className="text-[9px] font-bold leading-snug text-white/80">{desc}</span>
-          {tipExtra && <span className="text-[9px] font-black uppercase text-neo-secondary">{tipExtra}</span>}
+          <span className="text-[10px] font-bold leading-snug text-white/80">{desc}</span>
+          {tipExtra && <span className="text-[10px] font-black uppercase text-neo-secondary">{tipExtra}</span>}
         </div>
       }
     >
@@ -130,7 +130,7 @@ export function ItemTile({
       >
         <art.Icon className={s.icon} />
         {count !== undefined && count > 1 && (
-          <span className="absolute -bottom-1.5 -right-1.5 grid min-w-[16px] place-items-center border-2 border-black bg-white px-0.5 text-[9px] font-black leading-none text-black">
+          <span className="absolute -bottom-1.5 -right-1.5 grid min-w-[16px] place-items-center border-2 border-black bg-white px-0.5 text-[10px] font-black leading-none text-black">
             x{count}
           </span>
         )}

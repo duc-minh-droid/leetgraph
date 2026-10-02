@@ -93,7 +93,7 @@ const VERDICT_STYLE: Record<string, string> = {
 function Block({ label, children, tone = "" }: { label: string; children: React.ReactNode; tone?: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[10px] font-black uppercase tracking-widest text-black/50">{label}</span>
+      <span className="text-[10px] font-black uppercase tracking-widest text-black/60">{label}</span>
       <pre className={`max-h-32 overflow-auto whitespace-pre-wrap break-all border-2 border-black bg-white px-2 py-1.5 font-mono text-[12px] font-bold ${tone}`}>
         {children}
       </pre>
@@ -111,7 +111,7 @@ function CaseChip({ label, state, active, onClick, onRemove }: { label: string; 
         {label}
       </button>
       {onRemove && (
-        <button onClick={onRemove} aria-label={`Remove ${label}`} className="border-l-2 border-black px-1 py-0.5 text-[9px] hover:bg-neo-accent">
+        <button onClick={onRemove} aria-label={`Remove ${label}`} className="border-l-2 border-black px-1 py-0.5 text-[10px] hover:bg-neo-accent">
           <FaXmark />
         </button>
       )}
@@ -148,7 +148,8 @@ export function EditorPane({
   onRun: () => void;
   onClearResult: () => void;
 }) {
-  const [open, setOpen] = useState(true);
+  // Short screens start with the console collapsed so the editor keeps its room (it opens itself on Run).
+  const [open, setOpen] = useState(() => typeof window === "undefined" || window.innerHeight >= 720);
   const [tab, setTab] = useState<"cases" | "result">("cases");
   const [sel, setSel] = useState(0);
   const [resSel, setResSel] = useState(0);
@@ -195,17 +196,16 @@ export function EditorPane({
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => {
-              sfx("select", 0.4);
               onLangChange(l.id);
             }}
             className={`border-2 border-black px-2 py-0.5 text-[11px] font-black uppercase transition-colors duration-100 ${
-              lang === l.id ? "bg-neo-secondary" : "bg-white text-black/50 hover:text-black"
+              lang === l.id ? "bg-neo-secondary" : "bg-white text-black/60 hover:text-black"
             }`}
           >
             {l.label}
           </motion.button>
         ))}
-        <span className="ml-2 hidden text-[10px] font-bold uppercase text-black/40 md:inline">
+        <span className="ml-2 hidden text-[10px] font-bold uppercase text-black/60 md:inline">
           {specState === "loading" ? "Preparing judge…" : specState === "unavailable" ? "No test harness for this problem" : ""}
         </span>
         <div className="ml-auto flex items-center gap-1.5">
@@ -236,17 +236,16 @@ export function EditorPane({
       </div>
 
       {/* ---- console: Testcase | Test Result ---- */}
-      <div className="flex max-h-[46%] shrink-0 flex-col border-t-4 border-black bg-neo-bg">
+      <div className="flex max-h-[min(46%,24rem)] shrink-0 flex-col border-t-4 border-black bg-neo-bg">
         <div className="flex items-center gap-1 border-b-2 border-black px-2 py-1">
           {(["cases", "result"] as const).map((t) => (
             <button
               key={t}
               onClick={() => {
-                sfx("tab", 0.35);
                 setOpen(true);
                 setTab(t);
               }}
-              className={`border-2 border-black px-2 py-0.5 text-[10px] font-black uppercase ${tab === t && open ? "bg-neo-secondary" : "bg-white text-black/50 hover:text-black"}`}
+              className={`border-2 border-black px-2 py-0.5 text-[10px] font-black uppercase ${tab === t && open ? "bg-neo-secondary" : "bg-white text-black/60 hover:text-black"}`}
             >
               {t === "cases" ? "Testcase" : "Test Result"}
               {t === "result" && result && (
@@ -256,7 +255,6 @@ export function EditorPane({
           ))}
           <button
             onClick={() => {
-              sfx(open ? "panelClose" : "panelOpen", 0.4);
               setOpen((o) => !o);
             }}
             aria-label={open ? "Collapse console" : "Expand console"}
@@ -281,7 +279,6 @@ export function EditorPane({
                         onRemove={
                           cases.length > 1
                             ? () => {
-                                sfx("trash", 0.4);
                                 onCasesChange(cases.filter((_, j) => j !== i));
                               }
                             : undefined
@@ -290,7 +287,6 @@ export function EditorPane({
                     ))}
                     <button
                       onClick={() => {
-                        sfx("popOpen", 0.45);
                         const base = cases[sel] ?? spec!.params.map(() => "");
                         onCasesChange([...cases, [...base]]);
                         setSel(cases.length);
@@ -309,15 +305,14 @@ export function EditorPane({
                         <div key={p.name} className="flex flex-col gap-1">
                           <div className="flex items-center gap-2">
                             <span className="text-[11px] font-black text-black/60">
-                              {spec!.design ? "Calls" : <>{p.name} = <span className="font-mono text-[10px] text-black/35">{p.type}</span></>}
+                              {spec!.design ? "Calls" : <>{p.name} = <span className="font-mono text-[10px] text-black/60">{p.type}</span></>}
                             </span>
                             {visual && (
                               <button
                                 onClick={() => {
-                                  sfx("toggleOn", 0.35);
                                   setJsonMode((m) => ({ ...m, [p.name]: !m[p.name] }));
                                 }}
-                                className="ml-auto border-2 border-black bg-white px-1.5 py-0.5 text-[9px] font-black uppercase hover:bg-neo-secondary"
+                                className="ml-auto border-2 border-black bg-white px-1.5 py-0.5 text-[10px] font-black uppercase hover:bg-neo-secondary"
                               >
                                 {asJson ? "Visual" : "JSON"}
                               </button>
@@ -343,7 +338,7 @@ export function EditorPane({
                     })}
                 </div>
               ) : (
-                <p className="p-1 text-[11px] font-bold uppercase text-black/50">
+                <p className="p-1 text-[11px] font-bold uppercase text-black/60">
                   {specState === "loading"
                     ? "Building the judge for this problem…"
                     : "No test harness for this problem (it relies on extra hidden inputs or a provided API). Run executes your file as a plain program."}
@@ -352,7 +347,7 @@ export function EditorPane({
 
             {tab === "result" && (
               <>
-                {!result && !raw && <p className="p-1 text-[11px] font-bold uppercase text-black/50">Run your code to see results here.</p>}
+                {!result && !raw && <p className="p-1 text-[11px] font-bold uppercase text-black/60">Run your code to see results here.</p>}
 
                 {raw && !result && (
                   <div className="flex flex-col gap-1.5">

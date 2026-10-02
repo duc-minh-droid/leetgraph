@@ -80,11 +80,11 @@ function QuestsPane({ rev, onClaim }: { rev: number; onClaim: () => void }) {
           {daily.done ? <FaCheck /> : <FaSun className="text-neo-orange" />}
         </span>
         <div className="min-w-0">
-          <div className="text-[9px] font-black uppercase tracking-widest text-black/50">Daily quest</div>
+          <div className="text-[10px] font-black uppercase tracking-widest text-black/60">Daily quest</div>
           <div className="text-[11px] font-black uppercase leading-tight">{daily.label}</div>
         </div>
       </div>
-      <div className="flex items-center justify-between pt-1 text-[9px] font-black uppercase tracking-widest text-black/50">
+      <div className="flex items-center justify-between pt-1 text-[10px] font-black uppercase tracking-widest text-black/60">
         <span>Quest board</span>
         <span className="border-2 border-black bg-white px-1 text-black">{board.ai ? "By the Quest Master" : "Standard issue"}</span>
       </div>
@@ -110,7 +110,7 @@ function QuestsPane({ rev, onClaim }: { rev: number; onClaim: () => void }) {
               {s.progress}/{s.quest.count}
             </span>
             {s.claimed ? (
-              <span className="border-2 border-black bg-neo-bg px-1.5 py-0.5 text-[9px] font-black uppercase">Claimed</span>
+              <span className="border-2 border-black bg-neo-bg px-1.5 py-0.5 text-[10px] font-black uppercase">Claimed</span>
             ) : (
               <motion.button
                 whileHover={s.done ? { scale: 1.08 } : {}}
@@ -130,7 +130,7 @@ function QuestsPane({ rev, onClaim }: { rev: number; onClaim: () => void }) {
                   }
                   onClaim();
                 }}
-                className={`flex items-center gap-1 border-2 border-black px-1.5 py-0.5 text-[9px] font-black uppercase shadow-neo-sm ${
+                className={`flex items-center gap-1 border-2 border-black px-1.5 py-0.5 text-[10px] font-black uppercase shadow-neo-sm ${
                   s.done ? "bg-neo-secondary" : "bg-white opacity-50"
                 }`}
               >
@@ -154,7 +154,7 @@ function RematchPane({
   onPick: (slug: string) => void;
 }) {
   if (due.length === 0) {
-    return <p className="p-4 text-[11px] font-black uppercase text-black/50">Nothing due. Failed problems come back here on a 1/3/7/14-day rhythm.</p>;
+    return <p className="p-4 text-[11px] font-black uppercase text-black/60">Nothing due. Failed problems come back here on a 1/3/7/14-day rhythm.</p>;
   }
   return (
     <div className="flex flex-col">
@@ -172,7 +172,7 @@ function RematchPane({
           >
             <div className="min-w-0">
               <div className="truncate text-[11px] font-black uppercase">{p?.title ?? r.slug}</div>
-              <div className="text-[9px] font-bold uppercase text-black/55">
+              <div className="text-[10px] font-bold uppercase text-black/60">
                 {p?.elo ?? "?"} elo · last {r.lastResult.replace(/_/g, " ")}
                 {r.overdueDays > 0 ? ` · ${r.overdueDays}d overdue` : " · due today"}
               </div>

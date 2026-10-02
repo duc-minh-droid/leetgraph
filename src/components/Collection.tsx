@@ -81,7 +81,7 @@ function AvatarCollection({ rev, onChanged }: { rev: number; onChanged: () => vo
           >
             <img src={avatarUrl(id, 80)} alt="Owned avatar" className="h-full w-full" loading="lazy" />
             {isEquipped && (
-              <span className="absolute -right-2 -top-2 grid h-5 w-5 place-items-center border-2 border-black bg-neo-ok text-[9px]">
+              <span className="absolute -right-2 -top-2 grid h-5 w-5 place-items-center border-2 border-black bg-neo-ok text-[10px]">
                 <FaCheck />
               </span>
             )}
@@ -96,7 +96,7 @@ function Satchel({ rev }: { rev: number }) {
   const inv = useMemo(() => getInventory(), [rev]);
   if (inv.relics.length === 0 && inv.potions.length === 0) {
     return (
-      <p className="text-xs font-bold uppercase text-black/50">
+      <p className="text-xs font-bold uppercase text-black/60">
         Empty — relics drop from boss/elite chests and achievements; potions from events and the shop.
       </p>
     );

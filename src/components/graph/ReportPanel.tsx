@@ -187,7 +187,7 @@ export function ReportPanel({
               </span>
               <span className="flex items-stretch border-2 border-black bg-black">
                 <span className="grid place-items-center bg-neo-secondary px-1">
-                  <FaBolt className="text-[9px]" />
+                  <FaBolt className="text-[10px]" />
                 </span>
                 <span className="px-1.5 py-0.5 text-[10px] font-black text-white">{problem.elo}</span>
               </span>
@@ -278,11 +278,11 @@ export function ReportPanel({
                 transition={{ duration: 0.25 }}
                 onClick={() => setResult(o.val)}
                 className={`relative flex items-center justify-center gap-1.5 border-4 border-black px-2 py-3 text-xs font-black uppercase transition-colors ${
-                  on ? `${o.cls} shadow-neo-sm` : "bg-white text-black/50 hover:bg-neo-bg hover:text-black"
+                  on ? `${o.cls} shadow-neo-sm` : "bg-white text-black/60 hover:bg-neo-bg hover:text-black"
                 }`}
               >
                 {o.icon} {o.label}
-                <span className="absolute right-1 top-0.5 text-[8px] opacity-40">{o.key}</span>
+                <span className="absolute right-1 top-0.5 text-[10px] opacity-40">{o.key}</span>
               </motion.button>
             );
           })}
@@ -336,7 +336,7 @@ export function ReportPanel({
               onClick={() => set(!val)}
               aria-pressed={val}
               className={`flex items-center justify-center gap-1.5 border-2 border-black px-2 py-2 text-[10px] font-black uppercase transition-colors ${
-                val ? "bg-neo-secondary shadow-neo-sm" : "bg-white text-black/50 hover:text-black"
+                val ? "bg-neo-secondary shadow-neo-sm" : "bg-white text-black/60 hover:text-black"
               }`}
             >
               {icon} {label}
@@ -353,7 +353,7 @@ export function ReportPanel({
             className="flex w-full items-center justify-between px-3 py-2 text-[11px] font-black uppercase hover:bg-neo-bg"
           >
             <span className="flex items-center gap-1.5">
-              <FaSliders /> Details <span className="font-bold text-black/40">time · complexity · note</span>
+              <FaSliders /> Details <span className="font-bold text-black/60">time · complexity · note</span>
             </span>
             <motion.span animate={{ rotate: details ? 180 : 0 }}>
               <FaChevronDown />
@@ -374,7 +374,7 @@ export function ReportPanel({
                       <span className="flex items-center gap-1">
                         <FaRegClock className="text-neo-blue" /> Time by phase (s)
                       </span>
-                      <span className="text-black/50">
+                      <span className="text-black/60">
                         Total {total}s{timesTouched ? "" : " (auto)"}
                       </span>
                     </div>
@@ -429,7 +429,7 @@ export function ReportPanel({
       <div className="border-t-4 border-black bg-neo-bg p-3">
         <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }} className="neo-btn w-full" onClick={submit}>
           <FaPaperPlane /> Submit report
-          <span className="hidden text-[9px] font-bold opacity-50 md:inline">Ctrl+↵</span>
+          <span className="hidden text-[10px] font-bold opacity-50 md:inline">Ctrl+↵</span>
         </motion.button>
       </div>
     </>

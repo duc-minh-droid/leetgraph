@@ -84,7 +84,7 @@ function Legend() {
       <ul className="grid grid-cols-2 gap-x-3 gap-y-1.5 p-3">
         {items.map((it) => (
           <li key={it.label} className="flex items-center gap-1.5">
-            <span className={`grid h-5 w-5 place-items-center border-2 border-black text-[9px] ${it.cls}`}>{it.icon}</span>
+            <span className={`grid h-5 w-5 place-items-center border-2 border-black text-[10px] ${it.cls}`}>{it.icon}</span>
             {it.label}
           </li>
         ))}
@@ -93,7 +93,7 @@ function Legend() {
       <ul className="flex flex-col gap-1 p-3">
         {keys.map(([k, v]) => (
           <li key={k} className="flex items-center justify-between gap-2">
-            <kbd className="border-2 border-black bg-neo-bg px-1 font-mono text-[9px]">{k}</kbd>
+            <kbd className="border-2 border-black bg-neo-bg px-1 font-mono text-[10px]">{k}</kbd>
             <span className="text-black/60">{v}</span>
           </li>
         ))}

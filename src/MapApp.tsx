@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, lazy, type ReactNode } from "react";
+import { useState, useEffect, useMemo, useRef, lazy, Suspense, type ReactNode } from "react";
 import { BoneSuspense } from "boneyard-js/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useParams, useSearchParams, Navigate } from "react-router-dom";
@@ -18,8 +18,7 @@ import {
   FaHourglassHalf,
 } from "react-icons/fa6";
 import { GraphView } from "./components/GraphView";
-import { AnalyticsView } from "./components/AnalyticsView";
-import { ProfileDrawer, type ProfileTab } from "./components/ProfileDrawer";
+import type { ProfileTab } from "./components/ProfileDrawer";
 import { Coach, useCoachHidden } from "./components/Coach";
 import { Popover, HoverCard } from "./components/ui/Popover";
 import { NumberTicker } from "./components/ui/NumberTicker";
@@ -34,8 +33,19 @@ import { reduceFx, setReduceFx, onReduceFxChange, floatText, pointOf } from "./l
 import { avatarUrl, ensureAvatar } from "./lib/avatars";
 import { pageSwap, spring, tap } from "./lib/motion";
 
-// Heavy tab (CodeMirror + Excalidraw + ElevenLabs SDK) — loaded on demand.
-const InterviewView = lazy(() => import("./components/InterviewView"));
+// Heavy views load on demand (and get prefetched when the browser is idle / on hover).
+const loadInterview = () => import("./components/InterviewView");
+const loadAnalytics = () => import("./components/AnalyticsView").then((m) => ({ default: m.AnalyticsView }));
+const loadProfile = () => import("./components/ProfileDrawer").then((m) => ({ default: m.ProfileDrawer }));
+const InterviewView = lazy(loadInterview);
+const AnalyticsView = lazy(loadAnalytics);
+const ProfileDrawer = lazy(loadProfile);
+
+const ViewFallback = (
+  <div className="grid flex-1 place-items-center">
+    <div className="h-3 w-40 animate-pulse border-2 border-black bg-white" />
+  </div>
+);
 
 type Tab = "map" | "stats" | "interview";
 
@@ -208,12 +218,12 @@ function SoundMenu({ rev }: { rev: number }) {
               }}
               title={unlocked ? a.label : `Reach ${RANKS[a.rankIdx].name} to unlock`}
               className={`flex w-full items-center justify-between border-b-2 border-black px-3 py-2 text-left text-[11px] font-black uppercase ${
-                playing ? "bg-neo-blue text-white" : unlocked ? "hover:bg-neo-bg" : "text-black/35"
+                playing ? "bg-neo-blue text-white" : unlocked ? "hover:bg-neo-bg" : "text-black/60"
               }`}
             >
               <span>{a.label}</span>
               {!unlocked ? (
-                <span className="flex items-center gap-1 text-[9px]">
+                <span className="flex items-center gap-1 text-[10px]">
                   <FaLock /> {RANKS[a.rankIdx].name}
                 </span>
               ) : playing ? (
@@ -233,7 +243,7 @@ function SoundMenu({ rev }: { rev: number }) {
           <span className="flex items-center gap-1.5">
             <FaWandMagicSparkles /> Screen effects
           </span>
-          <span className={`border-2 border-black px-1.5 text-[9px] ${calm ? "bg-white" : "bg-neo-ok"}`}>{calm ? "Off" : "On"}</span>
+          <span className={`border-2 border-black px-1.5 text-[10px] ${calm ? "bg-white" : "bg-neo-ok"}`}>{calm ? "Off" : "On"}</span>
         </button>
       </Popover>
     </>
@@ -257,7 +267,7 @@ function AvatarButton({ rev, onClick, active }: { rev: number; onClick: () => vo
       className={`relative h-10 w-10 border-4 border-black shadow-neo-sm ${active ? "bg-neo-accent" : "bg-white"}`}
     >
       <img src={avatarUrl(avatar, 64)} alt="" className="h-full w-full object-cover" />
-      <span className="absolute -bottom-2 -right-2 border-2 border-black bg-neo-blue px-1 text-[9px] font-black leading-tight text-white">
+      <span className="absolute -bottom-2 -right-2 border-2 border-black bg-neo-blue px-1 text-[10px] font-black leading-tight text-white">
         {lvl.level}
       </span>
       {/* XP progress along the bottom edge */}
@@ -291,6 +301,19 @@ export function MapApp() {
   const [profileOpen, setProfileOpen] = useState(urlTab === "awards" || urlTab === "shop");
   const [profileTab, setProfileTab] = useState<ProfileTab>(urlTab === "shop" ? "shop" : "collection");
   useCoachHidden("profile", profileOpen);
+  // Keep the drawer mounted once opened (so it can animate out); load its code early.
+  const [profileMounted, setProfileMounted] = useState(profileOpen);
+  useEffect(() => {
+    if (profileOpen) setProfileMounted(true);
+  }, [profileOpen]);
+  useEffect(() => {
+    const idle = (window as any).requestIdleCallback ?? ((f: () => void) => setTimeout(f, 1500));
+    const h = idle(() => {
+      void loadAnalytics();
+      void loadProfile();
+    });
+    return () => ((window as any).cancelIdleCallback ?? clearTimeout)(h);
+  }, []);
 
   const setTab = (t: Tab) => {
     if (t === tab) return;
@@ -340,6 +363,7 @@ export function MapApp() {
             {TABS.map((t, i) => (
               <button
                 key={t.id}
+                onPointerEnter={() => t.id === "interview" && void loadInterview()}
                 onClick={() => setTab(t.id)}
                 aria-current={tab === t.id ? "page" : undefined}
                 className={`relative flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-black uppercase tracking-wide transition-colors ${
@@ -403,7 +427,9 @@ export function MapApp() {
                 onAttempt={bump}
               />
             ) : tab === "stats" ? (
-              <AnalyticsView map={map} rev={rev} onChanged={bump} />
+              <Suspense fallback={ViewFallback}>
+                <AnalyticsView map={map} rev={rev} onChanged={bump} />
+              </Suspense>
             ) : (
               <BoneSuspense
                 name="interview-room"
@@ -431,7 +457,8 @@ export function MapApp() {
         {TABS.map((t, i) => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onPointerEnter={() => t.id === "interview" && void loadInterview()}
+                onClick={() => setTab(t.id)}
             aria-current={tab === t.id ? "page" : undefined}
             className={`relative flex h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-black uppercase ${
               i > 0 ? "border-l-4 border-black" : ""
@@ -446,14 +473,18 @@ export function MapApp() {
         ))}
       </nav>
 
-      <ProfileDrawer
-        open={profileOpen}
-        onClose={() => setProfileOpen(false)}
-        tab={profileTab}
-        onTab={setProfileTab}
-        rev={rev}
-        onChanged={bump}
-      />
+      {profileMounted && (
+        <Suspense fallback={null}>
+          <ProfileDrawer
+            open={profileOpen}
+            onClose={() => setProfileOpen(false)}
+            tab={profileTab}
+            onTab={setProfileTab}
+            rev={rev}
+            onChanged={bump}
+          />
+        </Suspense>
+      )}
 
       <Coach />
     </div>

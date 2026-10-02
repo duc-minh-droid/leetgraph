@@ -3,8 +3,8 @@
 // judge already consumes (LeetCode's own formats), so the JSON view stays in sync.
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { FaPlus, FaXmark, FaArrowRight, FaArrowUp, FaArrowDown } from "react-icons/fa6";
-import { sfx } from "../../lib/sfx";
 import type { DesignSpec } from "../../lib/spec";
+import { sfx } from "../../lib/sfx";
 
 export const VISUAL_TYPES = new Set(["ListNode", "ListNode[]", "TreeNode", "Graph"]);
 
@@ -22,7 +22,7 @@ function tryParse(s: string): { ok: true; v: unknown } | { ok: false } {
 const num = (x: unknown) => (typeof x === "number" && Number.isFinite(x) ? x : 0);
 
 function Hint({ children }: { children: ReactNode }) {
-  return <p className="text-[10px] font-bold uppercase text-black/45">{children}</p>;
+  return <p className="text-[10px] font-bold uppercase text-black/60">{children}</p>;
 }
 
 // ---------------------------------------------------------------- linked list
@@ -30,7 +30,6 @@ function Hint({ children }: { children: ReactNode }) {
 function ListEditor({ values, onChange }: { values: number[]; onChange: (v: number[]) => void }) {
   const set = (i: number, v: number) => onChange(values.map((x, j) => (j === i ? v : x)));
   const insert = (at: number) => {
-    sfx("popOpen", 0.35);
     onChange([...values.slice(0, at), (values[at - 1] ?? 0) + 1, ...values.slice(at)]);
   };
   return (
@@ -38,7 +37,7 @@ function ListEditor({ values, onChange }: { values: number[]; onChange: (v: numb
       <span className="mr-1 border-2 border-black bg-black px-1.5 py-0.5 text-[10px] font-black uppercase text-neo-secondary">head</span>
       {values.map((v, i) => (
         <div key={i} className="flex items-center">
-          <FaArrowRight className="mx-1 text-[10px] text-black/50" />
+          <FaArrowRight className="mx-1 text-[10px] text-black/60" />
           <div className="group/n relative">
             <input
               type="number"
@@ -48,7 +47,6 @@ function ListEditor({ values, onChange }: { values: number[]; onChange: (v: numb
             />
             <button
               onClick={() => {
-                sfx("trash", 0.35);
                 onChange(values.filter((_, j) => j !== i));
               }}
               aria-label={`Delete node ${i + 1}`}
@@ -66,8 +64,8 @@ function ListEditor({ values, onChange }: { values: number[]; onChange: (v: numb
           </div>
         </div>
       ))}
-      <FaArrowRight className="mx-1 text-[10px] text-black/50" />
-      <span className="border-2 border-dashed border-black/50 px-1.5 py-1 text-[10px] font-black uppercase text-black/50">null</span>
+      <FaArrowRight className="mx-1 text-[10px] text-black/60" />
+      <span className="border-2 border-dashed border-black/50 px-1.5 py-1 text-[10px] font-black uppercase text-black/60">null</span>
       <button onClick={() => insert(values.length)} className={`${btn} ml-2 h-7 gap-1 px-2`}>
         <span className="flex items-center gap-1">
           <FaPlus /> Node
@@ -82,7 +80,7 @@ function ListsEditor({ lists, onChange }: { lists: number[][]; onChange: (v: num
     <div className="flex flex-col gap-2">
       {lists.map((l, i) => (
         <div key={i} className="flex items-start gap-2 border-2 border-black bg-white p-2">
-          <span className="mt-1 text-[10px] font-black uppercase text-black/50">#{i + 1}</span>
+          <span className="mt-1 text-[10px] font-black uppercase text-black/60">#{i + 1}</span>
           <div className="min-w-0 flex-1">
             <ListEditor values={l} onChange={(v) => onChange(lists.map((x, j) => (j === i ? v : x)))} />
           </div>
@@ -203,7 +201,6 @@ function TreeEditor({ values, onChange }: { values: unknown[]; onChange: (v: unk
   }, [tree, sel]);
   const commit = (t: T | null) => onChange(serializeTree(t));
   const addChild = (side: "L" | "R") => {
-    sfx("popOpen", 0.35);
     const child: T = { v: maxVal(tree) + 1, l: null, r: null };
     commit(mapAt(tree, sel, (n) => (n ? { ...n, [side === "L" ? "l" : "r"]: child } : n)));
     setSel(sel + side);
@@ -215,7 +212,6 @@ function TreeEditor({ values, onChange }: { values: unknown[]; onChange: (v: unk
         <Hint>Empty tree</Hint>
         <button
           onClick={() => {
-            sfx("popOpen", 0.35);
             commit({ v: 1, l: null, r: null });
             setSel("");
           }}
@@ -247,7 +243,7 @@ function TreeEditor({ values, onChange }: { values: unknown[]; onChange: (v: unk
       </div>
       {cur && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-black uppercase text-black/50">Node</span>
+          <span className="text-[10px] font-black uppercase text-black/60">Node</span>
           <input
             type="number"
             value={cur.v}
@@ -266,7 +262,6 @@ function TreeEditor({ values, onChange }: { values: unknown[]; onChange: (v: unk
           </button>
           <button
             onClick={() => {
-              sfx("trash", 0.35);
               commit(mapAt(tree, sel, () => null));
               setSel(sel.slice(0, -1));
             }}
@@ -341,7 +336,6 @@ function GraphEditor({ adj, onChange }: { adj: number[][]; onChange: (v: number[
       <div className="flex flex-wrap items-center gap-1.5">
         <button
           onClick={() => {
-            sfx("popOpen", 0.35);
             onChange([...adj, []]);
           }}
           className={`${btn} h-7 gap-1 px-2`}
@@ -353,7 +347,6 @@ function GraphEditor({ adj, onChange }: { adj: number[][]; onChange: (v: number[
         <button
           disabled={n === 0}
           onClick={() => {
-            sfx("trash", 0.35);
             setSel(null);
             onChange(adj.slice(0, -1).map((ns) => ns.filter((x) => x !== n)));
           }}
@@ -400,7 +393,7 @@ function ArgInput({ type, value, onChange, label }: { type: string; value: unkno
   }, [shown]);
   return (
     <label className="flex flex-col gap-0.5">
-      <span className="text-[9px] font-black uppercase text-black/45">{label}</span>
+      <span className="text-[10px] font-black uppercase text-black/60">{label}</span>
       <input
         value={draft}
         spellCheck={false}
@@ -432,7 +425,6 @@ export function DesignEditor({ design, value, onChange }: { design: DesignSpec; 
   const add = (name: string) => {
     const m = design.methods.find((x) => x.name === name);
     if (!m) return;
-    sfx("popOpen", 0.35);
     emit([...calls, [name, m.params.map((q) => dflt(q.type))]]);
   };
   const move = (i: number, d: number) => {
@@ -465,7 +457,6 @@ export function DesignEditor({ design, value, onChange }: { design: DesignSpec; 
                 </button>
                 <button
                   onClick={() => {
-                    sfx("trash", 0.35);
                     emit(calls.filter((_, j) => j !== i));
                   }}
                   aria-label="Delete call"
@@ -479,7 +470,7 @@ export function DesignEditor({ design, value, onChange }: { design: DesignSpec; 
         );
       })}
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-[10px] font-black uppercase text-black/50">Add call</span>
+        <span className="text-[10px] font-black uppercase text-black/60">Add call</span>
         {design.methods.map((m) => (
           <button key={m.name} onClick={() => add(m.name)} className={`${btn} h-7 px-2 normal-case`}>
             {m.name}
@@ -518,7 +509,7 @@ export function DesignTrace({ calls, output, expected }: { calls: string; output
             const wrong = e && ran && JSON.stringify(got) !== JSON.stringify(want) && !(typeof got === "number" && typeof want === "number" && Math.abs(got - want) < 1e-5);
             return (
               <tr key={i} className={`border-b border-black/20 ${wrong ? "bg-[#fee2e2]" : ran && e ? "bg-[#dcfce7]/60" : ""}`}>
-                <td className="px-2 py-1 text-black/50">{i + 1}</td>
+                <td className="px-2 py-1 text-black/60">{i + 1}</td>
                 <td className="px-2 py-1">{i === 0 ? `new ${call[0]}(${call[1].map((a) => JSON.stringify(a)).join(", ")})` : callText(call)}</td>
                 <td className="px-2 py-1">{ran ? show(got) : "—"}</td>
                 {e && <td className="px-2 py-1">{show(want)}</td>}

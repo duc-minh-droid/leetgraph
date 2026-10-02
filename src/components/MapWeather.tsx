@@ -15,9 +15,11 @@ interface Cloud { x: number; y: number; w: number; v: number; alpha: number }
 export function MapWeather({ mapId }: { mapId: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
+  const hasWeather = mapId === "amazon" || mapId === "google" || mapId === "meta" || mapId === "apple";
+
   useEffect(() => {
     const canvas = ref.current;
-    if (!canvas) return;
+    if (!canvas || !hasWeather) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     let raf = 0;
@@ -63,8 +65,15 @@ export function MapWeather({ mapId }: { mapId: string }) {
       alpha: 0.10 + Math.random() * 0.12,
     }));
 
+    // Motion is tuned per frame at 60 fps — cap the loop so 120/144 Hz screens don't run it twice as fast.
+    let last = 0;
     const tick = (now: number) => {
       if (!running) return;
+      if (now - last < 15) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      last = now;
       ctx.clearRect(0, 0, W(), H());
 
       if (mapId === "amazon") {
@@ -168,8 +177,9 @@ export function MapWeather({ mapId }: { mapId: string }) {
       cancelAnimationFrame(raf);
       ro.disconnect();
     };
-  }, [mapId]);
+  }, [mapId, hasWeather]);
 
+  if (!hasWeather) return null;
   return (
     <canvas
       ref={ref}

@@ -209,7 +209,7 @@ export function Home() {
                     <div className="flex rotate-[-3deg] flex-col items-center gap-1 border-4 border-black bg-neo-secondary px-4 py-2 shadow-neo">
                       <FaLock className="text-xl" />
                       <span className="text-sm font-black uppercase">Level {m.requiredLevel}</span>
-                      <span className="text-[9px] font-bold uppercase text-black/70">
+                      <span className="text-[10px] font-bold uppercase text-black/70">
                         You're level {level} — keep grinding
                       </span>
                     </div>
@@ -235,7 +235,7 @@ export function Home() {
                     </span>
                     <span className="inline-flex items-stretch border-2 border-black bg-black">
                       <span className="grid place-items-center bg-neo-secondary px-1">
-                        <FaBolt className="text-[8px]" />
+                        <FaBolt className="text-[10px]" />
                       </span>
                       <span className="px-1.5 py-0.5 tabular-nums text-white">
                         {m.eloMin}–{m.eloMax}

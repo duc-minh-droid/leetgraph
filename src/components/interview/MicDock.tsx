@@ -79,7 +79,7 @@ export function MicDock({
         >
           <FaUserTie className="text-xl" />
         </motion.div>
-        <span className="text-[9px] font-black uppercase">
+        <span className="text-[10px] font-black uppercase">
           {!live ? "offline" : isSpeaking ? "speaking" : "listening"}
         </span>
       </div>
@@ -96,7 +96,7 @@ export function MicDock({
           </p>
         )}
         {transcript.length === 0 ? (
-          <p className="text-[11px] font-bold uppercase text-black/50">
+          <p className="text-[11px] font-bold uppercase text-black/60">
             {agentMissing
               ? "Agent not configured — set VITE_ELEVENLABS_AGENT_ID in .env.local (npx tsx scripts/createInterviewAgent.ts), then restart the dev server."
               : statementPending
@@ -108,7 +108,7 @@ export function MicDock({
         ) : (
           transcript.map((l, i) => (
             <p key={i} className="text-[11px] font-bold leading-snug">
-              <span className={`mr-1 uppercase ${l.role === "agent" ? "text-neo-accent" : "text-black/50"}`}>
+              <span className={`mr-1 uppercase ${l.role === "agent" ? "text-neo-accent" : "text-black/60"}`}>
                 {l.role === "agent" ? "Interviewer" : "You"}:
               </span>
               {l.message}

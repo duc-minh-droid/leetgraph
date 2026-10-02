@@ -142,7 +142,7 @@ function PotionShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
             <span className="flex items-center gap-2 text-sm font-black uppercase">
               <ItemTile id={p.id} size="sm" tipSide="top" />
               {p.name}
-              {owned > 0 && <span className="border-2 border-black bg-neo-bg px-1 text-[9px]">x{owned}</span>}
+              {owned > 0 && <span className="border-2 border-black bg-neo-bg px-1 text-[10px]">x{owned}</span>}
             </span>
             <span className="text-[10px] font-bold leading-snug text-black/70">{p.desc}</span>
             <span
@@ -218,7 +218,7 @@ function BundleShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
                 outlineOffset: "2px",
               }}
             >
-              <span className="absolute -right-2 -top-3 rotate-6 border-2 border-black bg-neo-secondary px-1.5 py-0.5 text-[9px] font-black uppercase shadow-neo-sm">
+              <span className="absolute -right-2 -top-3 rotate-6 border-2 border-black bg-neo-secondary px-1.5 py-0.5 text-[10px] font-black uppercase shadow-neo-sm">
                 −{Math.round((1 - b.price / b.fullPrice) * 100)}%
               </span>
               {(bought || relicOwned) && (
@@ -244,7 +244,7 @@ function BundleShop({ rev, onChanged }: { rev: number; onChanged: () => void }) 
                 ))}
               </span>
               <span className="flex items-center gap-2 text-sm font-black tabular-nums">
-                <span className="text-black/40 line-through">{b.fullPrice}</span>
+                <span className="text-black/60 line-through">{b.fullPrice}</span>
                 <span
                   className={`flex items-center gap-1 border-2 border-black px-2 py-0.5 ${
                     bought ? "bg-neo-ok" : affordable ? "bg-neo-secondary" : "bg-neo-accent text-white"
@@ -293,7 +293,7 @@ export function AchievementCatalog({ rev, onChanged }: { rev: number; onChanged:
             <p>{a.desc}</p>
             <div className="flex flex-wrap items-center gap-1">
               {coach && (
-                <span className="flex items-center gap-1 border-2 border-black bg-neo-pink px-1.5 py-0.5 text-[9px] font-black uppercase text-white">
+                <span className="flex items-center gap-1 border-2 border-black bg-neo-pink px-1.5 py-0.5 text-[10px] font-black uppercase text-white">
                   <FaUserGroup /> Coach: {coach.name}
                 </span>
               )}

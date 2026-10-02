@@ -1,7 +1,7 @@
 // Sound layer (react-sounds / howler): one-shot SFX for instant feedback on
 // every interaction, plus rank-gated ambient loops (each promotion unlocks a
 // new background soundscape).
-import { playSound, getCDNUrl, type LibrarySoundName } from "react-sounds";
+import { playSound, preloadSounds, getCDNUrl, type LibrarySoundName } from "react-sounds";
 import { Howl } from "howler";
 import manifest from "react-sounds/dist/manifest.json";
 
@@ -63,6 +63,12 @@ let clickInit = false;
 export function initClickSfx() {
   if (clickInit) return;
   clickInit = true;
+  // Warm the few sounds used on every interaction so the first hover / click / keystroke has no network wait.
+  const warm = () =>
+    void preloadSounds(
+      (["click", "hover", "key", "keyMed", "keyHard", "focus", "blur", "tab", "toggleOn", "toggleOff"] as SfxKey[]).map((k) => SFX[k])
+    ).catch(() => {});
+  ((window as any).requestIdleCallback ?? ((f: () => void) => setTimeout(f, 2000)))(warm);
   document.addEventListener(
     "pointerdown",
     (e) => {

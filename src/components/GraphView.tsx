@@ -274,13 +274,16 @@ function GraphInner({ map, viewAct, maxAct, totalActs, progress, onViewAct, onAt
 
   // ---------------- flow elements ----------------
 
+  // Node objects are reused when their data is unchanged, so an attempt (which
+  // changes a handful of nodes) doesn't re-render all ~100 memoised cards.
+  const nodeCache = useRef(new Map<string, { sig: string; node: Node }>());
   const rfNodes: Node[] = useMemo(
     () =>
       actInfo[viewAct].ids.map((id) => {
         const n = byId.get(id)!;
         const p = pos.get(id)!;
         const prob = bySlug[n.slug];
-        return {
+        const next: Node = {
           id,
           type: "square",
           position: { x: p.x - SQ_W / 2, y: p.y - SQ_H / 2 },
@@ -308,6 +311,11 @@ function GraphInner({ map, viewAct, maxAct, totalActs, progress, onViewAct, onAt
             stamp: stamp?.id === id ? stamp.n : 0,
           } as SquareData,
         };
+        const sig = JSON.stringify(next.data);
+        const hit = nodeCache.current.get(id);
+        if (hit && hit.sig === sig) return hit.node;
+        nodeCache.current.set(id, { sig, node: next });
+        return next;
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [actInfo, viewAct, byId, pos, bySlug, available, visited, current, dueSet, inv, fresh, stamp, attemptsRev]

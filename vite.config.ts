@@ -36,9 +36,11 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // The Excalidraw/Mermaid chunks are huge — skip precaching anything
-        // over 3 MB; those load (and then cache) at runtime instead.
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        // Precache only the app shell + main entry (<2 MB). Everything else
+        // (Excalidraw, Mermaid, KaTeX, lazy views) is cached on first use by the
+        // runtime rule below, so first visits don't download ~11 MB in the background.
+        globPatterns: ["**/*.{html,css,svg,png,ico,webmanifest}", "assets/index-*.js"],
+        maximumFileSizeToCacheInBytes: 2 * 1024 * 1024,
         navigateFallback: "/index.html",
         runtimeCaching: [
           {
