@@ -1,13 +1,9 @@
 // Remote code execution via Wandbox (free, CORS-open, no key needed).
 // The user writes their own harness/prints — like pasting into a scratchpad.
-import type { Lang } from "../components/interview/EditorPane";
+import type { Lang } from "./lc";
 
 const COMPILERS: Record<Lang, string> = {
   python: "cpython-3.14.0",
-  javascript: "nodejs-20.17.0",
-  typescript: "typescript-5.6.2",
-  java: "openjdk-jdk-22+36",
-  cpp: "gcc-13.2.0",
   rust: "rust-1.82.0",
 };
 

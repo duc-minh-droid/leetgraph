@@ -1,0 +1,1 @@
+{"slug":"alien-dictionary","id":"269","title":"Alien Dictionary","content":null,"metaData":{"name":"alienOrder","params":[{"name":"words","type":"string[]"}],"return":{"type":"string"}},"exampleTestcases":"[\"wrt\",\"wrf\",\"er\",\"ett\",\"rftt\"]\n[\"z\",\"x\"]\n[\"z\",\"x\",\"z\"]","codeSnippets":{}}

@@ -23,12 +23,12 @@ export function hasGroq(): boolean {
   return Boolean(KEY);
 }
 
-async function chat(model: string, messages: Msg[], maxTokens = 1600): Promise<string> {
+async function chat(model: string, messages: Msg[], maxTokens = 1600, json = false): Promise<string> {
   if (!KEY) throw new Error("VITE_GROQ_API_KEY is not set");
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: 0.3 }),
+    body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: json ? 0.2 : 0.3, ...(json ? { response_format: { type: "json_object" } } : {}) }),
   });
   if (!res.ok) throw new Error(`Groq ${model}: ${res.status} ${await res.text()}`);
   const data = await res.json();
@@ -45,32 +45,12 @@ export async function askText(system: string, user: string, maxTokens = 600): Pr
   ], maxTokens);
 }
 
-const STATEMENT_CACHE_PREFIX = "leetgraph.statement.v2.";
-
-export async function generateProblemStatement(
-  slug: string,
-  title: string,
-  difficulty: string,
-  topics: string[]
-): Promise<string> {
-  const cacheKey = STATEMENT_CACHE_PREFIX + slug;
-  const cached = localStorage.getItem(cacheKey);
-  if (cached) return cached;
-
-  const raw = await chat(TEXT_MODEL, [
-    {
-      role: "system",
-      content:
-        "You are a LeetCode problem database. Given a problem title, output its full problem statement: a clear description, two 'Example N:' blocks with Input/Output/Explanation, and a 'Constraints:' list. Format as clean Markdown: start directly with the description (no title heading), wrap identifiers/values in `backticks`, use `**Example 1:**` style bold labels, put each example's Input/Output/Explanation in a fenced code block, and give Constraints as a bullet list. Never include hints, approaches, or solutions. If you are not certain of the exact problem, write a faithful statement in its spirit for the given topics.",
-    },
-    {
-      role: "user",
-      content: `Title: ${title}\nDifficulty: ${difficulty}\nTopics: ${topics.join(", ")}`,
-    },
-  ]);
-  const statement = raw.trim();
-  localStorage.setItem(cacheKey, statement);
-  return statement;
+// JSON-mode completion (response is guaranteed parseable JSON text).
+export async function askJson(system: string, user: string, maxTokens = 3000): Promise<string> {
+  return chat(TEXT_MODEL, [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ], maxTokens, true);
 }
 
 export async function describeBoard(pngDataUrl: string): Promise<string> {

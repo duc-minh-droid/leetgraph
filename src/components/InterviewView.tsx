@@ -15,12 +15,16 @@ import { currentStreak } from "../state/analytics";
 import { submitAttempt } from "../state/progress";
 import { listInterviews, saveInterview, type InterviewRecord } from "../state/interviews";
 import { emitCoach } from "../state/coachBus";
-import { generateProblemStatement, describeBoard, hasGroq } from "../lib/groq";
+import { describeBoard } from "../lib/groq";
+import { loadLc, statementMarkdown, starterCode, type LcData, type Lang } from "../lib/lc";
+import { baseSpec, loadSpec, defaultCompare, type ProblemSpec } from "../lib/spec";
+import { runTests, submitTests, initialCases, parseCaseArgs, type JudgeResult } from "../lib/judge";
+import { sfx } from "../lib/sfx";
 import { runCode, type RunResult } from "../lib/runCode";
 import { AGENT_ID, buildInterviewPrompt, buildFirstMessage } from "../lib/interviewPrompt";
 import { Celebration, type CelebrationData } from "./Celebration";
 import { ProblemPane, type StatementState } from "./interview/ProblemPane";
-import { EditorPane, STARTER, type Lang, type TestCase } from "./interview/EditorPane";
+import { EditorPane, type SpecState } from "./interview/EditorPane";
 import { BoardPane } from "./interview/BoardPane";
 import { MicDock, type TranscriptLine } from "./interview/MicDock";
 
@@ -55,55 +59,157 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
   }, [available, selectedSlug]);
   const problem = selectedSlug ? map.problems[selectedSlug] : null;
 
-  // ---- problem statement (Groq-generated, cached) ----
+  // ---- problem data (downloaded from LeetCode into public/lc) ----
+  const [lc, setLc] = useState<LcData | null>(null);
   const [statement, setStatement] = useState<StatementState>({ status: "loading" });
   const loadStatement = useCallback(() => {
     if (!problem) return;
-    if (!hasGroq()) {
-      setStatement({ status: "error", message: "VITE_GROQ_API_KEY is not set — add it to .env.local. Meanwhile, read the problem on LeetCode below." });
-      return;
-    }
     setStatement({ status: "loading" });
-    generateProblemStatement(problem.slug, problem.title, problem.difficulty, problem.topics)
-      .then((text) => setStatement({ status: "ready", text }))
+    setLc(null);
+    loadLc(problem.slug)
+      .then((d) => {
+        setLc(d);
+        setStatement({ status: "ready", text: statementMarkdown(d) });
+      })
       .catch((e) => setStatement({ status: "error", message: String(e?.message ?? e) }));
   }, [problem?.slug]);
   useEffect(loadStatement, [loadStatement]);
 
+  // ---- judge spec (signature + hidden cases + reference), built once per problem ----
+  const [spec, setSpec] = useState<ProblemSpec | null>(null);
+  const [specState, setSpecState] = useState<SpecState>("loading");
+  useEffect(() => {
+    setSpec(null);
+    if (!lc) {
+      setSpecState("loading");
+      return;
+    }
+    if (!baseSpec(lc)) {
+      setSpecState("unavailable");
+      return;
+    }
+    let dead = false;
+    setSpecState("loading");
+    loadSpec(lc)
+      .then((sp) => {
+        if (dead) return;
+        setSpec(sp);
+        setSpecState(sp ? "ready" : "unavailable");
+      })
+      .catch(() => {
+        // No Groq / network: still allow running the examples via the statement's own outputs.
+        const b = baseSpec(lc);
+        if (dead || !b) return;
+        setSpec({ ...b, mutates: b.void ? 0 : null, compare: defaultCompare(lc), hidden: [], reference: "" });
+        setSpecState("ready");
+      });
+    return () => {
+      dead = true;
+    };
+  }, [lc]);
+
   // ---- editor + board ----
   const [lang, setLang] = useState<Lang>("python");
-  const [code, setCode] = useState(STARTER.python);
-  const [testCases, setTestCases] = useState<TestCase[]>([]);
+  const [code, setCode] = useState("");
+  const [cases, setCases] = useState<string[][]>([]);
   const [pane, setPane] = useState<"code" | "board">("code");
   const excalRef = useRef<ExcalidrawImperativeAPI | null>(null);
   const boardDirty = useRef(false);
   const [sharingBoard, setSharingBoard] = useState(false);
+  // Starter code comes straight from LeetCode; reset on problem / language change.
   useEffect(() => {
-    setCode(STARTER[lang]);
-  }, [lang, problem?.slug]);
+    if (lc) setCode(starterCode(lc, lang));
+    else setCode("");
+  }, [lc, lang]);
   useEffect(() => {
-    setTestCases([]);
-  }, [problem?.slug]);
+    setCases(spec ? initialCases(spec) : []);
+  }, [spec]);
 
-  // ---- run code (Wandbox) ----
-  const [running, setRunning] = useState(false);
-  const [runResult, setRunResult] = useState<RunResult | null>(null);
+  // ---- run / submit (Wandbox judge) ----
+  const [busy, setBusy] = useState<"run" | "submit" | null>(null);
+  const [judged, setJudged] = useState<JudgeResult | null>(null);
+  const [raw, setRaw] = useState<RunResult | null>(null);
+
+  const report = (r: JudgeResult) => {
+    const failing = r.failedIndex != null ? r.cases[r.failedIndex] : null;
+    let msg = `[${r.kind === "submit" ? "SUBMISSION" : "RUN"} RESULT] ${r.verdict}`;
+    if (r.cases.length) msg += ` — ${r.passed}/${r.total} testcases passed, ${r.ms}ms.`;
+    if (r.message) msg += `\n${r.message.slice(0, 800)}`;
+    if (failing && spec) {
+      msg += `\nFirst failing case: ${spec.params.map((p, i) => `${p.name}=${failing.args[i]}`).join(", ")}`;
+      if (failing.output !== undefined) msg += `\nGot: ${failing.output}`;
+      if (failing.expected !== undefined) msg += `\nExpected: ${failing.expected}`;
+      if (failing.error) msg += `\nError: ${failing.error.slice(0, 400)}`;
+    }
+    if (statusRef.current === "connected") sendContextualUpdate(msg);
+  };
+
   const run = async () => {
-    if (running) return;
-    setRunning(true);
+    if (busy || !lc) return;
+    setBusy("run");
+    sfx("runStart", 0.5);
     try {
-      const result = await runCode(lang, code);
-      setRunResult(result);
-      emitCoach({ type: result.ok ? "run-ok" : "run-fail" });
-      if (statusRef.current === "connected") {
-        sendContextualUpdate(
-          `[RUN RESULT] The candidate ran their code (${result.ok ? "success" : "failure"}, ${result.ms}ms). Output:\n${result.output.slice(0, 1500)}`
-        );
+      if (spec) {
+        const parsed: unknown[][] = [];
+        for (const c of cases) {
+          const p = parseCaseArgs(spec, c);
+          if (!p.ok) {
+            setRaw(null);
+            setJudged({ kind: "run", verdict: "Runtime Error", message: `Invalid test case — ${p.error}`, cases: [], passed: 0, total: cases.length, ms: 0, failedIndex: null });
+            sfx("error", 0.4);
+            return;
+          }
+          parsed.push(p.args);
+        }
+        const r = await runTests(spec, lc, lang, code, parsed);
+        setRaw(null);
+        setJudged(r);
+        sfx(r.verdict === "Accepted" ? "assisted" : "failed", 0.5);
+        emitCoach({ type: r.verdict === "Accepted" ? "run-ok" : "run-fail" });
+        report(r);
+      } else {
+        const result = await runCode(lang, code);
+        setJudged(null);
+        setRaw(result);
+        sfx(result.ok ? "assisted" : "failed", 0.5);
+        emitCoach({ type: result.ok ? "run-ok" : "run-fail" });
+        if (statusRef.current === "connected") {
+          sendContextualUpdate(
+            `[RUN RESULT] The candidate ran their code (${result.ok ? "success" : "failure"}, ${result.ms}ms). Output:\n${result.output.slice(0, 1500)}`
+          );
+        }
       }
     } catch (e) {
-      setRunResult({ ok: false, output: `Runner unreachable: ${String(e)}`, ms: 0 });
+      setJudged(null);
+      setRaw({ ok: false, output: `Runner unreachable: ${String(e)}`, ms: 0 });
+      sfx("error", 0.4);
     } finally {
-      setRunning(false);
+      setBusy(null);
+    }
+  };
+
+  const submit = async () => {
+    if (busy || !lc || !spec) return;
+    setBusy("submit");
+    sfx("submit", 0.55);
+    try {
+      const r = await submitTests(spec, lc, lang, code);
+      setRaw(null);
+      setJudged(r);
+      if (r.verdict === "Accepted") {
+        sfx("solved", 0.6);
+        emitCoach({ type: "run-ok" });
+      } else {
+        sfx("failed", 0.5);
+        emitCoach({ type: "run-fail" });
+      }
+      report(r);
+    } catch (e) {
+      setJudged(null);
+      setRaw({ ok: false, output: `Judge unreachable: ${String(e)}`, ms: 0 });
+      sfx("error", 0.4);
+    } finally {
+      setBusy(null);
     }
   };
 
@@ -175,17 +281,16 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
   useEffect(() => {
     if (!live) return;
     const t = setTimeout(() => {
-      const tests = testCases
-        .filter((tc) => tc.input.trim() || tc.expected.trim())
-        .map((tc, i) => `${i + 1}. input: ${tc.input} -> expected: ${tc.expected}`)
-        .join("\n");
+      const tests = spec
+        ? cases.map((c, i) => `${i + 1}. ${spec.params.map((p, j) => `${p.name}=${c[j]}`).join(", ")}`).join("\n")
+        : "";
       sendContextualUpdate(
         `[CODE SNAPSHOT — ${lang}]\n${code.trim() || "(editor is empty)"}` +
           (tests ? `\n[TEST CASES]\n${tests}` : "")
       );
     }, 2500);
     return () => clearTimeout(t);
-  }, [code, lang, testCases, live, sendContextualUpdate]);
+  }, [code, lang, cases, spec, live, sendContextualUpdate]);
 
   // ---- context streaming: whiteboard (vision, throttled 15s + manual) ----
   const shareBoard = useCallback(async () => {
@@ -393,14 +498,21 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
               <EditorPane
                 code={code}
                 lang={lang}
-                testCases={testCases}
-                running={running}
-                runResult={runResult}
+                spec={spec}
+                specState={specState}
+                cases={cases}
+                busy={busy}
+                result={judged}
+                raw={raw}
                 onChange={setCode}
                 onLangChange={setLang}
-                onTestCasesChange={setTestCases}
+                onCasesChange={setCases}
                 onRun={() => void run()}
-                onClearRun={() => setRunResult(null)}
+                onSubmit={() => void submit()}
+                onClearResult={() => {
+                  setJudged(null);
+                  setRaw(null);
+                }}
               />
             </div>
             <div className={`absolute inset-0 ${pane === "board" ? "" : "invisible"}`}>

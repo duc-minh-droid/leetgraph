@@ -1,0 +1,1 @@
+{"slug":"meeting-rooms","id":"252","title":"Meeting Rooms","content":null,"metaData":{"name":"canAttendMeetings","params":[{"name":"intervals","type":"integer[][]"}],"return":{"type":"boolean"}},"exampleTestcases":"[[0,30],[5,10],[15,20]]\n[[7,10],[2,4]]","codeSnippets":{}}
