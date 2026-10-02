@@ -45,20 +45,7 @@ export async function askText(system: string, user: string, maxTokens = 600): Pr
   ], maxTokens);
 }
 
-const STATEMENT_CACHE_PREFIX = "leetgraph.statement.v1.";
-
-// Models sneak markdown in despite instructions — strip it for plain rendering.
-function stripMarkdown(s: string): string {
-  return s
-    .replace(/^```[a-z]*\n?/gm, "")
-    .replace(/^---+$/gm, "")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/\*([^*]+)\*/g, "$1")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/^#+\s*/gm, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
+const STATEMENT_CACHE_PREFIX = "leetgraph.statement.v2.";
 
 export async function generateProblemStatement(
   slug: string,
@@ -74,14 +61,14 @@ export async function generateProblemStatement(
     {
       role: "system",
       content:
-        "You are a LeetCode problem database. Given a problem title, output its full problem statement: a clear description, two 'Example N:' blocks with Input/Output/Explanation, and a 'Constraints:' list. Plain text only — no markdown symbols (#, *, `). Never include hints, approaches, or solutions. If you are not certain of the exact problem, write a faithful statement in its spirit for the given topics.",
+        "You are a LeetCode problem database. Given a problem title, output its full problem statement: a clear description, two 'Example N:' blocks with Input/Output/Explanation, and a 'Constraints:' list. Format as clean Markdown: start directly with the description (no title heading), wrap identifiers/values in `backticks`, use `**Example 1:**` style bold labels, put each example's Input/Output/Explanation in a fenced code block, and give Constraints as a bullet list. Never include hints, approaches, or solutions. If you are not certain of the exact problem, write a faithful statement in its spirit for the given topics.",
     },
     {
       role: "user",
       content: `Title: ${title}\nDifficulty: ${difficulty}\nTopics: ${topics.join(", ")}`,
     },
   ]);
-  const statement = stripMarkdown(raw);
+  const statement = raw.trim();
   localStorage.setItem(cacheKey, statement);
   return statement;
 }

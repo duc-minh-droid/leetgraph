@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { Skeleton } from "boneyard-js/react";
 import { FaArrowUpRightFromSquare, FaBolt, FaRotate, FaFileLines } from "react-icons/fa6";
 import type { Problem } from "../../data/problems";
@@ -7,6 +9,40 @@ const DIFF_STYLE: Record<string, string> = {
   EASY: "bg-neo-ok",
   MEDIUM: "bg-neo-orange",
   HARD: "bg-neo-accent",
+};
+
+const MD: Components = {
+  p: ({ children }) => <p className="my-2 text-[13px] font-medium leading-relaxed">{children}</p>,
+  strong: ({ children }) => (
+    <strong className="mt-4 mb-1 inline-block border-2 border-black bg-neo-secondary px-1.5 py-0.5 text-[11px] font-black uppercase tracking-wide">
+      {children}
+    </strong>
+  ),
+  ul: ({ children }) => <ul className="my-2 flex flex-col gap-1 pl-1">{children}</ul>,
+  ol: ({ children }) => <ol className="my-2 list-decimal pl-5 text-[13px] font-medium">{children}</ol>,
+  li: ({ children }) => (
+    <li className="flex gap-2 text-[13px] font-medium leading-snug before:mt-[7px] before:h-1.5 before:w-1.5 before:shrink-0 before:border before:border-black before:bg-neo-accent before:content-['']">
+      <span className="min-w-0">{children}</span>
+    </li>
+  ),
+  h1: ({ children }) => <h3 className="mt-4 mb-1 text-sm font-black uppercase">{children}</h3>,
+  h2: ({ children }) => <h3 className="mt-4 mb-1 text-sm font-black uppercase">{children}</h3>,
+  h3: ({ children }) => <h3 className="mt-4 mb-1 text-sm font-black uppercase">{children}</h3>,
+  pre: ({ children }) => (
+    <pre className="my-2 overflow-x-auto border-2 border-black border-l-[6px] border-l-neo-blue bg-white px-3 py-2 font-mono text-[12px] font-bold leading-relaxed shadow-neo-sm">
+      {children}
+    </pre>
+  ),
+  code: ({ className, children }) =>
+    className ? (
+      <code className={className}>{children}</code>
+    ) : (
+      <code className="border border-black/40 bg-neo-bg px-1 py-px font-mono text-[12px] font-bold">{children}</code>
+    ),
+  blockquote: ({ children }) => <blockquote className="my-2 border-l-4 border-black bg-neo-bg px-3 py-1">{children}</blockquote>,
+  table: ({ children }) => <table className="my-2 w-full border-2 border-black text-[12px]">{children}</table>,
+  th: ({ children }) => <th className="border-2 border-black bg-neo-secondary px-2 py-1 text-left font-black uppercase">{children}</th>,
+  td: ({ children }) => <td className="border-2 border-black px-2 py-1 font-mono font-bold">{children}</td>,
 };
 
 export type StatementState =
@@ -70,9 +106,9 @@ export function ProblemPane({
             }
           >
             {statement.status === "ready" && (
-              <pre className="whitespace-pre-wrap font-sans text-[13px] font-medium leading-relaxed">
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD}>
                 {statement.text}
-              </pre>
+              </ReactMarkdown>
             )}
           </Skeleton>
         )}

@@ -29,6 +29,25 @@ export const SFX = {
   boss: "system/boot_up",
   curse: "ui/buzz_deep",
   error: "notification/error",
+  hover: "ui/button_soft",
+  key: "ui/keystroke_soft",
+  keyHard: "ui/keystroke_hard",
+  keyMed: "ui/keystroke_medium",
+  focus: "ui/input_focus",
+  blur: "ui/input_blur",
+  panelOpen: "ui/panel_expand",
+  panelClose: "ui/panel_collapse",
+  popOpen: "ui/pop_open",
+  popClose: "ui/pop_close",
+  send: "ui/send",
+  submit: "ui/submit",
+  select: "ui/item_select",
+  deselect: "ui/item_deselect",
+  blocked: "ui/blocked",
+  runStart: "ui/button_squishy",
+  copy: "ui/copy",
+  info: "notification/info",
+  trash: "system/trash",
 } as const satisfies Record<string, LibrarySoundName>;
 
 export type SfxKey = keyof typeof SFX;
@@ -54,6 +73,33 @@ export function initClickSfx() {
     },
     { capture: true }
   );
+
+  // Hover tick on interactive elements (once per element entry, throttled),
+  // focus / blur on text fields.
+  const HOVER_SEL = "button, a, [role='button'], select, label, summary";
+  let lastHover: Element | null = null;
+  let lastAt = 0;
+  document.addEventListener(
+    "pointerover",
+    (e) => {
+      if ((e as PointerEvent).pointerType !== "mouse") return;
+      const t = (e.target as HTMLElement | null)?.closest(HOVER_SEL);
+      if (!t || t === lastHover || (t as HTMLButtonElement).disabled) return;
+      lastHover = t;
+      const now = performance.now();
+      if (now - lastAt < 70) return;
+      lastAt = now;
+      sfx("hover", 0.07);
+    },
+    { capture: true }
+  );
+  document.addEventListener("pointerout", (e) => {
+    if (e.target === lastHover) lastHover = null;
+  }, { capture: true });
+  const isField = (t: EventTarget | null) =>
+    t instanceof HTMLElement && t.matches("input:not([type='checkbox']), textarea, .cm-content");
+  document.addEventListener("focusin", (e) => isField(e.target) && sfx("focus", 0.2), { capture: true });
+  document.addEventListener("focusout", (e) => isField(e.target) && sfx("blur", 0.15), { capture: true });
 }
 
 // ---------------- rank-gated ambient loops ----------------

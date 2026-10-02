@@ -6,7 +6,15 @@ import { javascript } from "@codemirror/lang-javascript";
 import { java } from "@codemirror/lang-java";
 import { cpp } from "@codemirror/lang-cpp";
 import { rust } from "@codemirror/lang-rust";
-import type { Extension } from "@codemirror/state";
+import { EditorState, Prec, type Extension } from "@codemirror/state";
+import { EditorView, keymap, drawSelection, highlightActiveLine, highlightActiveLineGutter, lineNumbers, rectangularSelection, dropCursor } from "@codemirror/view";
+import { history, historyKeymap, defaultKeymap, indentWithTab, insertNewlineAndIndent, toggleComment } from "@codemirror/commands";
+import { closeBrackets, closeBracketsKeymap, autocompletion, completionKeymap, acceptCompletion, completionStatus } from "@codemirror/autocomplete";
+import { bracketMatching, indentOnInput, indentUnit, foldGutter, foldKeymap, syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
+import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
+import { indentationMarkers } from "@replit/codemirror-indentation-markers";
+import { githubLight } from "@uiw/codemirror-theme-github";
+import { sfx } from "../../lib/sfx";
 import { FaPlus, FaXmark, FaVial, FaChevronDown, FaChevronUp, FaPlay, FaSpinner } from "react-icons/fa6";
 import type { RunResult } from "../../lib/runCode";
 
@@ -26,14 +34,62 @@ export const LANGS: { id: Lang; label: string }[] = [
   { id: "rust", label: "Rust" },
 ];
 
-const EXTENSIONS: Record<Lang, Extension[]> = {
-  python: [python()],
-  javascript: [javascript()],
-  typescript: [javascript({ typescript: true })],
-  java: [java()],
-  cpp: [cpp()],
-  rust: [rust()],
+const EXTENSIONS_LANG: Record<Lang, Extension> = {
+  python: python(),
+  javascript: javascript(),
+  typescript: javascript({ typescript: true }),
+  java: java(),
+  cpp: cpp(),
+  rust: rust(),
 };
+
+const TAB: Record<Lang, number> = { python: 4, javascript: 2, typescript: 2, java: 4, cpp: 4, rust: 4 };
+
+// Full IDE-style editing: auto-closing pairs (incl. quotes), smart Enter
+// (indents between {} / after ":" and reindents on dedent), Tab indent,
+// bracket matching, completion, indent guides, comment toggle, multi-cursor.
+function ideExtensions(lang: Lang): Extension[] {
+  return [
+    EditorState.tabSize.of(TAB[lang]),
+    indentUnit.of(" ".repeat(TAB[lang])),
+    lineNumbers(),
+    highlightActiveLineGutter(),
+    foldGutter(),
+    history(),
+    drawSelection(),
+    dropCursor(),
+    EditorState.allowMultipleSelections.of(true),
+    rectangularSelection(),
+    indentOnInput(),
+    bracketMatching(),
+    closeBrackets(),
+    autocompletion({ activateOnTyping: true, closeOnBlur: false }),
+    highlightActiveLine(),
+    highlightSelectionMatches(),
+    indentationMarkers({ highlightActiveBlock: true, hideFirstIndent: true }),
+    syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+    EditorView.lineWrapping,
+    Prec.high(
+      keymap.of([
+        { key: "Enter", run: (v) => (completionStatus(v.state) === "active" ? false : insertNewlineAndIndent(v)) },
+        { key: "Tab", run: acceptCompletion },
+        { key: "Mod-/", run: toggleComment },
+      ])
+    ),
+    keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...searchKeymap, ...historyKeymap, ...foldKeymap, ...completionKeymap, indentWithTab]),
+    // typing sounds: soft per char, firmer on Enter / delete
+    EditorView.domEventHandlers({
+      keydown: (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return false;
+        if (e.key === "Enter") sfx("keyMed", 0.28);
+        else if (e.key === "Backspace" || e.key === "Delete") sfx("keyHard", 0.18);
+        else if (e.key.length === 1 || e.key === "Tab") sfx("key", 0.2);
+        return false;
+      },
+    }),
+    EXTENSIONS_LANG[lang],
+  ];
+}
 
 export const STARTER: Record<Lang, string> = {
   python: "# Write your solution here\n\ndef solve():\n    pass\n",
@@ -80,7 +136,7 @@ export function EditorPane({
             key={l.id}
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => onLangChange(l.id)}
+            onClick={() => { sfx("select", 0.4); onLangChange(l.id); }}
             className={`border-2 border-black px-2 py-0.5 text-[11px] font-black uppercase transition-colors duration-100 ${
               lang === l.id ? "bg-neo-secondary" : "bg-white text-black/50 hover:text-black"
             }`}
@@ -91,7 +147,7 @@ export function EditorPane({
         <motion.button
           whileHover={{ scale: 1.08, rotate: -1 }}
           whileTap={{ scale: 0.9 }}
-          onClick={onRun}
+          onClick={() => { sfx("runStart", 0.5); onRun(); }}
           disabled={running}
           className="ml-auto flex items-center gap-1.5 border-2 border-black bg-neo-ok px-3 py-0.5 text-[11px] font-black uppercase shadow-neo-sm disabled:opacity-60"
         >
@@ -103,10 +159,11 @@ export function EditorPane({
         <CodeMirror
           value={code}
           onChange={onChange}
-          extensions={EXTENSIONS[lang]}
+          extensions={ideExtensions(lang)}
+          theme={githubLight}
           height="100%"
-          style={{ height: "100%" }}
-          basicSetup={{ lineNumbers: true, foldGutter: false, autocompletion: false }}
+          style={{ height: "100%", fontSize: 13 }}
+          basicSetup={false}
         />
       </div>
 
@@ -118,7 +175,7 @@ export function EditorPane({
               {runResult.ok ? "Ran OK" : "Failed"} · {runResult.ms}ms
             </span>
             <button
-              onClick={onClearRun}
+              onClick={() => { sfx("popClose", 0.4); onClearRun(); }}
               aria-label="Close output"
               className="grid h-5 w-5 place-items-center border-2 border-black bg-white text-[10px]"
             >
@@ -135,14 +192,14 @@ export function EditorPane({
       <div className="shrink-0 border-t-4 border-black bg-neo-bg">
         <div className="flex items-center justify-between px-2 py-1.5">
           <button
-            onClick={() => setShowTests((s) => !s)}
+            onClick={() => { sfx(showTests ? "panelClose" : "panelOpen", 0.4); setShowTests((s) => !s); }}
             className="flex items-center gap-1.5 text-[11px] font-black uppercase"
           >
             <FaVial className="text-neo-accent" /> Test cases ({testCases.length})
             {showTests ? <FaChevronDown /> : <FaChevronUp />}
           </button>
           <button
-            onClick={() => onTestCasesChange([...testCases, { input: "", expected: "" }])}
+            onClick={() => { sfx("popOpen", 0.45); onTestCasesChange([...testCases, { input: "", expected: "" }]); }}
             className="flex items-center gap-1 border-2 border-black bg-neo-secondary px-2 py-0.5 text-[10px] font-black uppercase transition-transform active:translate-y-[1px]"
           >
             <FaPlus /> Add
@@ -173,7 +230,7 @@ export function EditorPane({
                     onChange={(e) => updateCase(i, { expected: e.target.value })}
                   />
                   <button
-                    onClick={() => onTestCasesChange(testCases.filter((_, j) => j !== i))}
+                    onClick={() => { sfx("trash", 0.4); onTestCasesChange(testCases.filter((_, j) => j !== i)); }}
                     aria-label={`Remove test case ${i + 1}`}
                     className="grid w-6 shrink-0 place-items-center border-2 border-black bg-white text-[10px] hover:bg-neo-accent"
                   >
