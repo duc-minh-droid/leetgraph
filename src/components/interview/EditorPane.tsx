@@ -11,7 +11,7 @@ import { bracketMatching, indentOnInput, indentUnit, foldGutter, foldKeymap, syn
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
 import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import { githubLight } from "@uiw/codemirror-theme-github";
-import { FaPlus, FaXmark, FaChevronDown, FaChevronUp, FaPlay, FaSpinner, FaCloudArrowUp, FaCheck, FaTriangleExclamation } from "react-icons/fa6";
+import { FaPlus, FaXmark, FaChevronDown, FaChevronUp, FaPlay, FaSpinner, FaCheck, FaTriangleExclamation } from "react-icons/fa6";
 import { sfx } from "../../lib/sfx";
 import type { Lang } from "../../lib/lc";
 import type { RunResult } from "../../lib/runCode";
@@ -30,8 +30,8 @@ const TAB: Record<Lang, number> = { python: 4, rust: 4 };
 
 // Full IDE-style editing: auto-closing pairs, smart Enter / indent, Tab indent,
 // bracket matching, completion, indent guides, comment toggle, multi-cursor,
-// plus LeetCode shortcuts (Ctrl+' run, Ctrl+Enter submit).
-function ideExtensions(lang: Lang, hooks: { run: () => void; submit: () => void }): Extension[] {
+// plus run shortcuts (Ctrl+' / Ctrl+Enter).
+function ideExtensions(lang: Lang, hooks: { run: () => void }): Extension[] {
   return [
     EditorState.tabSize.of(TAB[lang]),
     indentUnit.of(" ".repeat(TAB[lang])),
@@ -55,7 +55,7 @@ function ideExtensions(lang: Lang, hooks: { run: () => void; submit: () => void 
     Prec.highest(
       keymap.of([
         { key: "Mod-'", run: () => (hooks.run(), true) },
-        { key: "Mod-Enter", run: () => (hooks.submit(), true) },
+        { key: "Mod-Enter", run: () => (hooks.run(), true) },
       ])
     ),
     Prec.high(
@@ -131,7 +131,6 @@ export function EditorPane({
   onLangChange,
   onCasesChange,
   onRun,
-  onSubmit,
   onClearResult,
 }: {
   code: string;
@@ -139,14 +138,13 @@ export function EditorPane({
   spec: ProblemSpec | null;
   specState: SpecState;
   cases: string[][];
-  busy: "run" | "submit" | null;
+  busy: "run" | null;
   result: JudgeResult | null;
   raw: RunResult | null;
   onChange: (code: string) => void;
   onLangChange: (l: Lang) => void;
   onCasesChange: (c: string[][]) => void;
   onRun: () => void;
-  onSubmit: () => void;
   onClearResult: () => void;
 }) {
   const [open, setOpen] = useState(true);
@@ -155,10 +153,10 @@ export function EditorPane({
   const [resSel, setResSel] = useState(0);
 
   // Latest callbacks for the CodeMirror keymap (extensions are built once per language).
-  const hooks = useRef({ run: onRun, submit: onSubmit });
-  hooks.current = { run: onRun, submit: onSubmit };
+  const hooks = useRef({ run: onRun });
+  hooks.current = { run: onRun };
   const extensions = useMemo(
-    () => ideExtensions(lang, { run: () => hooks.current.run(), submit: () => hooks.current.submit() }),
+    () => ideExtensions(lang, { run: () => hooks.current.run() }),
     [lang]
   );
 
@@ -214,25 +212,12 @@ export function EditorPane({
             whileTap={{ scale: 0.92 }}
             onClick={onRun}
             disabled={busy !== null || specState === "loading"}
-            title="Run (Ctrl+')"
+            title="Run (Ctrl+Enter)"
             className="flex items-center gap-1.5 border-2 border-black bg-white px-3 py-0.5 text-[11px] font-black uppercase shadow-neo-sm disabled:opacity-50"
           >
             {busy === "run" ? <FaSpinner className="animate-spin" /> : <FaPlay />}
             {busy === "run" ? "Running…" : "Run"}
           </motion.button>
-          {canTest && (
-            <motion.button
-              whileHover={{ scale: 1.06 }}
-              whileTap={{ scale: 0.92 }}
-              onClick={onSubmit}
-              disabled={busy !== null}
-              title="Submit (Ctrl+Enter)"
-              className="flex items-center gap-1.5 border-2 border-black bg-neo-ok px-3 py-0.5 text-[11px] font-black uppercase shadow-neo-sm disabled:opacity-50"
-            >
-              {busy === "submit" ? <FaSpinner className="animate-spin" /> : <FaCloudArrowUp />}
-              {busy === "submit" ? "Judging…" : "Submit"}
-            </motion.button>
-          )}
         </div>
       </div>
 
@@ -366,18 +351,14 @@ export function EditorPane({
                       </span>
                       {result.cases.length > 0 && (
                         <span className="text-[11px] font-bold text-black/60">
-                          {result.kind === "submit"
-                            ? `${result.passed} / ${result.total} testcases passed`
-                            : `${result.passed} / ${result.total} cases passed`}{" "}
-                          · Runtime {result.ms} ms
+                          {result.passed} / {result.total} cases passed · Runtime {result.ms} ms
                         </span>
                       )}
                       <button onClick={onClearResult} aria-label="Clear" className="ml-auto grid h-5 w-5 place-items-center border-2 border-black bg-white text-[10px]">
                         <FaXmark />
                       </button>
                     </div>
-                    {result.note && <p className="text-[10px] font-bold uppercase text-black/50">{result.note}</p>}
-                    {result.message && (
+                                        {result.message && (
                       <pre className="max-h-44 overflow-auto whitespace-pre-wrap border-2 border-black bg-[#fee2e2] px-2 py-1.5 font-mono text-[11px] font-bold text-[#991b1b]">
                         {result.message}
                       </pre>
@@ -389,7 +370,7 @@ export function EditorPane({
                           {result.cases.map((c, i) => (
                             <CaseChip
                               key={i}
-                              label={c.hidden ? "Failed case" : `Case ${i + 1}`}
+                              label={`Case ${i + 1}`}
                               state={c.status}
                               active={resSel === i}
                               onClick={() => setResSel(i)}
@@ -398,7 +379,6 @@ export function EditorPane({
                         </div>
                         {cur && spec && (
                           <div className="flex flex-col gap-2">
-                            {cur.hidden && result.kind === "submit" && <p className="text-[10px] font-bold uppercase text-black/50">Hidden test case</p>}
                             <Block label="Input">
                               {spec.params.map((p, i) => `${p.name} = ${cur.args[i]}`).join("\n")}
                             </Block>

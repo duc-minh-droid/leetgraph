@@ -17,8 +17,8 @@ import { listInterviews, saveInterview, type InterviewRecord } from "../state/in
 import { emitCoach } from "../state/coachBus";
 import { describeBoard } from "../lib/groq";
 import { loadLc, statementMarkdown, starterCode, type LcData, type Lang } from "../lib/lc";
-import { baseSpec, loadSpec, defaultCompare, type ProblemSpec } from "../lib/spec";
-import { runTests, submitTests, initialCases, parseCaseArgs, type JudgeResult } from "../lib/judge";
+import { makeSpec } from "../lib/spec";
+import { runTests, initialCases, parseCaseArgs, type JudgeResult } from "../lib/judge";
 import { sfx } from "../lib/sfx";
 import { runCode, type RunResult } from "../lib/runCode";
 import { AGENT_ID, buildInterviewPrompt, buildFirstMessage } from "../lib/interviewPrompt";
@@ -75,38 +75,9 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
   }, [problem?.slug]);
   useEffect(loadStatement, [loadStatement]);
 
-  // ---- judge spec (signature + hidden cases + reference), built once per problem ----
-  const [spec, setSpec] = useState<ProblemSpec | null>(null);
-  const [specState, setSpecState] = useState<SpecState>("loading");
-  useEffect(() => {
-    setSpec(null);
-    if (!lc) {
-      setSpecState("loading");
-      return;
-    }
-    if (!baseSpec(lc)) {
-      setSpecState("unavailable");
-      return;
-    }
-    let dead = false;
-    setSpecState("loading");
-    loadSpec(lc)
-      .then((sp) => {
-        if (dead) return;
-        setSpec(sp);
-        setSpecState(sp ? "ready" : "unavailable");
-      })
-      .catch(() => {
-        // No Groq / network: still allow running the examples via the statement's own outputs.
-        const b = baseSpec(lc);
-        if (dead || !b) return;
-        setSpec({ ...b, mutates: b.void ? 0 : null, compare: defaultCompare(lc), hidden: [], reference: "" });
-        setSpecState("ready");
-      });
-    return () => {
-      dead = true;
-    };
-  }, [lc]);
+  // ---- judge spec (signature + examples), derived from the downloaded data ----
+  const spec = useMemo(() => (lc ? makeSpec(lc) : null), [lc]);
+  const specState: SpecState = !lc ? "loading" : spec ? "ready" : "unavailable";
 
   // ---- editor + board ----
   const [lang, setLang] = useState<Lang>("python");
@@ -125,14 +96,14 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
     setCases(spec ? initialCases(spec) : []);
   }, [spec]);
 
-  // ---- run / submit (Wandbox judge) ----
-  const [busy, setBusy] = useState<"run" | "submit" | null>(null);
+  // ---- run (Wandbox judge) ----
+  const [busy, setBusy] = useState<"run" | null>(null);
   const [judged, setJudged] = useState<JudgeResult | null>(null);
   const [raw, setRaw] = useState<RunResult | null>(null);
 
   const report = (r: JudgeResult) => {
     const failing = r.failedIndex != null ? r.cases[r.failedIndex] : null;
-    let msg = `[${r.kind === "submit" ? "SUBMISSION" : "RUN"} RESULT] ${r.verdict}`;
+    let msg = `[RUN RESULT] ${r.verdict}`;
     if (r.cases.length) msg += ` — ${r.passed}/${r.total} testcases passed, ${r.ms}ms.`;
     if (r.message) msg += `\n${r.message.slice(0, 800)}`;
     if (failing && spec) {
@@ -155,7 +126,7 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
           const p = parseCaseArgs(spec, c);
           if (!p.ok) {
             setRaw(null);
-            setJudged({ kind: "run", verdict: "Runtime Error", message: `Invalid test case — ${p.error}`, cases: [], passed: 0, total: cases.length, ms: 0, failedIndex: null });
+            setJudged({ verdict: "Runtime Error", message: `Invalid test case — ${p.error}`, cases: [], passed: 0, total: cases.length, ms: 0, failedIndex: null });
             sfx("error", 0.4);
             return;
           }
@@ -182,31 +153,6 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
     } catch (e) {
       setJudged(null);
       setRaw({ ok: false, output: `Runner unreachable: ${String(e)}`, ms: 0 });
-      sfx("error", 0.4);
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const submit = async () => {
-    if (busy || !lc || !spec) return;
-    setBusy("submit");
-    sfx("submit", 0.55);
-    try {
-      const r = await submitTests(spec, lc, lang, code);
-      setRaw(null);
-      setJudged(r);
-      if (r.verdict === "Accepted") {
-        sfx("solved", 0.6);
-        emitCoach({ type: "run-ok" });
-      } else {
-        sfx("failed", 0.5);
-        emitCoach({ type: "run-fail" });
-      }
-      report(r);
-    } catch (e) {
-      setJudged(null);
-      setRaw({ ok: false, output: `Judge unreachable: ${String(e)}`, ms: 0 });
       sfx("error", 0.4);
     } finally {
       setBusy(null);
@@ -508,7 +454,6 @@ function InterviewInner({ map, onAttempt }: { map: MapMeta; onAttempt?: () => vo
                 onLangChange={setLang}
                 onCasesChange={setCases}
                 onRun={() => void run()}
-                onSubmit={() => void submit()}
                 onClearResult={() => {
                   setJudged(null);
                   setRaw(null);

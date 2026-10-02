@@ -1,8 +1,8 @@
 // LeetCode-style judge on top of Wandbox: wraps the candidate's `class
 // Solution` in a per-language driver (Python, Rust) that feeds JSON test cases
 // through the real method signature and reports each case's output / stdout /
-// time. Expected outputs come from the statement's examples and a reference
-// solution (for hidden + custom cases).
+// time. Cases matching a statement example are checked against its printed
+// output; custom cases just display what the code produced.
 import type { Lang, LcData } from "./lc";
 import { starterCode } from "./lc";
 import type { ProblemSpec } from "./spec";
@@ -24,19 +24,16 @@ export interface CaseResult {
   stdout?: string;
   error?: string;
   ms: number;
-  hidden?: boolean;
 }
 
 export interface JudgeResult {
-  kind: "run" | "submit";
   verdict: Verdict;
   message?: string; // compile / fatal error text
-  cases: CaseResult[]; // run: every case; submit: examples + the first failing hidden case
+  cases: CaseResult[];
   passed: number;
   total: number;
   ms: number;
   failedIndex: number | null; // index into cases
-  note?: string;
 }
 
 const b64 = (s: string) => btoa(unescape(encodeURIComponent(s)));
@@ -362,74 +359,17 @@ function same(spec: ProblemSpec, out: string, exp: string): boolean {
   return deepEq(a, b);
 }
 
-// ---------------- expected outputs (statement examples + reference) ----------------
+// ---------------- expected outputs (statement examples only) ----------------
 
-const EXP = "leetgraph.expected.v1.";
 const key = (args: unknown[]) => JSON.stringify(args);
 
-interface ExpStore {
-  map: Record<string, string | null>; // args JSON -> output JSON (null = reference failed on it)
-  trusted: boolean; // reference agrees with the statement's example outputs
-}
-
-function loadStore(slug: string): ExpStore {
-  try {
-    const s = localStorage.getItem(EXP + slug);
-    if (s) return JSON.parse(s);
-  } catch {
-    /* ignore */
-  }
-  return { map: {}, trusted: true };
-}
-
-async function runReference(spec: ProblemSpec, cases: unknown[][]): Promise<(string | null)[]> {
-  if (!spec.reference.trim() || !cases.length) return cases.map(() => null);
-  try {
-    const r = await execCases("python", pythonProgram(spec.reference, spec.fn, spec.mutates, cases), cases.length);
-    if (r.kind !== "ok") return cases.map(() => null);
-    return r.cases.map((c) => (c.out != null ? c.out : null));
-  } catch {
-    return cases.map(() => null);
-  }
-}
-
-/** Expected outputs for `cases` (JSON text, undefined = unknown). Fills the cache as needed. */
-async function expectedFor(spec: ProblemSpec, cases: unknown[][]): Promise<{ exp: (string | undefined)[]; store: ExpStore }> {
-  const store = loadStore(spec.slug);
-  const known = (a: unknown[]) => store.map[key(a)];
-  // Statement outputs are authoritative for examples.
-  spec.examples.forEach((a, i) => {
-    const o = spec.exampleOutputs[i];
-    if (o !== undefined) store.map[key(a)] = JSON.stringify(o);
+/** Expected output (JSON text) for a case that matches a statement example; undefined for custom cases. */
+function expectedFor(spec: ProblemSpec, cases: unknown[][]): (string | undefined)[] {
+  return cases.map((a) => {
+    const i = spec.examples.findIndex((e) => key(e) === key(a));
+    const o = i >= 0 ? spec.exampleOutputs[i] : undefined;
+    return o === undefined ? undefined : JSON.stringify(o);
   });
-  const need = cases.filter((a) => known(a) === undefined);
-  // Always (re)validate the reference against the examples on first use.
-  const firstTime = !localStorage.getItem(EXP + spec.slug);
-  const toRun = firstTime ? [...need, ...spec.examples.filter((a) => !need.includes(a))] : need;
-  if (toRun.length) {
-    const outs = await runReference(spec, toRun);
-    toRun.forEach((a, i) => {
-      const o = outs[i];
-      const k = key(a);
-      const isExample = spec.examples.some((e) => key(e) === k);
-      const stated = isExample ? spec.exampleOutputs[spec.examples.findIndex((e) => key(e) === k)] : undefined;
-      if (isExample && stated !== undefined) {
-        if (o == null || !same(spec, o, JSON.stringify(stated))) store.trusted = false;
-      } else if (known(a) === undefined) {
-        store.map[k] = o;
-      }
-    });
-    try {
-      localStorage.setItem(EXP + spec.slug, JSON.stringify(store));
-    } catch {
-      /* ignore */
-    }
-  }
-  return { exp: cases.map((a) => (store.trusted ? store.map[key(a)] ?? undefined : isExampleCase(spec, a) ? store.map[key(a)] ?? undefined : undefined)), store };
-}
-
-function isExampleCase(spec: ProblemSpec, a: unknown[]) {
-  return spec.examples.some((e) => key(e) === key(a));
 }
 
 // ---------------- public API ----------------
@@ -447,14 +387,11 @@ function argText(a: unknown[]): string[] {
 }
 
 function summarize(
-  kind: "run" | "submit",
   results: CaseResult[],
-  total: number,
-  passedExtra = 0,
-  note?: string
+  total: number
 ): JudgeResult {
   const bad = results.findIndex((c) => c.status === "fail" || c.status === "error" || c.status === "tle");
-  const passed = results.filter((c) => c.status === "pass" || c.status === "ran").length + passedExtra;
+  const passed = results.filter((c) => c.status === "pass" || c.status === "ran").length;
   const first = bad >= 0 ? results[bad] : null;
   const verdict: Verdict = !first
     ? "Accepted"
@@ -464,19 +401,17 @@ function summarize(
         ? "Time Limit Exceeded"
         : "Runtime Error";
   return {
-    kind,
     verdict,
     cases: results,
     passed,
     total,
     ms: Math.round(results.reduce((s, c) => s + c.ms, 0)),
     failedIndex: bad >= 0 ? bad : null,
-    note,
   };
 }
 
-function fail(kind: "run" | "submit", v: Verdict, message: string, total: number): JudgeResult {
-  return { kind, verdict: v, message, cases: [], passed: 0, total, ms: 0, failedIndex: null };
+function fail(v: Verdict, message: string, total: number): JudgeResult {
+  return { verdict: v, message, cases: [], passed: 0, total, ms: 0, failedIndex: null };
 }
 
 export function judgeSupported(lang: Lang, lc: LcData | null): boolean {
@@ -495,47 +430,26 @@ async function runUser(spec: ProblemSpec, lc: LcData, lang: Lang, code: string, 
   return execCases(lang, program, cases.length);
 }
 
-function toResults(spec: ProblemSpec, cases: unknown[][], raw: RawCase[], exp: (string | undefined)[], hidden = false): CaseResult[] {
+function toResults(spec: ProblemSpec, cases: unknown[][], raw: RawCase[], exp: (string | undefined)[]): CaseResult[] {
   return cases.map((a, i) => {
     const r = raw[i];
     const args = argText(a);
-    if (!r) return { status: "ran", args, ms: 0, hidden, error: "Not executed (an earlier case stopped the run)." };
-    if (r.tle) return { status: "tle", args, ms: r.ms, stdout: r.stdout, expected: exp[i], hidden };
-    if (r.err) return { status: "error", args, ms: r.ms, stdout: r.stdout, error: r.err, expected: exp[i], hidden };
+    if (!r) return { status: "ran", args, ms: 0, error: "Not executed (an earlier case stopped the run)." };
+    if (r.tle) return { status: "tle", args, ms: r.ms, stdout: r.stdout, expected: exp[i] };
+    if (r.err) return { status: "error", args, ms: r.ms, stdout: r.stdout, error: r.err, expected: exp[i] };
     const output = compact(r.out ?? "null");
     const e = exp[i] === undefined ? undefined : compact(exp[i]!);
     const status = e === undefined ? "ran" : same(spec, output, e) ? "pass" : "fail";
-    return { status, args, output, expected: e, stdout: r.stdout, ms: r.ms, hidden };
+    return { status, args, output, expected: e, stdout: r.stdout, ms: r.ms };
   });
 }
 
-/** Run: the candidate's own list of cases (custom cases get expected outputs from the reference). */
+/** Run the candidate's cases. Examples are checked against the statement; custom cases just show their output. */
 export async function runTests(spec: ProblemSpec, lc: LcData, lang: Lang, code: string, cases: unknown[][]): Promise<JudgeResult> {
-  const [exec, ex] = await Promise.all([runUser(spec, lc, lang, code, cases), expectedFor(spec, cases)]);
-  if (exec.kind === "ce") return fail("run", "Compile Error", exec.message, cases.length);
-  if (exec.kind === "fatal") return fail("run", exec.tle ? "Time Limit Exceeded" : "Runtime Error", exec.message, cases.length);
-  return summarize("run", toResults(spec, cases, exec.cases, ex.exp), cases.length);
-}
-
-/** Submit: statement examples + hidden edge cases. */
-export async function submitTests(spec: ProblemSpec, lc: LcData, lang: Lang, code: string): Promise<JudgeResult> {
-  // 1) make sure the reference is validated and hidden cases have expected outputs
-  const all = [...spec.examples, ...spec.hidden];
-  const ex = await expectedFor(spec, all);
-  const usable: { args: unknown[]; exp: string | undefined; hidden: boolean }[] = all
-    .map((args, i) => ({ args, exp: ex.exp[i], hidden: i >= spec.examples.length }))
-    .filter((c) => !c.hidden || c.exp !== undefined);
-  const cases = usable.map((c) => c.args);
   const exec = await runUser(spec, lc, lang, code, cases);
-  const total = cases.length;
-  if (exec.kind === "ce") return fail("submit", "Compile Error", exec.message, total);
-  if (exec.kind === "fatal") return fail("submit", exec.tle ? "Time Limit Exceeded" : "Runtime Error", exec.message, total);
-  const results = toResults(spec, cases, exec.cases, usable.map((c) => c.exp)).map((r, i) => ({ ...r, hidden: usable[i].hidden }));
-  const bad = results.findIndex((c) => c.status === "fail" || c.status === "error" || c.status === "tle");
-  const shown = results.filter((r, i) => !r.hidden || i === bad);
-  const hiddenShownIdx = bad >= 0 ? shown.findIndex((r) => r === results[bad]) : -1;
-  const summary = summarize("submit", results, total, 0, ex.store.trusted ? undefined : "Reference solution disagreed with the statement examples, so hidden cases were skipped.");
-  return { ...summary, cases: shown, failedIndex: hiddenShownIdx >= 0 ? hiddenShownIdx : null };
+  if (exec.kind === "ce") return fail("Compile Error", exec.message, cases.length);
+  if (exec.kind === "fatal") return fail(exec.tle ? "Time Limit Exceeded" : "Runtime Error", exec.message, cases.length);
+  return summarize(toResults(spec, cases, exec.cases, expectedFor(spec, cases)), cases.length);
 }
 
 export function initialCases(spec: ProblemSpec): string[][] {

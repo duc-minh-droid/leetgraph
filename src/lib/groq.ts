@@ -45,14 +45,6 @@ export async function askText(system: string, user: string, maxTokens = 600): Pr
   ], maxTokens);
 }
 
-// JSON-mode completion (response is guaranteed parseable JSON text).
-export async function askJson(system: string, user: string, maxTokens = 3000): Promise<string> {
-  return chat(TEXT_MODEL, [
-    { role: "system", content: system },
-    { role: "user", content: user },
-  ], maxTokens, true);
-}
-
 export async function describeBoard(pngDataUrl: string): Promise<string> {
   return chat(
     VISION_MODEL,
