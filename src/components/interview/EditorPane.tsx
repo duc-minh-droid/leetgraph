@@ -13,6 +13,7 @@ import { indentationMarkers } from "@replit/codemirror-indentation-markers";
 import { githubLight } from "@uiw/codemirror-theme-github";
 import { FaPlus, FaXmark, FaChevronDown, FaChevronUp, FaPlay, FaSpinner, FaCheck, FaTriangleExclamation } from "react-icons/fa6";
 import { sfx } from "../../lib/sfx";
+import { StructEditor, DesignEditor, DesignTrace, VISUAL_TYPES } from "./StructEditor";
 import type { Lang } from "../../lib/lc";
 import type { RunResult } from "../../lib/runCode";
 import type { JudgeResult, CaseResult } from "../../lib/judge";
@@ -151,6 +152,7 @@ export function EditorPane({
   const [tab, setTab] = useState<"cases" | "result">("cases");
   const [sel, setSel] = useState(0);
   const [resSel, setResSel] = useState(0);
+  const [jsonMode, setJsonMode] = useState<Record<string, boolean>>({});
 
   // Latest callbacks for the CodeMirror keymap (extensions are built once per language).
   const hooks = useRef({ run: onRun });
@@ -300,28 +302,51 @@ export function EditorPane({
                     </button>
                   </div>
                   {cases[sel] &&
-                    spec!.params.map((p, pi) => (
-                      <label key={p.name} className="flex flex-col gap-1">
-                        <span className="text-[11px] font-black text-black/60">
-                          {p.name} = <span className="font-mono text-[10px] text-black/35">{p.type}</span>
-                        </span>
-                        <textarea
-                          rows={1}
-                          spellCheck={false}
-                          value={cases[sel][pi] ?? ""}
-                          onChange={(e) => setArg(sel, pi, e.target.value)}
-                          className={`resize-y border-2 border-black bg-white px-2 py-1.5 font-mono text-[12px] font-bold focus:bg-neo-secondary/40 focus:outline-none ${
-                            badJson(cases[sel][pi] ?? "") ? "!border-neo-accent" : ""
-                          }`}
-                        />
-                      </label>
-                    ))}
+                    spec!.params.map((p, pi) => {
+                      const visual = spec!.design ? "design" : VISUAL_TYPES.has(p.type) ? "struct" : null;
+                      const asJson = !visual || jsonMode[p.name];
+                      return (
+                        <div key={p.name} className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-black text-black/60">
+                              {spec!.design ? "Calls" : <>{p.name} = <span className="font-mono text-[10px] text-black/35">{p.type}</span></>}
+                            </span>
+                            {visual && (
+                              <button
+                                onClick={() => {
+                                  sfx("toggleOn", 0.35);
+                                  setJsonMode((m) => ({ ...m, [p.name]: !m[p.name] }));
+                                }}
+                                className="ml-auto border-2 border-black bg-white px-1.5 py-0.5 text-[9px] font-black uppercase hover:bg-neo-secondary"
+                              >
+                                {asJson ? "Visual" : "JSON"}
+                              </button>
+                            )}
+                          </div>
+                          {asJson ? (
+                            <textarea
+                              rows={1}
+                              spellCheck={false}
+                              value={cases[sel][pi] ?? ""}
+                              onChange={(e) => setArg(sel, pi, e.target.value)}
+                              className={`resize-y border-2 border-black bg-white px-2 py-1.5 font-mono text-[12px] font-bold focus:bg-neo-secondary/40 focus:outline-none ${
+                                badJson(cases[sel][pi] ?? "") ? "!border-neo-accent" : ""
+                              }`}
+                            />
+                          ) : visual === "design" ? (
+                            <DesignEditor design={spec!.design!} value={cases[sel][pi] ?? "[]"} onChange={(v) => setArg(sel, pi, v)} />
+                          ) : (
+                            <StructEditor type={p.type} value={cases[sel][pi] ?? "[]"} onChange={(v) => setArg(sel, pi, v)} />
+                          )}
+                        </div>
+                      );
+                    })}
                 </div>
               ) : (
                 <p className="p-1 text-[11px] font-bold uppercase text-black/50">
                   {specState === "loading"
                     ? "Building the judge for this problem…"
-                    : "Linked-list / tree / design problems can't be auto-tested yet. Run executes your file as a plain program."}
+                    : "No test harness for this problem (it relies on extra hidden inputs or a provided API). Run executes your file as a plain program."}
                 </p>
               ))}
 
@@ -379,17 +404,21 @@ export function EditorPane({
                         </div>
                         {cur && spec && (
                           <div className="flex flex-col gap-2">
-                            <Block label="Input">
-                              {spec.params.map((p, i) => `${p.name} = ${cur.args[i]}`).join("\n")}
-                            </Block>
+                            {spec.design ? (
+                              <DesignTrace calls={cur.args[0]} output={cur.output} expected={cur.expected} />
+                            ) : (
+                              <Block label="Input">
+                                {spec.params.map((p, i) => `${p.name} = ${cur.args[i]}`).join("\n")}
+                              </Block>
+                            )}
                             {cur.error && <Block label={cur.status === "tle" ? "Time limit" : "Error"} tone="!bg-[#fee2e2] !text-[#991b1b]">{cur.error}</Block>}
                             {cur.status === "tle" && <Block label="Error" tone="!bg-[#fee2e2] !text-[#991b1b]">Time Limit Exceeded (&gt; 3s)</Block>}
-                            {cur.output !== undefined && (
+                            {cur.output !== undefined && !spec.design && (
                               <Block label="Output" tone={cur.status === "fail" ? "!bg-[#fee2e2]" : cur.status === "pass" ? "!bg-[#dcfce7]" : ""}>
                                 {cur.output}
                               </Block>
                             )}
-                            {cur.expected !== undefined && <Block label="Expected">{cur.expected}</Block>}
+                            {cur.expected !== undefined && !spec.design && <Block label="Expected">{cur.expected}</Block>}
                             {cur.stdout ? <Block label="Stdout">{cur.stdout}</Block> : null}
                           </div>
                         )}

@@ -9,6 +9,8 @@ export interface LcMeta {
   params: { name: string; type: string }[];
   return?: { type: string };
   classname?: string;
+  constructor?: { params: { name: string; type: string }[] };
+  methods?: { name: string; params: { name: string; type: string }[]; return: { type: string } }[];
   manual?: boolean;
   systemdesign?: boolean;
 }
@@ -73,7 +75,7 @@ export function statementMarkdown(lc: LcData): string {
 export function statementOutputs(lc: LcData): unknown[] {
   if (!lc.content) return [];
   const out: unknown[] = [];
-  const re = /<strong>\s*Output:?\s*<\/strong>:?\s*([^\n]*)/g;
+  const re = /<(?:strong|b)>\s*Output:?\s*<\/(?:strong|b)>:?\s*([^\n]*)/g;
   for (const m of lc.content.matchAll(re)) {
     const txt = m[1]
       .replace(/<[^>]+>/g, "")

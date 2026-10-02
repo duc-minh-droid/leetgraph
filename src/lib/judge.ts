@@ -41,8 +41,20 @@ const TIMEOUT_S = 3;
 
 // ---------------- drivers ----------------
 
-function pythonProgram(code: string, fn: string, mut: number | null, cases: unknown[][]): string {
-  const data = b64(JSON.stringify({ fn, mut, cases, timeout: TIMEOUT_S }));
+function pythonProgram(code: string, spec: ProblemSpec, cases: unknown[][]): string {
+  const d = spec.design;
+  const data = b64(
+    JSON.stringify({
+      fn: spec.fn,
+      mut: spec.mutates,
+      cases,
+      timeout: TIMEOUT_S,
+      types: spec.params.map((p) => p.type),
+      ret: spec.returns,
+      design: Boolean(d),
+      voids: d ? d.methods.filter((m) => m.ret === "void").map((m) => m.name) : [],
+    })
+  );
   return `from typing import *
 import collections, heapq, bisect, math, itertools, functools, sys, json, time, io, copy, contextlib, traceback, signal, base64
 from collections import deque, defaultdict, Counter, OrderedDict
@@ -51,7 +63,106 @@ from functools import lru_cache, cache
 from bisect import bisect_left, bisect_right
 sys.setrecursionlimit(10000)
 
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+class Node:
+    def __init__(self, val=0, neighbors=None):
+        self.val = val
+        self.neighbors = neighbors if neighbors is not None else []
+
+# @@USER_CODE@@
 ${code}
+
+__LG_ORIG = set()
+
+def __lg_in(t, v):
+    if t == "ListNode":
+        head = None
+        for x in reversed(v):
+            head = ListNode(x, head)
+        return head
+    if t == "ListNode[]":
+        return [__lg_in("ListNode", x) for x in v]
+    if t == "TreeNode":
+        if not v or v[0] is None:
+            return None
+        root = TreeNode(v[0])
+        q = collections.deque([root])
+        i = 1
+        while q and i < len(v):
+            n = q.popleft()
+            if v[i] is not None:
+                n.left = TreeNode(v[i])
+                q.append(n.left)
+            i += 1
+            if i < len(v):
+                if v[i] is not None:
+                    n.right = TreeNode(v[i])
+                    q.append(n.right)
+                i += 1
+        return root
+    if t == "Graph":
+        if not v:
+            return None
+        nodes = [Node(i + 1) for i in range(len(v))]
+        for i, ns in enumerate(v):
+            nodes[i].neighbors = [nodes[j - 1] for j in ns]
+        for n in nodes:
+            __LG_ORIG.add(id(n))
+        return nodes[0]
+    return v
+
+def __lg_out(t, o):
+    if t == "ListNode":
+        res = []
+        while o is not None and len(res) < 200000:
+            res.append(o.val)
+            o = o.next
+        return res
+    if t == "ListNode[]":
+        return [__lg_out("ListNode", x) for x in o]
+    if t == "TreeNode":
+        res = []
+        q = collections.deque([o])
+        while q:
+            n = q.popleft()
+            if n is None:
+                res.append(None)
+            else:
+                res.append(n.val)
+                q.append(n.left)
+                q.append(n.right)
+        while res and res[-1] is None:
+            res.pop()
+        return res
+    if t == "Graph":
+        if o is None:
+            return []
+        seen = {id(o): o}
+        order = [o]
+        k = 0
+        while k < len(order):
+            for nb in order[k].neighbors:
+                if id(nb) not in seen:
+                    seen[id(nb)] = nb
+                    order.append(nb)
+            k += 1
+        if any(id(n) in __LG_ORIG for n in order):
+            raise ValueError("cloneGraph returned the original nodes - build new Node objects")
+        adj = [[] for _ in range(max(n.val for n in order))]
+        for n in order:
+            adj[n.val - 1] = sorted(x.val for x in n.neighbors)
+        return adj
+    return o
 
 def __lg_main():
     T = json.loads(base64.b64decode("${data}").decode())
@@ -64,23 +175,40 @@ def __lg_main():
     for args in T["cases"]:
         buf = io.StringIO()
         r = {}
+        step = [None]
         t0 = time.perf_counter()
         try:
             a = copy.deepcopy(args)
-            sol = Solution()
             signal.setitimer(signal.ITIMER_REAL, T["timeout"])
             with contextlib.redirect_stdout(buf):
-                o = getattr(sol, T["fn"])(*a)
+                if T["design"]:
+                    cls = globals()[T["fn"]]
+                    obj = None
+                    o = []
+                    for i, (name, cargs) in enumerate(a[0]):
+                        step[0] = "step %d (%s)" % (i + 1, name)
+                        if i == 0:
+                            obj = cls(*cargs)
+                            o.append(None)
+                        else:
+                            res = getattr(obj, name)(*cargs)
+                            o.append(None if name in T["voids"] else res)
+                else:
+                    a = [__lg_in(t, v) for t, v in zip(T["types"], a)]
+                    sol = Solution()
+                    o = getattr(sol, T["fn"])(*a)
+                    if T["mut"] is not None:
+                        o = __lg_out(T["types"][T["mut"]], a[T["mut"]])
+                    else:
+                        o = __lg_out(T["ret"], o)
             signal.setitimer(signal.ITIMER_REAL, 0)
-            if T["mut"] is not None:
-                o = a[T["mut"]]
             r["out"] = json.dumps(o)
         except TO:
             r["tle"] = True
         except BaseException:
             signal.setitimer(signal.ITIMER_REAL, 0)
             tb = traceback.format_exc().strip().splitlines()
-            r["err"] = "\\n".join(tb[-4:])
+            r["err"] = ((step[0] + ": ") if step[0] else "") + "\\n".join(tb[-4:])
         r["ms"] = (time.perf_counter() - t0) * 1000
         r["stdout"] = buf.getvalue()[:4000]
         out.append(r)
@@ -97,6 +225,7 @@ interface RustSig {
 }
 
 function parseRustSig(snippet: string): RustSig | null {
+  snippet = snippet.replace(/^\s*\/\/.*$/gm, "");
   const m = snippet.match(/pub\s+fn\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*([^{]+?))?\s*\{/);
   if (!m) return null;
   const params: RustSig["params"] = [];
@@ -216,25 +345,211 @@ fn panic_msg(e: Box<dyn std::any::Any + Send>) -> String {
 }
 `;
 
-function rustProgram(code: string, sig: RustSig, mut: number | null, cases: unknown[][]): string {
-  const lets = sig.params
-    .map((p, i) => `let mut p${i}: ${p.ty} = FromJ::from_j(&a[${i}]);`)
-    .join("\n                ");
-  const callArgs = sig.params.map((p, i) => `${p.ref}p${i}`).join(", ");
-  const tail = mut != null && !sig.ret ? `ToJ::to_j(&p${mut})` : `ToJ::to_j(&r)`;
-  const call = sig.ret ? `let r = Solution::${sig.fn}(${callArgs});` : `Solution::${sig.fn}(${callArgs}); let r = ();`;
+const RUST_NODES = String.raw`
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub struct ListNode { pub val: i32, pub next: Option<Box<ListNode>> }
+impl ListNode { #[inline] fn new(val: i32) -> Self { ListNode { next: None, val } } }
+#[derive(Debug, PartialEq, Eq)]
+pub struct TreeNode { pub val: i32, pub left: Option<Rc<RefCell<TreeNode>>>, pub right: Option<Rc<RefCell<TreeNode>>> }
+impl TreeNode { #[inline] pub fn new(val: i32) -> Self { TreeNode { val, left: None, right: None } } }
+`;
+
+const RUST_NODE_IMPLS = String.raw`
+impl FromJ for Option<Box<ListNode>> {
+    fn from_j(j: &J) -> Self {
+        let mut head: Option<Box<ListNode>> = None;
+        if let J::Arr(v) = j {
+            for x in v.iter().rev() {
+                let mut n = Box::new(ListNode::new(i32::from_j(x)));
+                n.next = head;
+                head = Some(n);
+            }
+        }
+        head
+    }
+}
+impl ToJ for Option<Box<ListNode>> {
+    fn to_j(&self) -> String {
+        let mut v: Vec<String> = vec![];
+        let mut cur = self.as_ref();
+        while let Some(n) = cur {
+            v.push(n.val.to_string());
+            cur = n.next.as_ref();
+            if v.len() > 200000 { break; }
+        }
+        format!("[{}]", v.join(","))
+    }
+}
+impl FromJ for Option<Rc<RefCell<TreeNode>>> {
+    fn from_j(j: &J) -> Self {
+        let v = if let J::Arr(v) = j { v } else { return None };
+        if v.is_empty() || matches!(v[0], J::Null) { return None; }
+        let root = Rc::new(RefCell::new(TreeNode::new(i32::from_j(&v[0]))));
+        let mut q = VecDeque::new();
+        q.push_back(root.clone());
+        let mut i = 1;
+        while let Some(n) = q.pop_front() {
+            if i >= v.len() { break; }
+            if !matches!(v[i], J::Null) {
+                let c = Rc::new(RefCell::new(TreeNode::new(i32::from_j(&v[i]))));
+                n.borrow_mut().left = Some(c.clone());
+                q.push_back(c);
+            }
+            i += 1;
+            if i >= v.len() { break; }
+            if !matches!(v[i], J::Null) {
+                let c = Rc::new(RefCell::new(TreeNode::new(i32::from_j(&v[i]))));
+                n.borrow_mut().right = Some(c.clone());
+                q.push_back(c);
+            }
+            i += 1;
+        }
+        Some(root)
+    }
+}
+impl ToJ for Option<Rc<RefCell<TreeNode>>> {
+    fn to_j(&self) -> String {
+        let mut out: Vec<String> = vec![];
+        let mut q: VecDeque<Option<Rc<RefCell<TreeNode>>>> = VecDeque::new();
+        q.push_back(self.clone());
+        while let Some(x) = q.pop_front() {
+            match x {
+                None => out.push("null".to_string()),
+                Some(n) => {
+                    out.push(n.borrow().val.to_string());
+                    q.push_back(n.borrow().left.clone());
+                    q.push_back(n.borrow().right.clone());
+                }
+            }
+        }
+        while out.last().map(|s| s == "null").unwrap_or(false) { out.pop(); }
+        format!("[{}]", out.join(","))
+    }
+}
+`;
+
+const snake = (s: string) => s.replace(/^./, (c) => c.toLowerCase()).replace(/[A-Z]/g, (c) => "_" + c.toLowerCase());
+
+/** Parse a Rust parameter list "a: Vec<i32>, b: &mut i32" into types + borrow kind. */
+function splitRustParams(list: string): RustSig["params"] {
+  const parts: string[] = [];
+  let depth = 0;
+  let cur = "";
+  for (const ch of list) {
+    if (ch === "<") depth++;
+    if (ch === ">") depth--;
+    if (ch === "," && depth === 0) {
+      parts.push(cur);
+      cur = "";
+    } else cur += ch;
+  }
+  if (cur.trim()) parts.push(cur);
+  return parts
+    .filter((p) => p.includes(":"))
+    .map((p) => {
+      const ty = p.slice(p.indexOf(":") + 1).trim();
+      const ref = ty.startsWith("&mut ") ? "&mut " : ty.startsWith("&") ? "&" : "";
+      return { ty: ty.replace(/^&(mut\s+)?/, "").trim(), ref } as RustSig["params"][number];
+    });
+}
+
+interface RustMethod {
+  params: RustSig["params"];
+  ret: string | null;
+}
+
+function rustImplMethods(snippet: string, cls: string): Record<string, RustMethod> | null {
+  snippet = snippet.replace(/^\s*\/\/.*$/gm, "");
+  const i = snippet.search(new RegExp(`impl\\s+${cls}\\s*\\{`));
+  if (i < 0) return null;
+  const body = snippet.slice(i);
+  const out: Record<string, RustMethod> = {};
+  for (const m of body.matchAll(/fn\s+(\w+)\s*\(([^)]*)\)\s*(?:->\s*([^{]+?))?\s*\{/g)) {
+    const list = m[2].replace(/^\s*&?\s*(mut\s+)?self\s*,?/, "");
+    out[m[1]] = { params: splitRustParams(list), ret: m[3]?.trim() ?? null };
+  }
+  return out;
+}
+
+function rustDesignBody(spec: ProblemSpec, snippet: string): string | null {
+  const d = spec.design!;
+  const ms = rustImplMethods(snippet, d.cls);
+  if (!ms || !ms.new) return null;
+  const lets = (ps: RustSig["params"]) => ps.map((p, i) => `let p${i}: ${p.ty} = FromJ::from_j(&a[${i}]);`).join(" ");
+  const args = (ps: RustSig["params"]) => ps.map((_, i) => `p${i}`).join(", ");
+  const arms: string[] = [
+    `"${d.cls}" => { let a = &cargs; ${lets(ms.new.params)} obj = Some(${d.cls}::new(${args(ms.new.params)})); "null".to_string() }`,
+  ];
+  for (const meth of d.methods) {
+    const rm = ms[snake(meth.name)];
+    if (!rm) return null;
+    const call = `let o = obj.as_mut().unwrap(); let r = o.${snake(meth.name)}(${args(rm.params)});`;
+    arms.push(
+      `"${meth.name}" => { let a = &cargs; ${lets(rm.params)} ${call} ${meth.ret === "void" || !rm.ret ? `let _ = r; "null".to_string()` : "ToJ::to_j(&r)"} }`
+    );
+  }
+  return `
+                    let calls = match &c { J::Arr(a) if !a.is_empty() => match &a[0] { J::Arr(x) => x.clone(), _ => vec![] }, _ => vec![] };
+                    let mut obj: Option<${d.cls}> = None;
+                    let mut outs: Vec<String> = vec![];
+                    let mut fail: Option<String> = None;
+                    for (step, call) in calls.iter().enumerate() {
+                        let (name, cargs) = match call {
+                            J::Arr(p) if p.len() == 2 => (
+                                match &p[0] { J::Str(s) => s.clone(), _ => String::new() },
+                                match &p[1] { J::Arr(x) => x.clone(), _ => vec![] },
+                            ),
+                            _ => continue,
+                        };
+                        let res = std::panic::catch_unwind(AssertUnwindSafe(|| -> String {
+                            match name.as_str() {
+                                ${arms.join("\n                                ")}
+                                _ => panic!("unknown method"),
+                            }
+                        }));
+                        match res {
+                            Ok(s) => outs.push(s),
+                            Err(e) => { fail = Some(format!("step {} ({}): {}", step + 1, name, panic_msg(e))); break; }
+                        }
+                    }
+                    match fail { Some(m) => Err(m), None => Ok(format!("[{}]", outs.join(","))) }`;
+}
+
+function rustProgram(code: string, spec: ProblemSpec, snippet: string, sig: RustSig | null, cases: unknown[][]): string | null {
+  let body: string;
+  if (spec.design) {
+    const b = rustDesignBody(spec, snippet);
+    if (!b) return null;
+    body = b;
+  } else {
+    if (!sig) return null;
+    const lets = sig.params.map((p, i) => `let mut p${i}: ${p.ty} = FromJ::from_j(&a[${i}]);`).join("\n                    ");
+    const callArgs = sig.params.map((p, i) => `${p.ref}p${i}`).join(", ");
+    const tail = spec.mutates != null && !sig.ret ? `ToJ::to_j(&p${spec.mutates})` : `ToJ::to_j(&r)`;
+    const call = sig.ret ? `let r = Solution::${sig.fn}(${callArgs});` : `Solution::${sig.fn}(${callArgs}); let r = ();`;
+    body = `
+                    let a = match &c { J::Arr(a) => a.clone(), _ => vec![] };
+                    let r = std::panic::catch_unwind(AssertUnwindSafe(|| -> String {
+                        ${lets}
+                        ${call}
+                        ${tail}
+                    }));
+                    r.map_err(panic_msg)`;
+  }
   const data = JSON.stringify(cases);
+  const imports =
+    (/use\s+std::rc::Rc/.test(code) ? "" : "use std::rc::Rc;\n") + (/use\s+std::cell::RefCell/.test(code) ? "" : "use std::cell::RefCell;\n");
   return `#![allow(unused, dead_code, unused_mut)]
 use std::collections::*;
-use std::rc::Rc;
-use std::cell::RefCell;
-use std::sync::mpsc;
+${imports}use std::sync::mpsc;
 use std::thread;
 use std::time::{Duration, Instant};
 use std::panic::AssertUnwindSafe;
-struct Solution;
+${spec.design ? "" : "struct Solution;\n"}${RUST_NODES}
+// @@USER_CODE@@
 ${code}
 ${RUST_RUNTIME}
+${RUST_NODE_IMPLS}
 fn main() {
     let data = r####"${data}"####;
     let cases = Pr { s: data.chars().collect(), i: 0 }.val();
@@ -247,13 +562,9 @@ fn main() {
             let (tx, rx) = mpsc::channel();
             let t0 = Instant::now();
             thread::Builder::new().stack_size(128 * 1024 * 1024).spawn(move || {
-                let r = std::panic::catch_unwind(AssertUnwindSafe(|| {
-                    let a = match &c { J::Arr(a) => a.clone(), _ => vec![] };
-                    ${lets}
-                    ${call}
-                    ${tail}
-                }));
-                let _ = tx.send(r.map_err(panic_msg));
+                let r: Result<String, String> = {${body}
+                };
+                let _ = tx.send(r);
             }).unwrap();
             match rx.recv_timeout(Duration::from_secs(${TIMEOUT_S})) {
                 Ok(Ok(s)) => res.push(format!("{{\\"out\\":{},\\"ms\\":{:.3}}}", esc(&s), t0.elapsed().as_secs_f64() * 1000.0)),
@@ -290,13 +601,30 @@ async function wandbox(lang: Lang, code: string): Promise<Record<string, string>
   return res.json();
 }
 
+/** Lines of driver code before the candidate's code (so error line numbers can be shown relative to it). */
+function userLineOffset(program: string): number {
+  const m = program.split("\n").findIndex((l) => l.includes("@@USER_CODE@@"));
+  return m < 0 ? 0 : m + 1;
+}
+
+function remapLines(text: string, off: number): string {
+  if (!off) return text;
+  const fix = (n: string) => String(Math.max(1, Number(n) - off));
+  return text
+    .replace(/\bline (\d+)/g, (_m, n) => (Number(n) > off ? `line ${fix(n)}` : `line ${n} (judge)`))
+    .replace(/prog\.rs:(\d+)/g, (_m, n) => `line ${fix(n)}`)
+    .replace(/^(\s*)(\d+)(\s+\|)/gm, (_m, a, n, b) => `${a}${Number(n) > off ? fix(n) : n}${b}`);
+}
+
 async function execCases(lang: Lang, program: string, n: number): Promise<Exec> {
+  const off = userLineOffset(program);
   const d = await wandbox(lang, program);
   const out = d.program_output ?? "";
   const i = out.lastIndexOf("\n@@LG@@");
   if (i >= 0) {
     try {
       const cases: RawCase[] = JSON.parse(out.slice(i + 7));
+      for (const c of cases) if (c.err) c.err = remapLines(c.err, off);
       if (lang === "rust") {
         const segs = out.slice(0, i).split("\n@@LGC@@\n").slice(1);
         cases.forEach((c, k) => (c.stdout = (segs[k] ?? "").replace(/\n$/, "")));
@@ -308,14 +636,14 @@ async function execCases(lang: Lang, program: string, n: number): Promise<Exec> 
   }
   const perr0 = (d.program_error ?? "").trim();
   if (lang === "python" && /(^|\n)\s*(SyntaxError|IndentationError|TabError)/.test(perr0)) {
-    return { kind: "ce", message: cleanCompile(perr0, lang) };
+    return { kind: "ce", message: remapLines(cleanCompile(perr0, lang), off) };
   }
   const cerr = (d.compiler_error ?? "").trim();
-  if (cerr && d.status !== "0") return { kind: "ce", message: cleanCompile(cerr, lang) };
+  if (cerr && d.status !== "0") return { kind: "ce", message: remapLines(cleanCompile(cerr, lang), off) };
   const perr = (d.program_error ?? "").trim();
   const tle = Boolean(d.signal) || /killed|timed out|time limit/i.test(perr + (d.status ?? ""));
   void n;
-  return { kind: "fatal", tle, message: perr || out.slice(0, 1500) || "Program produced no result." };
+  return { kind: "fatal", tle, message: remapLines(perr || out.slice(0, 1500) || "Program produced no result.", off) };
 }
 
 // Hide our driver's line numbers: only keep the errors that point at user code.
@@ -414,19 +742,19 @@ function fail(v: Verdict, message: string, total: number): JudgeResult {
   return { verdict: v, message, cases: [], passed: 0, total, ms: 0, failedIndex: null };
 }
 
-export function judgeSupported(lang: Lang, lc: LcData | null): boolean {
-  return Boolean(lc?.codeSnippets && (lang === "python" || parseRustSig(lc.codeSnippets.rust ?? "")));
-}
-
 function buildProgram(spec: ProblemSpec, lc: LcData, lang: Lang, code: string, cases: unknown[][]): string | null {
-  if (lang === "python") return pythonProgram(code, spec.fn, spec.mutates, cases);
-  const sig = parseRustSig(lc.codeSnippets.rust ?? "");
-  return sig ? rustProgram(code, sig, spec.mutates, cases) : null;
+  if (lang === "python") return pythonProgram(code, spec, cases);
+  const snippet = lc.codeSnippets.rust ?? "";
+  return rustProgram(code, spec, snippet, parseRustSig(snippet), cases);
 }
 
 async function runUser(spec: ProblemSpec, lc: LcData, lang: Lang, code: string, cases: unknown[][]): Promise<Exec> {
+  if (lang === "python") {
+    const last = code.split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")).pop();
+    if (!last || last.endsWith(":")) return { kind: "ce", message: "Your solution has no body yet — write the method's code, then run." };
+  }
   const program = buildProgram(spec, lc, lang, code, cases);
-  if (!program) return { kind: "fatal", message: "This problem's Rust signature can't be harnessed yet — switch to Python.", tle: false };
+  if (!program) return { kind: "fatal", message: "Rust isn't supported for this problem yet — switch to Python.", tle: false };
   return execCases(lang, program, cases.length);
 }
 
