@@ -127,7 +127,8 @@ function SquareNodeImpl({ data }: NodeProps) {
   const d = data as SquareData;
   const far = useStore(zoomSel);
   const diffHex = DIFF_HEX[d.difficulty] ?? "#4D96FF";
-  const interactive = d.available && !d.locked;
+  const interactive = d.available && !d.locked; // glow / bob: "play me next"
+  const clickable = true; // every node can be opened and replayed
 
   // Just-unlocked pop + just-attempted stamp, driven by data changes.
   const animate = d.fresh
@@ -137,7 +138,7 @@ function SquareNodeImpl({ data }: NodeProps) {
       : { scale: 1, opacity: 1 };
 
   const base = `group relative border-4 border-black ${
-    interactive ? "cursor-pointer" : "cursor-default"
+    clickable ? "cursor-pointer" : "cursor-default"
   } ${d.locked ? "grayscale-[0.7] opacity-55" : ""}`;
 
   // ---- shared glow / markers ----
@@ -154,8 +155,8 @@ function SquareNodeImpl({ data }: NodeProps) {
       <motion.div
         initial={{ scale: 0.6, opacity: 0 }}
         animate={animate}
-        whileHover={interactive ? { scale: 1.06, y: -4, rotate: 2 } : {}}
-        whileTap={interactive ? { scale: 0.93 } : {}}
+        whileHover={clickable ? { scale: 1.06, y: -4, rotate: 2 } : {}}
+        whileTap={clickable ? { scale: 0.93 } : {}}
         transition={{ type: "spring", stiffness: 420, damping: 20 }}
         className={`${base} flex flex-col items-center justify-center gap-1 bg-black shadow-neo-sm`}
         style={{ width: SQ_W, height: SQ_H }}
@@ -206,8 +207,8 @@ function SquareNodeImpl({ data }: NodeProps) {
     <motion.div
       initial={false}
       animate={animate}
-      whileHover={interactive ? { scale: 1.06, y: -5, rotate: d.current ? -1.5 : 1.2 } : { y: -2 }}
-      whileTap={interactive ? { scale: 0.93, rotate: 0 } : {}}
+      whileHover={clickable ? { scale: 1.06, y: -5, rotate: d.current ? -1.5 : 1.2 } : { y: -2 }}
+      whileTap={clickable ? { scale: 0.93, rotate: 0 } : {}}
       transition={{ type: "spring", stiffness: 420, damping: 20 }}
       className={`${base} flex flex-col justify-between p-2 pt-3 shadow-neo-sm ${
         d.current ? "!bg-neo-accent !shadow-neo z-10" : STATUS_STYLE[d.status]

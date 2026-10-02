@@ -383,18 +383,7 @@ function GraphInner({ map, viewAct, maxAct, totalActs, progress, onViewAct, onAt
   }
 
   function open(id: string) {
-    if (!available.has(id)) {
-      // Locked/visited nodes still give feedback.
-      const el = nodeEl(id);
-      if (el && !visited.has(id)) {
-        (el as HTMLElement).animate(
-          [{ transform: "translateX(0)" }, { transform: "translateX(-6px)" }, { transform: "translateX(6px)" }, { transform: "translateX(0)" }],
-          { duration: 220 }
-        );
-        sfx("error", 0.2);
-      }
-      return;
-    }
+    // Any node can be (re)played — locked and already-cleared ones included.
     const slug = byId.get(id)!.slug;
     const el = nodeEl(id);
     if (el) {
