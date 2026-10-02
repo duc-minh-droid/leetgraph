@@ -1,1 +1,0 @@
-{"slug":"longest-substring-with-at-most-k-distinct-characters","id":"340","title":"Longest Substring with At Most K Distinct Characters","content":null,"metaData":{"name":"lengthOfLongestSubstringKDistinct","params":[{"name":"s","type":"string"},{"name":"k","type":"integer"}],"return":{"type":"integer"}},"exampleTestcases":"\"eceba\"\n2\n\"aa\"\n1","codeSnippets":{}}

@@ -90,7 +90,6 @@ EASY,Check if Array Is Sorted and Rotated,36.7,0.00576111884252575,https://leetc
 MEDIUM,Find First and Last Position of Element in Sorted Array,36.7,0.004950613165826725,https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array,"Array, Binary Search"
 MEDIUM,Merge Intervals,36.7,0.005257639318283639,https://leetcode.com/problems/merge-intervals,"Array, Sorting, Quicksort"
 EASY,Find the Index of the First Occurrence in a String,36.7,0.004716731680124558,https://leetcode.com/problems/find-the-index-of-the-first-occurrence-in-a-string,"Two Pointers, String, String Matching, Z Algorithm, Knuth–Morris–Pratt Algorithm, Boyer–Moore String-Search Algorithm"
-MEDIUM,Meeting Rooms II,36.7,0.005277676895072449,https://leetcode.com/problems/meeting-rooms-ii,"Array, Two Pointers, Greedy, Sorting, Heap (Priority Queue), Prefix Sum"
 MEDIUM,Zigzag Conversion,36.7,0.005489174671880834,https://leetcode.com/problems/zigzag-conversion,String
 EASY,Shift 2D Grid,36.7,0.0074480674284730305,https://leetcode.com/problems/shift-2d-grid,"Array, Matrix, Simulation"
 HARD,Reverse Pairs,36.7,0.0034986555072175985,https://leetcode.com/problems/reverse-pairs,"Array, Binary Search, Divide and Conquer, Binary Indexed Tree, Segment Tree, Merge Sort, Ordered Set, Treap"
@@ -104,7 +103,6 @@ MEDIUM,Count Valid Sequences,36.7,0.004254327982373308,https://leetcode.com/prob
 EASY,Maximum Average Subarray I,36.7,0.004890205518827249,https://leetcode.com/problems/maximum-average-subarray-i,"Array, Sliding Window"
 MEDIUM,Smallest Palindromic Rearrangement I,36.7,0.0074541310220621335,https://leetcode.com/problems/smallest-palindromic-rearrangement-i,"String, Sorting, Counting Sort"
 MEDIUM,Lowest Common Ancestor of a Binary Tree,36.7,0.006995184319913237,https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree,"Tree, Depth-First Search, Binary Tree, Binary Lifting, Lowest Common Ancestor"
-EASY,Logger Rate Limiter,36.7,0.007688314472535719,https://leetcode.com/problems/logger-rate-limiter,"Hash Table, Design, Data Stream"
 MEDIUM,Next Greater Element II,36.7,0.0069005638853998266,https://leetcode.com/problems/next-greater-element-ii,"Array, Stack, Monotonic Stack"
 EASY,Isomorphic Strings,36.7,0.0048921184586472,https://leetcode.com/problems/isomorphic-strings,"Hash Table, String"
 MEDIUM,Sort List,36.7,0.006518684803039642,https://leetcode.com/problems/sort-list,"Linked List, Two Pointers, Divide and Conquer, Sorting, Merge Sort"

@@ -1,1 +1,0 @@
-{"slug":"read-n-characters-given-read4","id":"157","title":"Read N Characters Given Read4","content":null,"metaData":{"name":"read","params":[{"name":"file","type":"string"},{"name":"n","type":"integer"}],"return":{"type":"string"},"manual":true},"exampleTestcases":"\"abc\"\n4\n\"abcde\"\n5\n\"abcdABCD1234\"\n12","codeSnippets":{}}

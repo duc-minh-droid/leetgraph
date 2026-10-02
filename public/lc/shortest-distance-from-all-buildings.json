@@ -1,1 +1,0 @@
-{"slug":"shortest-distance-from-all-buildings","id":"317","title":"Shortest Distance from All Buildings","content":null,"metaData":{"name":"shortestDistance","params":[{"name":"grid","type":"integer[][]"}],"return":{"type":"integer"}},"exampleTestcases":"[[1,0,2,0,1],[0,0,0,0,0],[0,0,1,0,0]]\n[[1,0]]\n[[1]]","codeSnippets":{}}

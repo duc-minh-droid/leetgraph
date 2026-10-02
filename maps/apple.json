@@ -1,25 +1,26 @@
 {
   "name": "Apple",
   "eloMin": 900,
-  "eloMax": 2456,
+  "eloMax": 2464,
   "nodes": [
     {
       "id": "0-4",
       "row": 0,
       "col": 4,
       "edges_out": [
-        "1-3",
-        "1-5"
+        "1-5",
+        "1-4"
       ],
       "slug": "reverse-linked-list",
       "act": 0
     },
     {
-      "id": "1-3",
+      "id": "1-4",
       "row": 1,
-      "col": 3,
+      "col": 4,
       "edges_out": [
-        "2-4"
+        "2-3",
+        "2-5"
       ],
       "slug": "fibonacci-number",
       "act": 0
@@ -29,9 +30,19 @@
       "row": 1,
       "col": 5,
       "edges_out": [
-        "2-6"
+        "2-4"
       ],
-      "slug": "move-zeroes",
+      "slug": "best-time-to-buy-and-sell-stock",
+      "act": 0
+    },
+    {
+      "id": "2-3",
+      "row": 2,
+      "col": 3,
+      "edges_out": [
+        "3-3"
+      ],
+      "slug": "first-unique-character-in-a-string",
       "act": 0
     },
     {
@@ -39,17 +50,17 @@
       "row": 2,
       "col": 4,
       "edges_out": [
-        "3-3"
+        "3-5"
       ],
       "slug": "apple-redistribution-into-boxes",
       "act": 0
     },
     {
-      "id": "2-6",
+      "id": "2-5",
       "row": 2,
-      "col": 6,
+      "col": 5,
       "edges_out": [
-        "3-6"
+        "3-5"
       ],
       "slug": "intersection-of-two-arrays",
       "act": 0
@@ -59,39 +70,41 @@
       "row": 3,
       "col": 3,
       "edges_out": [
-        "4-3"
+        "4-4"
       ],
-      "slug": "number-of-1-bits",
+      "slug": "reverse-bits",
       "act": 0
     },
     {
-      "id": "3-6",
+      "id": "3-5",
       "row": 3,
-      "col": 6,
+      "col": 5,
       "edges_out": [
-        "4-6"
+        "4-4",
+        "4-5"
       ],
-      "slug": "counting-bits",
+      "slug": "group-anagrams",
       "act": 0
     },
     {
-      "id": "4-3",
+      "id": "4-4",
       "row": 4,
-      "col": 3,
+      "col": 4,
       "edges_out": [
-        "5-3"
+        "5-3",
+        "5-4"
       ],
-      "slug": "missing-number",
+      "slug": "remove-duplicates-from-sorted-array",
       "act": 0
     },
     {
-      "id": "4-6",
+      "id": "4-5",
       "row": 4,
-      "col": 6,
+      "col": 5,
       "edges_out": [
-        "5-7"
+        "5-4"
       ],
-      "slug": "number-of-islands",
+      "slug": "merge-two-sorted-lists",
       "act": 0
     },
     {
@@ -101,17 +114,17 @@
       "edges_out": [
         "6-3"
       ],
-      "slug": "island-perimeter",
+      "slug": "number-of-islands",
       "act": 0
     },
     {
-      "id": "5-7",
+      "id": "5-4",
       "row": 5,
-      "col": 7,
+      "col": 4,
       "edges_out": [
-        "6-8"
+        "6-3"
       ],
-      "slug": "top-k-frequent-elements",
+      "slug": "island-perimeter",
       "act": 0
     },
     {
@@ -119,19 +132,20 @@
       "row": 6,
       "col": 3,
       "edges_out": [
-        "7-4"
+        "7-4",
+        "7-3"
       ],
-      "slug": "longest-common-prefix",
+      "slug": "valid-palindrome",
       "act": 0
     },
     {
-      "id": "6-8",
-      "row": 6,
-      "col": 8,
+      "id": "7-3",
+      "row": 7,
+      "col": 3,
       "edges_out": [
-        "7-8"
+        "8-3"
       ],
-      "slug": "first-letter-to-appear-twice",
+      "slug": "longest-common-prefix",
       "act": 0
     },
     {
@@ -141,17 +155,17 @@
       "edges_out": [
         "8-4"
       ],
-      "slug": "roman-to-integer",
+      "slug": "generate-parentheses",
       "act": 0
     },
     {
-      "id": "7-8",
-      "row": 7,
-      "col": 8,
+      "id": "8-3",
+      "row": 8,
+      "col": 3,
       "edges_out": [
-        "8-7"
+        "9-2"
       ],
-      "slug": "permutations",
+      "slug": "product-of-array-except-self",
       "act": 0
     },
     {
@@ -159,19 +173,20 @@
       "row": 8,
       "col": 4,
       "edges_out": [
+        "9-5",
         "9-4"
       ],
-      "slug": "dot-product-of-two-sparse-vectors",
+      "slug": "same-tree",
       "act": 0
     },
     {
-      "id": "8-7",
-      "row": 8,
-      "col": 7,
+      "id": "9-2",
+      "row": 9,
+      "col": 2,
       "edges_out": [
-        "9-7"
+        "10-1"
       ],
-      "slug": "valid-parentheses",
+      "slug": "best-time-to-buy-and-sell-stock-with-transaction-fee",
       "act": 0
     },
     {
@@ -181,17 +196,27 @@
       "edges_out": [
         "10-4"
       ],
-      "slug": "goat-latin",
+      "slug": "valid-parentheses",
       "act": 0
     },
     {
-      "id": "9-7",
+      "id": "9-5",
       "row": 9,
-      "col": 7,
+      "col": 5,
       "edges_out": [
         "10-6"
       ],
-      "slug": "image-smoother",
+      "slug": "kth-largest-element-in-an-array",
+      "act": 0
+    },
+    {
+      "id": "10-1",
+      "row": 10,
+      "col": 1,
+      "edges_out": [
+        "11-0"
+      ],
+      "slug": "lru-cache",
       "act": 0
     },
     {
@@ -199,9 +224,9 @@
       "row": 10,
       "col": 4,
       "edges_out": [
-        "11-5"
+        "11-3"
       ],
-      "slug": "find-winner-on-a-tic-tac-toe-game",
+      "slug": "encode-and-decode-tinyurl",
       "act": 0
     },
     {
@@ -211,17 +236,27 @@
       "edges_out": [
         "11-6"
       ],
-      "slug": "implement-trie-prefix-tree",
+      "slug": "contains-duplicate",
       "act": 0
     },
     {
-      "id": "11-5",
+      "id": "11-0",
       "row": 11,
-      "col": 5,
+      "col": 0,
       "edges_out": [
-        "12-4"
+        "12-1"
       ],
-      "slug": "shortest-word-distance",
+      "slug": "find-winner-on-a-tic-tac-toe-game",
+      "act": 0
+    },
+    {
+      "id": "11-3",
+      "row": 11,
+      "col": 3,
+      "edges_out": [
+        "12-2"
+      ],
+      "slug": "happy-number",
       "act": 0
     },
     {
@@ -229,115 +264,111 @@
       "row": 11,
       "col": 6,
       "edges_out": [
-        "12-4"
+        "12-7"
+      ],
+      "slug": "lowest-common-ancestor-of-a-binary-tree",
+      "act": 0
+    },
+    {
+      "id": "12-1",
+      "row": 12,
+      "col": 1,
+      "edges_out": [
+        "13-2"
+      ],
+      "slug": "remove-element",
+      "act": 0
+    },
+    {
+      "id": "12-2",
+      "row": 12,
+      "col": 2,
+      "edges_out": [
+        "13-3"
       ],
       "slug": "ransom-note",
       "act": 0
     },
     {
-      "id": "12-4",
+      "id": "12-7",
       "row": 12,
-      "col": 4,
+      "col": 7,
       "edges_out": [
-        "13-4"
+        "13-8"
       ],
-      "slug": "maximum-population-year",
+      "slug": "diameter-of-binary-tree",
       "act": 0
     },
     {
-      "id": "13-4",
+      "id": "13-2",
       "row": 13,
-      "col": 4,
+      "col": 2,
       "edges_out": [
-        "14-5",
-        "14-3",
+        "14-4"
+      ],
+      "slug": "merge-intervals",
+      "act": 0
+    },
+    {
+      "id": "13-3",
+      "row": 13,
+      "col": 3,
+      "edges_out": [
+        "14-4"
+      ],
+      "slug": "find-pivot-index",
+      "act": 0
+    },
+    {
+      "id": "13-8",
+      "row": 13,
+      "col": 8,
+      "edges_out": [
         "14-4"
       ],
       "slug": "keys-and-rooms",
-      "act": 1
-    },
-    {
-      "id": "14-3",
-      "row": 14,
-      "col": 3,
-      "edges_out": [
-        "15-3",
-        "15-2"
-      ],
-      "slug": "capacity-to-ship-packages-within-d-days",
-      "act": 1
+      "act": 0
     },
     {
       "id": "14-4",
       "row": 14,
       "col": 4,
       "edges_out": [
-        "15-3",
-        "15-5",
         "15-4"
       ],
-      "slug": "min-stack",
-      "act": 1
-    },
-    {
-      "id": "14-5",
-      "row": 14,
-      "col": 5,
-      "edges_out": [
-        "15-4"
-      ],
-      "slug": "maximum-subarray",
-      "act": 1
-    },
-    {
-      "id": "15-2",
-      "row": 15,
-      "col": 2,
-      "edges_out": [
-        "16-2"
-      ],
-      "slug": "string-compression",
-      "act": 1
-    },
-    {
-      "id": "15-3",
-      "row": 15,
-      "col": 3,
-      "edges_out": [
-        "16-2"
-      ],
-      "slug": "interval-list-intersections",
-      "act": 1
+      "slug": "spiral-matrix",
+      "act": 0
     },
     {
       "id": "15-4",
       "row": 15,
       "col": 4,
       "edges_out": [
-        "16-5"
+        "16-5",
+        "16-4",
+        "16-3"
       ],
-      "slug": "palindromic-substrings",
+      "slug": "climbing-stairs",
       "act": 1
     },
     {
-      "id": "15-5",
-      "row": 15,
-      "col": 5,
-      "edges_out": [
-        "16-5"
-      ],
-      "slug": "two-sum-ii-input-array-is-sorted",
-      "act": 1
-    },
-    {
-      "id": "16-2",
+      "id": "16-3",
       "row": 16,
-      "col": 2,
+      "col": 3,
       "edges_out": [
-        "17-1",
-        "17-2"
+        "17-3"
       ],
-      "slug": "design-circular-queue",
+      "slug": "maximum-subarray",
+      "act": 1
+    },
+    {
+      "id": "16-4",
+      "row": 16,
+      "col": 4,
+      "edges_out": [
+        "17-4"
+      ],
+      "slug": "decode-string",
       "act": 1
     },
     {
@@ -345,31 +376,19 @@
       "row": 16,
       "col": 5,
       "edges_out": [
-        "17-6",
         "17-4"
       ],
-      "slug": "reverse-words-in-a-string",
+      "slug": "interval-list-intersections",
       "act": 1
     },
     {
-      "id": "17-1",
+      "id": "17-3",
       "row": 17,
-      "col": 1,
+      "col": 3,
       "edges_out": [
-        "18-0",
-        "18-1"
+        "18-2"
       ],
-      "slug": "verifying-an-alien-dictionary",
-      "act": 1
-    },
-    {
-      "id": "17-2",
-      "row": 17,
-      "col": 2,
-      "edges_out": [
-        "18-1"
-      ],
-      "slug": "calculate-score-after-performing-instructions",
+      "slug": "binary-search-tree-iterator",
       "act": 1
     },
     {
@@ -380,38 +399,17 @@
         "18-4",
         "18-3"
       ],
-      "slug": "subarray-product-less-than-k",
+      "slug": "two-sum-ii-input-array-is-sorted",
       "act": 1
     },
     {
-      "id": "17-6",
-      "row": 17,
-      "col": 6,
-      "edges_out": [
-        "18-7"
-      ],
-      "slug": "container-with-most-water",
-      "act": 1
-    },
-    {
-      "id": "18-0",
+      "id": "18-2",
       "row": 18,
-      "col": 0,
+      "col": 2,
       "edges_out": [
-        "19-0"
+        "19-2"
       ],
-      "slug": "k-closest-points-to-origin",
-      "act": 1
-    },
-    {
-      "id": "18-1",
-      "row": 18,
-      "col": 1,
-      "edges_out": [
-        "19-2",
-        "19-1"
-      ],
-      "slug": "assign-cookies",
+      "slug": "max-area-of-island",
       "act": 1
     },
     {
@@ -419,9 +417,9 @@
       "row": 18,
       "col": 3,
       "edges_out": [
-        "19-4"
+        "19-3"
       ],
-      "slug": "binary-tree-level-order-traversal",
+      "slug": "sort-colors",
       "act": 1
     },
     {
@@ -429,39 +427,9 @@
       "row": 18,
       "col": 4,
       "edges_out": [
-        "19-3"
+        "19-4"
       ],
-      "slug": "remove-linked-list-elements",
-      "act": 1
-    },
-    {
-      "id": "18-7",
-      "row": 18,
-      "col": 7,
-      "edges_out": [
-        "19-6"
-      ],
-      "slug": "next-greater-element-ii",
-      "act": 1
-    },
-    {
-      "id": "19-0",
-      "row": 19,
-      "col": 0,
-      "edges_out": [
-        "20-1"
-      ],
-      "slug": "minimum-remove-to-make-valid-parentheses",
-      "act": 1
-    },
-    {
-      "id": "19-1",
-      "row": 19,
-      "col": 1,
-      "edges_out": [
-        "20-0"
-      ],
-      "slug": "time-based-key-value-store",
+      "slug": "rotate-array",
       "act": 1
     },
     {
@@ -471,7 +439,7 @@
       "edges_out": [
         "20-3"
       ],
-      "slug": "brace-expansion",
+      "slug": "binary-tree-level-order-traversal",
       "act": 1
     },
     {
@@ -481,7 +449,7 @@
       "edges_out": [
         "20-3"
       ],
-      "slug": "binary-tree-right-side-view",
+      "slug": "k-closest-points-to-origin",
       "act": 1
     },
     {
@@ -489,39 +457,9 @@
       "row": 19,
       "col": 4,
       "edges_out": [
-        "20-4"
-      ],
-      "slug": "task-scheduler",
-      "act": 1
-    },
-    {
-      "id": "19-6",
-      "row": 19,
-      "col": 6,
-      "edges_out": [
         "20-5"
       ],
-      "slug": "kth-smallest-element-in-a-sorted-matrix",
-      "act": 1
-    },
-    {
-      "id": "20-0",
-      "row": 20,
-      "col": 0,
-      "edges_out": [
-        "21-0"
-      ],
-      "slug": "set-matrix-zeroes",
-      "act": 1
-    },
-    {
-      "id": "20-1",
-      "row": 20,
-      "col": 1,
-      "edges_out": [
-        "21-1"
-      ],
-      "slug": "maximum-product-of-three-numbers",
+      "slug": "calculate-score-after-performing-instructions",
       "act": 1
     },
     {
@@ -529,20 +467,9 @@
       "row": 20,
       "col": 3,
       "edges_out": [
-        "21-2",
         "21-4"
       ],
-      "slug": "reorder-list",
-      "act": 1
-    },
-    {
-      "id": "20-4",
-      "row": 20,
-      "col": 4,
-      "edges_out": [
-        "21-4"
-      ],
-      "slug": "insert-delete-getrandom-o1",
+      "slug": "assign-cookies",
       "act": 1
     },
     {
@@ -550,39 +477,10 @@
       "row": 20,
       "col": 5,
       "edges_out": [
+        "21-5",
         "21-6"
       ],
-      "slug": "contains-duplicate-ii",
-      "act": 1
-    },
-    {
-      "id": "21-0",
-      "row": 21,
-      "col": 0,
-      "edges_out": [
-        "22-1"
-      ],
-      "slug": "find-the-index-of-the-first-occurrence-in-a-string",
-      "act": 1
-    },
-    {
-      "id": "21-1",
-      "row": 21,
-      "col": 1,
-      "edges_out": [
-        "22-1"
-      ],
-      "slug": "find-first-and-last-position-of-element-in-sorted-array",
-      "act": 1
-    },
-    {
-      "id": "21-2",
-      "row": 21,
-      "col": 2,
-      "edges_out": [
-        "22-2"
-      ],
-      "slug": "permutations-ii",
+      "slug": "course-schedule",
       "act": 1
     },
     {
@@ -590,10 +488,19 @@
       "row": 21,
       "col": 4,
       "edges_out": [
-        "22-5",
-        "22-3"
+        "22-4"
       ],
-      "slug": "my-calendar-ii",
+      "slug": "minimum-remove-to-make-valid-parentheses",
+      "act": 1
+    },
+    {
+      "id": "21-5",
+      "row": 21,
+      "col": 5,
+      "edges_out": [
+        "22-6"
+      ],
+      "slug": "binary-tree-right-side-view",
       "act": 1
     },
     {
@@ -601,82 +508,31 @@
       "row": 21,
       "col": 6,
       "edges_out": [
-        "22-7"
+        "22-6"
       ],
-      "slug": "convert-sorted-list-to-binary-search-tree",
+      "slug": "time-based-key-value-store",
       "act": 1
     },
     {
-      "id": "22-1",
+      "id": "22-4",
       "row": 22,
-      "col": 1,
+      "col": 4,
       "edges_out": [
-        "23-0",
-        "23-2"
-      ],
-      "slug": "string-compression-iii",
-      "act": 1
-    },
-    {
-      "id": "22-2",
-      "row": 22,
-      "col": 2,
-      "edges_out": [
-        "23-2"
-      ],
-      "slug": "remove-nth-node-from-end-of-list",
-      "act": 1
-    },
-    {
-      "id": "22-3",
-      "row": 22,
-      "col": 3,
-      "edges_out": [
-        "23-4",
-        "23-3"
-      ],
-      "slug": "rotting-oranges",
-      "act": 1
-    },
-    {
-      "id": "22-5",
-      "row": 22,
-      "col": 5,
-      "edges_out": [
+        "23-3",
         "23-5"
       ],
-      "slug": "find-largest-value-in-each-tree-row",
+      "slug": "reorder-list",
       "act": 1
     },
     {
-      "id": "22-7",
+      "id": "22-6",
       "row": 22,
-      "col": 7,
+      "col": 6,
       "edges_out": [
-        "23-6"
+        "23-7",
+        "23-5"
       ],
-      "slug": "subarray-sum-equals-k",
-      "act": 1
-    },
-    {
-      "id": "23-0",
-      "row": 23,
-      "col": 0,
-      "edges_out": [
-        "24-1"
-      ],
-      "slug": "clone-graph",
-      "act": 1
-    },
-    {
-      "id": "23-2",
-      "row": 23,
-      "col": 2,
-      "edges_out": [
-        "24-2",
-        "24-1"
-      ],
-      "slug": "trapping-rain-water",
+      "slug": "insert-delete-getrandom-o1",
       "act": 1
     },
     {
@@ -684,19 +540,9 @@
       "row": 23,
       "col": 3,
       "edges_out": [
-        "24-2"
+        "24-4"
       ],
-      "slug": "first-bad-version",
-      "act": 1
-    },
-    {
-      "id": "23-4",
-      "row": 23,
-      "col": 4,
-      "edges_out": [
-        "24-3"
-      ],
-      "slug": "short-encoding-of-words",
+      "slug": "find-the-index-of-the-first-occurrence-in-a-string",
       "act": 1
     },
     {
@@ -704,50 +550,40 @@
       "row": 23,
       "col": 5,
       "edges_out": [
-        "24-6"
+        "24-6",
+        "24-5"
       ],
-      "slug": "search-a-2d-matrix-ii",
+      "slug": "permutations-ii",
       "act": 1
     },
     {
-      "id": "23-6",
+      "id": "23-7",
       "row": 23,
-      "col": 6,
+      "col": 7,
       "edges_out": [
-        "24-6"
+        "24-7"
       ],
-      "slug": "merge-k-sorted-lists",
+      "slug": "find-first-and-last-position-of-element-in-sorted-array",
       "act": 1
     },
     {
-      "id": "24-1",
+      "id": "24-4",
       "row": 24,
-      "col": 1,
-      "edges_out": [
-        "25-0",
-        "25-1"
-      ],
-      "slug": "walking-robot-simulation",
-      "act": 1
-    },
-    {
-      "id": "24-2",
-      "row": 24,
-      "col": 2,
-      "edges_out": [
-        "25-2"
-      ],
-      "slug": "evaluate-division",
-      "act": 1
-    },
-    {
-      "id": "24-3",
-      "row": 24,
-      "col": 3,
+      "col": 4,
       "edges_out": [
         "25-3"
       ],
-      "slug": "binary-tree-zigzag-level-order-traversal",
+      "slug": "convert-sorted-list-to-binary-search-tree",
+      "act": 1
+    },
+    {
+      "id": "24-5",
+      "row": 24,
+      "col": 5,
+      "edges_out": [
+        "25-6"
+      ],
+      "slug": "string-compression-iii",
       "act": 1
     },
     {
@@ -755,41 +591,19 @@
       "row": 24,
       "col": 6,
       "edges_out": [
-        "25-7",
-        "25-6"
+        "25-7"
       ],
-      "slug": "max-chunks-to-make-sorted",
+      "slug": "remove-nth-node-from-end-of-list",
       "act": 1
     },
     {
-      "id": "25-0",
-      "row": 25,
-      "col": 0,
+      "id": "24-7",
+      "row": 24,
+      "col": 7,
       "edges_out": [
-        "26-0"
+        "25-7"
       ],
-      "slug": "find-k-closest-elements",
-      "act": 1
-    },
-    {
-      "id": "25-1",
-      "row": 25,
-      "col": 1,
-      "edges_out": [
-        "26-1"
-      ],
-      "slug": "product-of-the-last-k-numbers",
-      "act": 1
-    },
-    {
-      "id": "25-2",
-      "row": 25,
-      "col": 2,
-      "edges_out": [
-        "26-2",
-        "26-1"
-      ],
-      "slug": "odd-even-linked-list",
+      "slug": "find-largest-value-in-each-tree-row",
       "act": 1
     },
     {
@@ -797,9 +611,9 @@
       "row": 25,
       "col": 3,
       "edges_out": [
-        "26-3"
+        "26-2"
       ],
-      "slug": "best-time-to-buy-and-sell-stock-with-cooldown",
+      "slug": "trapping-rain-water",
       "act": 1
     },
     {
@@ -807,9 +621,9 @@
       "row": 25,
       "col": 6,
       "edges_out": [
-        "26-5"
+        "26-6"
       ],
-      "slug": "longest-substring-without-repeating-characters",
+      "slug": "clone-graph",
       "act": 1
     },
     {
@@ -817,30 +631,10 @@
       "row": 25,
       "col": 7,
       "edges_out": [
+        "26-7",
         "26-6"
       ],
-      "slug": "longest-consecutive-sequence",
-      "act": 1
-    },
-    {
-      "id": "26-0",
-      "row": 26,
-      "col": 0,
-      "edges_out": [
-        "27-0"
-      ],
-      "slug": "sum-of-subarray-ranges",
-      "act": 1
-    },
-    {
-      "id": "26-1",
-      "row": 26,
-      "col": 1,
-      "edges_out": [
-        "27-0",
-        "27-1"
-      ],
-      "slug": "basic-calculator-ii",
+      "slug": "peeking-iterator",
       "act": 1
     },
     {
@@ -848,29 +642,9 @@
       "row": 26,
       "col": 2,
       "edges_out": [
-        "27-1"
-      ],
-      "slug": "robot-bounded-in-circle",
-      "act": 1
-    },
-    {
-      "id": "26-3",
-      "row": 26,
-      "col": 3,
-      "edges_out": [
         "27-3"
       ],
-      "slug": "read-n-characters-given-read4",
-      "act": 1
-    },
-    {
-      "id": "26-5",
-      "row": 26,
-      "col": 5,
-      "edges_out": [
-        "27-6"
-      ],
-      "slug": "the-maze",
+      "slug": "merge-k-sorted-lists",
       "act": 1
     },
     {
@@ -880,27 +654,17 @@
       "edges_out": [
         "27-6"
       ],
-      "slug": "find-all-lonely-numbers-in-the-array",
+      "slug": "first-bad-version",
       "act": 1
     },
     {
-      "id": "27-0",
-      "row": 27,
-      "col": 0,
+      "id": "26-7",
+      "row": 26,
+      "col": 7,
       "edges_out": [
-        "28-0"
+        "27-7"
       ],
-      "slug": "top-k-frequent-words",
-      "act": 1
-    },
-    {
-      "id": "27-1",
-      "row": 27,
-      "col": 1,
-      "edges_out": [
-        "28-1"
-      ],
-      "slug": "design-log-storage-system",
+      "slug": "search-a-2d-matrix-ii",
       "act": 1
     },
     {
@@ -908,9 +672,9 @@
       "row": 27,
       "col": 3,
       "edges_out": [
-        "28-4"
+        "28-2"
       ],
-      "slug": "longest-common-subsequence",
+      "slug": "evaluate-division",
       "act": 1
     },
     {
@@ -919,40 +683,39 @@
       "col": 6,
       "edges_out": [
         "28-6",
+        "28-5"
+      ],
+      "slug": "binary-tree-zigzag-level-order-traversal",
+      "act": 1
+    },
+    {
+      "id": "27-7",
+      "row": 27,
+      "col": 7,
+      "edges_out": [
         "28-7"
       ],
-      "slug": "find-minimum-in-rotated-sorted-array",
+      "slug": "max-chunks-to-make-sorted",
       "act": 1
     },
     {
-      "id": "28-0",
+      "id": "28-2",
       "row": 28,
-      "col": 0,
-      "edges_out": [
-        "29-0"
-      ],
-      "slug": "add-two-numbers",
-      "act": 1
-    },
-    {
-      "id": "28-1",
-      "row": 28,
-      "col": 1,
-      "edges_out": [
-        "29-1",
-        "29-0"
-      ],
-      "slug": "search-a-2d-matrix",
-      "act": 1
-    },
-    {
-      "id": "28-4",
-      "row": 28,
-      "col": 4,
+      "col": 2,
       "edges_out": [
         "29-4"
       ],
-      "slug": "coin-change",
+      "slug": "odd-even-linked-list",
+      "act": 1
+    },
+    {
+      "id": "28-5",
+      "row": 28,
+      "col": 5,
+      "edges_out": [
+        "29-4"
+      ],
+      "slug": "find-k-closest-elements",
       "act": 1
     },
     {
@@ -960,9 +723,9 @@
       "row": 28,
       "col": 6,
       "edges_out": [
-        "29-5"
+        "29-4"
       ],
-      "slug": "evaluate-reverse-polish-notation",
+      "slug": "best-time-to-buy-and-sell-stock-with-cooldown",
       "act": 1
     },
     {
@@ -970,29 +733,9 @@
       "row": 28,
       "col": 7,
       "edges_out": [
-        "29-6"
+        "29-4"
       ],
-      "slug": "gas-station",
-      "act": 1
-    },
-    {
-      "id": "29-0",
-      "row": 29,
-      "col": 0,
-      "edges_out": [
-        "30-4"
-      ],
-      "slug": "non-overlapping-intervals",
-      "act": 1
-    },
-    {
-      "id": "29-1",
-      "row": 29,
-      "col": 1,
-      "edges_out": [
-        "30-4"
-      ],
-      "slug": "insert-interval",
+      "slug": "sum-of-subarray-ranges",
       "act": 1
     },
     {
@@ -1002,27 +745,7 @@
       "edges_out": [
         "30-4"
       ],
-      "slug": "knight-probability-in-chessboard",
-      "act": 1
-    },
-    {
-      "id": "29-5",
-      "row": 29,
-      "col": 5,
-      "edges_out": [
-        "30-4"
-      ],
-      "slug": "search-in-rotated-sorted-array",
-      "act": 1
-    },
-    {
-      "id": "29-6",
-      "row": 29,
-      "col": 6,
-      "edges_out": [
-        "30-4"
-      ],
-      "slug": "maximum-frequency-stack",
+      "slug": "basic-calculator-ii",
       "act": 1
     },
     {
@@ -1030,21 +753,31 @@
       "row": 30,
       "col": 4,
       "edges_out": [
-        "31-4"
+        "31-4",
+        "31-3"
       ],
-      "slug": "shortest-path-in-binary-matrix",
-      "act": 1
+      "slug": "longest-common-subsequence",
+      "act": 2
+    },
+    {
+      "id": "31-3",
+      "row": 31,
+      "col": 3,
+      "edges_out": [
+        "32-4"
+      ],
+      "slug": "add-two-numbers",
+      "act": 2
     },
     {
       "id": "31-4",
       "row": 31,
       "col": 4,
       "edges_out": [
-        "32-4",
         "32-3",
-        "32-5"
+        "32-4"
       ],
-      "slug": "01-matrix",
+      "slug": "coin-change",
       "act": 2
     },
     {
@@ -1052,9 +785,9 @@
       "row": 32,
       "col": 3,
       "edges_out": [
-        "33-4"
+        "33-3"
       ],
-      "slug": "random-pick-with-weight",
+      "slug": "knight-probability-in-chessboard",
       "act": 2
     },
     {
@@ -1062,19 +795,10 @@
       "row": 32,
       "col": 4,
       "edges_out": [
+        "33-5",
         "33-3"
       ],
-      "slug": "find-the-celebrity",
-      "act": 2
-    },
-    {
-      "id": "32-5",
-      "row": 32,
-      "col": 5,
-      "edges_out": [
-        "33-4"
-      ],
-      "slug": "jump-game",
+      "slug": "insert-interval",
       "act": 2
     },
     {
@@ -1082,20 +806,20 @@
       "row": 33,
       "col": 3,
       "edges_out": [
+        "34-4",
         "34-3"
       ],
-      "slug": "maximum-path-quality-of-a-graph",
+      "slug": "shortest-path-in-binary-matrix",
       "act": 2
     },
     {
-      "id": "33-4",
+      "id": "33-5",
       "row": 33,
-      "col": 4,
+      "col": 5,
       "edges_out": [
-        "34-5",
-        "34-3"
+        "34-6"
       ],
-      "slug": "sudoku-solver",
+      "slug": "find-median-from-data-stream",
       "act": 2
     },
     {
@@ -1105,17 +829,27 @@
       "edges_out": [
         "35-4"
       ],
-      "slug": "simplify-path",
+      "slug": "word-search",
       "act": 2
     },
     {
-      "id": "34-5",
+      "id": "34-4",
       "row": 34,
-      "col": 5,
+      "col": 4,
       "edges_out": [
         "35-4"
       ],
-      "slug": "compare-version-numbers",
+      "slug": "01-matrix",
+      "act": 2
+    },
+    {
+      "id": "34-6",
+      "row": 34,
+      "col": 6,
+      "edges_out": [
+        "35-5"
+      ],
+      "slug": "determine-if-two-strings-are-close",
       "act": 2
     },
     {
@@ -1126,7 +860,17 @@
         "36-5",
         "36-3"
       ],
-      "slug": "reverse-nodes-in-k-group",
+      "slug": "random-pick-with-weight",
+      "act": 2
+    },
+    {
+      "id": "35-5",
+      "row": 35,
+      "col": 5,
+      "edges_out": [
+        "36-5"
+      ],
+      "slug": "minimum-size-subarray-sum",
       "act": 2
     },
     {
@@ -1134,9 +878,9 @@
       "row": 36,
       "col": 3,
       "edges_out": [
-        "37-3"
+        "37-2"
       ],
-      "slug": "can-place-flowers",
+      "slug": "3sum",
       "act": 2
     },
     {
@@ -1144,40 +888,29 @@
       "row": 36,
       "col": 5,
       "edges_out": [
-        "37-4",
-        "37-5"
+        "37-6"
       ],
-      "slug": "reverse-integer",
+      "slug": "sudoku-solver",
       "act": 2
     },
     {
-      "id": "37-3",
+      "id": "37-2",
       "row": 37,
-      "col": 3,
+      "col": 2,
       "edges_out": [
         "38-3"
       ],
-      "slug": "h-index",
+      "slug": "longest-palindromic-substring",
       "act": 2
     },
     {
-      "id": "37-4",
+      "id": "37-6",
       "row": 37,
-      "col": 4,
+      "col": 6,
       "edges_out": [
-        "38-3"
+        "38-5"
       ],
-      "slug": "4sum",
-      "act": 2
-    },
-    {
-      "id": "37-5",
-      "row": 37,
-      "col": 5,
-      "edges_out": [
-        "38-4"
-      ],
-      "slug": "design-twitter",
+      "slug": "compare-version-numbers",
       "act": 2
     },
     {
@@ -1185,30 +918,30 @@
       "row": 38,
       "col": 3,
       "edges_out": [
-        "39-3"
+        "39-4"
       ],
-      "slug": "jump-game-ii",
+      "slug": "reverse-nodes-in-k-group",
       "act": 2
     },
     {
-      "id": "38-4",
+      "id": "38-5",
       "row": 38,
-      "col": 4,
+      "col": 5,
       "edges_out": [
+        "39-6",
         "39-5"
       ],
-      "slug": "minimize-maximum-component-cost",
+      "slug": "snakes-and-ladders",
       "act": 2
     },
     {
-      "id": "39-3",
+      "id": "39-4",
       "row": 39,
-      "col": 3,
+      "col": 4,
       "edges_out": [
-        "40-2",
-        "40-3"
+        "40-4"
       ],
-      "slug": "text-justification",
+      "slug": "distribute-money-to-maximum-children",
       "act": 2
     },
     {
@@ -1218,27 +951,17 @@
       "edges_out": [
         "40-4"
       ],
-      "slug": "best-time-to-buy-and-sell-stock-iii",
+      "slug": "can-place-flowers",
       "act": 2
     },
     {
-      "id": "40-2",
-      "row": 40,
-      "col": 2,
+      "id": "39-6",
+      "row": 39,
+      "col": 6,
       "edges_out": [
-        "41-2"
+        "40-5"
       ],
-      "slug": "count-primes",
-      "act": 2
-    },
-    {
-      "id": "40-3",
-      "row": 40,
-      "col": 3,
-      "edges_out": [
-        "41-4"
-      ],
-      "slug": "validate-ip-address",
+      "slug": "reverse-integer",
       "act": 2
     },
     {
@@ -1246,29 +969,19 @@
       "row": 40,
       "col": 4,
       "edges_out": [
-        "41-3"
+        "41-4"
       ],
-      "slug": "largest-rectangle-in-histogram",
+      "slug": "water-and-jug-problem",
       "act": 2
     },
     {
-      "id": "41-2",
-      "row": 41,
-      "col": 2,
+      "id": "40-5",
+      "row": 40,
+      "col": 5,
       "edges_out": [
-        "42-3"
+        "41-4"
       ],
-      "slug": "regular-expression-matching",
-      "act": 2
-    },
-    {
-      "id": "41-3",
-      "row": 41,
-      "col": 3,
-      "edges_out": [
-        "42-3"
-      ],
-      "slug": "integer-to-english-words",
+      "slug": "h-index",
       "act": 2
     },
     {
@@ -1276,9 +989,10 @@
       "row": 41,
       "col": 4,
       "edges_out": [
-        "42-4"
+        "42-4",
+        "42-3"
       ],
-      "slug": "minimum-window-substring",
+      "slug": "find-servers-that-handled-most-number-of-requests",
       "act": 2
     },
     {
@@ -1288,7 +1002,7 @@
       "edges_out": [
         "43-4"
       ],
-      "slug": "the-skyline-problem",
+      "slug": "minimize-maximum-component-cost",
       "act": 2
     },
     {
@@ -1296,17 +1010,138 @@
       "row": 42,
       "col": 4,
       "edges_out": [
-        "43-4"
+        "43-5",
+        "43-3"
       ],
-      "slug": "shortest-distance-from-all-buildings",
+      "slug": "sum-of-subarray-minimums",
+      "act": 2
+    },
+    {
+      "id": "43-3",
+      "row": 43,
+      "col": 3,
+      "edges_out": [
+        "44-4"
+      ],
+      "slug": "best-time-to-buy-and-sell-stock-iii",
       "act": 2
     },
     {
       "id": "43-4",
       "row": 43,
       "col": 4,
+      "edges_out": [
+        "44-5"
+      ],
+      "slug": "validate-binary-search-tree",
+      "act": 2
+    },
+    {
+      "id": "43-5",
+      "row": 43,
+      "col": 5,
+      "edges_out": [
+        "44-6"
+      ],
+      "slug": "similar-string-groups",
+      "act": 2
+    },
+    {
+      "id": "44-4",
+      "row": 44,
+      "col": 4,
+      "edges_out": [
+        "45-5"
+      ],
+      "slug": "validate-ip-address",
+      "act": 2
+    },
+    {
+      "id": "44-5",
+      "row": 44,
+      "col": 5,
+      "edges_out": [
+        "45-4"
+      ],
+      "slug": "largest-rectangle-in-histogram",
+      "act": 2
+    },
+    {
+      "id": "44-6",
+      "row": 44,
+      "col": 6,
+      "edges_out": [
+        "45-7"
+      ],
+      "slug": "continuous-subarray-sum",
+      "act": 2
+    },
+    {
+      "id": "45-4",
+      "row": 45,
+      "col": 4,
+      "edges_out": [
+        "46-3"
+      ],
+      "slug": "string-to-integer-atoi",
+      "act": 2
+    },
+    {
+      "id": "45-5",
+      "row": 45,
+      "col": 5,
+      "edges_out": [
+        "46-5"
+      ],
+      "slug": "design-linked-list",
+      "act": 2
+    },
+    {
+      "id": "45-7",
+      "row": 45,
+      "col": 7,
+      "edges_out": [
+        "46-8"
+      ],
+      "slug": "regular-expression-matching",
+      "act": 2
+    },
+    {
+      "id": "46-3",
+      "row": 46,
+      "col": 3,
+      "edges_out": [
+        "47-4"
+      ],
+      "slug": "the-skyline-problem",
+      "act": 2
+    },
+    {
+      "id": "46-5",
+      "row": 46,
+      "col": 5,
+      "edges_out": [
+        "47-4"
+      ],
+      "slug": "reconstruct-itinerary",
+      "act": 2
+    },
+    {
+      "id": "46-8",
+      "row": 46,
+      "col": 8,
+      "edges_out": [
+        "47-4"
+      ],
+      "slug": "first-missing-positive",
+      "act": 2
+    },
+    {
+      "id": "47-4",
+      "row": 47,
+      "col": 4,
       "edges_out": [],
-      "slug": "sliding-window-median",
+      "slug": "word-search-ii",
       "act": 2
     }
   ]

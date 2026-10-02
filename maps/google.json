@@ -1,28 +1,16 @@
 {
   "name": "Google",
   "eloMin": 900,
-  "eloMax": 2470,
+  "eloMax": 2455,
   "nodes": [
     {
       "id": "0-4",
       "row": 0,
       "col": 4,
       "edges_out": [
-        "1-4",
         "1-5"
       ],
       "slug": "concatenation-of-array",
-      "act": 0
-    },
-    {
-      "id": "1-4",
-      "row": 1,
-      "col": 4,
-      "edges_out": [
-        "2-4",
-        "2-3"
-      ],
-      "slug": "running-sum-of-1d-array",
       "act": 0
     },
     {
@@ -30,51 +18,20 @@
       "row": 1,
       "col": 5,
       "edges_out": [
-        "2-4",
-        "2-6"
+        "2-5"
       ],
       "slug": "maximum-product-of-two-elements-in-an-array",
       "act": 0
     },
     {
-      "id": "2-3",
+      "id": "2-5",
       "row": 2,
-      "col": 3,
+      "col": 5,
       "edges_out": [
-        "3-4"
-      ],
-      "slug": "middle-of-the-linked-list",
-      "act": 0
-    },
-    {
-      "id": "2-4",
-      "row": 2,
-      "col": 4,
-      "edges_out": [
-        "3-3"
-      ],
-      "slug": "reverse-string",
-      "act": 0
-    },
-    {
-      "id": "2-6",
-      "row": 2,
-      "col": 6,
-      "edges_out": [
+        "3-4",
         "3-5"
       ],
-      "slug": "reverse-linked-list",
-      "act": 0
-    },
-    {
-      "id": "3-3",
-      "row": 3,
-      "col": 3,
-      "edges_out": [
-        "4-3",
-        "4-2"
-      ],
-      "slug": "richest-customer-wealth",
+      "slug": "reverse-string",
       "act": 0
     },
     {
@@ -82,7 +39,7 @@
       "row": 3,
       "col": 4,
       "edges_out": [
-        "4-3"
+        "4-4"
       ],
       "slug": "minimum-number-of-pushes-to-type-word-i",
       "act": 0
@@ -92,29 +49,9 @@
       "row": 3,
       "col": 5,
       "edges_out": [
-        "4-4"
+        "4-5"
       ],
       "slug": "next-greater-element-i",
-      "act": 0
-    },
-    {
-      "id": "4-2",
-      "row": 4,
-      "col": 2,
-      "edges_out": [
-        "5-2"
-      ],
-      "slug": "maximum-depth-of-binary-tree",
-      "act": 0
-    },
-    {
-      "id": "4-3",
-      "row": 4,
-      "col": 3,
-      "edges_out": [
-        "5-3"
-      ],
-      "slug": "intersection-of-two-arrays",
       "act": 0
     },
     {
@@ -122,38 +59,37 @@
       "row": 4,
       "col": 4,
       "edges_out": [
-        "5-3"
+        "5-5"
       ],
       "slug": "smallest-divisible-digit-product-i",
       "act": 0
     },
     {
-      "id": "5-2",
-      "row": 5,
-      "col": 2,
+      "id": "4-5",
+      "row": 4,
+      "col": 5,
       "edges_out": [
-        "6-2"
+        "5-4"
       ],
-      "slug": "find-missing-and-repeated-values",
+      "slug": "number-of-recent-calls",
       "act": 0
     },
     {
-      "id": "5-3",
+      "id": "5-4",
       "row": 5,
-      "col": 3,
+      "col": 4,
       "edges_out": [
-        "6-3",
-        "15-2"
+        "6-3"
       ],
-      "slug": "majority-element",
+      "slug": "maximum-length-substring-with-two-occurrences",
       "act": 0
     },
     {
-      "id": "6-2",
-      "row": 6,
-      "col": 2,
+      "id": "5-5",
+      "row": 5,
+      "col": 5,
       "edges_out": [
-        "7-3"
+        "6-5"
       ],
       "slug": "valid-anagram",
       "act": 0
@@ -163,30 +99,39 @@
       "row": 6,
       "col": 3,
       "edges_out": [
-        "7-3"
-      ],
-      "slug": "remove-duplicates-from-sorted-array",
-      "act": 0
-    },
-    {
-      "id": "7-3",
-      "row": 7,
-      "col": 3,
-      "edges_out": [
-        "8-3",
-        "8-2"
+        "7-2"
       ],
       "slug": "employees-earning-more-than-their-managers",
       "act": 0
     },
     {
-      "id": "8-2",
-      "row": 8,
+      "id": "6-5",
+      "row": 6,
+      "col": 5,
+      "edges_out": [
+        "7-6"
+      ],
+      "slug": "find-customer-referee",
+      "act": 0
+    },
+    {
+      "id": "7-2",
+      "row": 7,
       "col": 2,
       "edges_out": [
-        "9-1"
+        "8-3"
       ],
-      "slug": "range-sum-query-immutable",
+      "slug": "maximum-product-of-two-digits",
+      "act": 0
+    },
+    {
+      "id": "7-6",
+      "row": 7,
+      "col": 6,
+      "edges_out": [
+        "8-5"
+      ],
+      "slug": "palindrome-number",
       "act": 0
     },
     {
@@ -194,202 +139,235 @@
       "row": 8,
       "col": 3,
       "edges_out": [
-        "9-2"
-      ],
-      "slug": "maximum-product-of-two-digits",
-      "act": 0
-    },
-    {
-      "id": "9-1",
-      "row": 9,
-      "col": 1,
-      "edges_out": [
-        "10-0"
-      ],
-      "slug": "single-number",
-      "act": 0
-    },
-    {
-      "id": "9-2",
-      "row": 9,
-      "col": 2,
-      "edges_out": [
-        "10-1",
-        "10-3"
+        "9-3"
       ],
       "slug": "move-zeroes",
       "act": 0
     },
     {
-      "id": "10-0",
-      "row": 10,
-      "col": 0,
+      "id": "8-5",
+      "row": 8,
+      "col": 5,
       "edges_out": [
-        "11-0"
+        "9-4"
       ],
-      "slug": "contains-duplicate",
+      "slug": "best-time-to-buy-and-sell-stock",
       "act": 0
     },
     {
-      "id": "10-1",
-      "row": 10,
-      "col": 1,
+      "id": "9-3",
+      "row": 9,
+      "col": 3,
       "edges_out": [
-        "11-2"
+        "10-2"
       ],
       "slug": "binary-search",
       "act": 0
     },
     {
-      "id": "10-3",
-      "row": 10,
-      "col": 3,
+      "id": "9-4",
+      "row": 9,
+      "col": 4,
       "edges_out": [
-        "11-2"
+        "10-5"
       ],
       "slug": "remove-all-adjacent-duplicates-in-string",
       "act": 0
     },
     {
-      "id": "11-0",
-      "row": 11,
-      "col": 0,
-      "edges_out": [
-        "12-0"
-      ],
-      "slug": "unique-middle-element",
-      "act": 0
-    },
-    {
-      "id": "11-2",
-      "row": 11,
+      "id": "10-2",
+      "row": 10,
       "col": 2,
       "edges_out": [
-        "12-1"
+        "11-3"
       ],
-      "slug": "roman-to-integer",
+      "slug": "generate-parentheses",
       "act": 0
     },
     {
-      "id": "12-0",
-      "row": 12,
-      "col": 0,
+      "id": "10-5",
+      "row": 10,
+      "col": 5,
       "edges_out": [
-        "13-0"
+        "11-5"
       ],
       "slug": "stone-game",
       "act": 0
     },
     {
-      "id": "12-1",
-      "row": 12,
-      "col": 1,
+      "id": "11-3",
+      "row": 11,
+      "col": 3,
       "edges_out": [
-        "13-1",
-        "13-2"
+        "12-4"
       ],
-      "slug": "diameter-of-binary-tree",
+      "slug": "merge-two-sorted-lists",
       "act": 0
     },
     {
-      "id": "13-0",
-      "row": 13,
-      "col": 0,
+      "id": "11-5",
+      "row": 11,
+      "col": 5,
       "edges_out": [
-        "14-0"
+        "12-4"
       ],
       "slug": "palindrome-linked-list",
       "act": 0
     },
     {
-      "id": "13-1",
+      "id": "12-4",
+      "row": 12,
+      "col": 4,
+      "edges_out": [
+        "13-4"
+      ],
+      "slug": "longest-common-prefix",
+      "act": 0
+    },
+    {
+      "id": "13-4",
       "row": 13,
-      "col": 1,
+      "col": 4,
       "edges_out": [
-        "14-1"
+        "14-3",
+        "14-4"
       ],
-      "slug": "happy-number",
-      "act": 0
+      "slug": "remove-duplicates-from-sorted-list",
+      "act": 1
     },
     {
-      "id": "13-2",
-      "row": 13,
-      "col": 2,
-      "edges_out": [
-        "14-2"
-      ],
-      "slug": "group-anagrams",
-      "act": 0
-    },
-    {
-      "id": "14-0",
+      "id": "14-3",
       "row": 14,
-      "col": 0,
+      "col": 3,
       "edges_out": [
-        "15-0"
+        "15-2",
+        "15-3",
+        "15-4"
       ],
-      "slug": "max-consecutive-ones",
-      "act": 0
+      "slug": "symmetric-tree",
+      "act": 1
     },
     {
-      "id": "14-1",
+      "id": "14-4",
       "row": 14,
-      "col": 1,
+      "col": 4,
       "edges_out": [
-        "15-2"
+        "15-5"
       ],
-      "slug": "stone-game-ii",
-      "act": 0
-    },
-    {
-      "id": "14-2",
-      "row": 14,
-      "col": 2,
-      "edges_out": [
-        "15-1"
-      ],
-      "slug": "find-the-difference",
-      "act": 0
-    },
-    {
-      "id": "15-0",
-      "row": 15,
-      "col": 0,
-      "edges_out": [
-        "16-4"
-      ],
-      "slug": "search-insert-position",
-      "act": 0
-    },
-    {
-      "id": "15-1",
-      "row": 15,
-      "col": 1,
-      "edges_out": [
-        "16-4"
-      ],
-      "slug": "smallest-subsequence-of-distinct-characters",
-      "act": 0
+      "slug": "check-if-array-is-sorted-and-rotated",
+      "act": 1
     },
     {
       "id": "15-2",
       "row": 15,
       "col": 2,
       "edges_out": [
+        "16-1"
+      ],
+      "slug": "container-with-most-water",
+      "act": 1
+    },
+    {
+      "id": "15-3",
+      "row": 15,
+      "col": 3,
+      "edges_out": [
+        "16-2",
+        "16-3"
+      ],
+      "slug": "plus-one",
+      "act": 1
+    },
+    {
+      "id": "15-4",
+      "row": 15,
+      "col": 4,
+      "edges_out": [
         "16-4"
       ],
-      "slug": "power-of-two",
-      "act": 0
+      "slug": "merge-sorted-array",
+      "act": 1
+    },
+    {
+      "id": "15-5",
+      "row": 15,
+      "col": 5,
+      "edges_out": [
+        "16-4"
+      ],
+      "slug": "contains-duplicate-ii",
+      "act": 1
+    },
+    {
+      "id": "16-1",
+      "row": 16,
+      "col": 1,
+      "edges_out": [
+        "17-1"
+      ],
+      "slug": "climbing-stairs",
+      "act": 1
+    },
+    {
+      "id": "16-2",
+      "row": 16,
+      "col": 2,
+      "edges_out": [
+        "17-2"
+      ],
+      "slug": "number-of-islands",
+      "act": 1
+    },
+    {
+      "id": "16-3",
+      "row": 16,
+      "col": 3,
+      "edges_out": [
+        "17-3"
+      ],
+      "slug": "product-of-array-except-self",
+      "act": 1
     },
     {
       "id": "16-4",
       "row": 16,
       "col": 4,
       "edges_out": [
-        "17-4"
+        "17-4",
+        "17-5"
       ],
-      "slug": "symmetric-tree",
-      "act": 0
+      "slug": "letter-combinations-of-a-phone-number",
+      "act": 1
+    },
+    {
+      "id": "17-1",
+      "row": 17,
+      "col": 1,
+      "edges_out": [
+        "18-0"
+      ],
+      "slug": "two-sum-ii-input-array-is-sorted",
+      "act": 1
+    },
+    {
+      "id": "17-2",
+      "row": 17,
+      "col": 2,
+      "edges_out": [
+        "18-3"
+      ],
+      "slug": "smallest-missing-integer-greater-than-sequential-prefix-sum",
+      "act": 1
+    },
+    {
+      "id": "17-3",
+      "row": 17,
+      "col": 3,
+      "edges_out": [
+        "18-3"
+      ],
+      "slug": "palindrome-partitioning",
+      "act": 1
     },
     {
       "id": "17-4",
@@ -397,10 +375,29 @@
       "col": 4,
       "edges_out": [
         "18-5",
-        "18-4",
-        "18-3"
+        "18-4"
       ],
-      "slug": "best-time-to-buy-and-sell-stock-ii",
+      "slug": "top-k-frequent-elements",
+      "act": 1
+    },
+    {
+      "id": "17-5",
+      "row": 17,
+      "col": 5,
+      "edges_out": [
+        "18-5"
+      ],
+      "slug": "maximum-product-of-three-numbers",
+      "act": 1
+    },
+    {
+      "id": "18-0",
+      "row": 18,
+      "col": 0,
+      "edges_out": [
+        "19-1"
+      ],
+      "slug": "lowest-common-ancestor-of-a-binary-tree",
       "act": 1
     },
     {
@@ -408,9 +405,9 @@
       "row": 18,
       "col": 3,
       "edges_out": [
-        "19-2"
+        "19-4"
       ],
-      "slug": "contains-duplicate-ii",
+      "slug": "reorder-list",
       "act": 1
     },
     {
@@ -418,9 +415,9 @@
       "row": 18,
       "col": 4,
       "edges_out": [
-        "19-3"
+        "19-4"
       ],
-      "slug": "climbing-stairs",
+      "slug": "next-greater-element-ii",
       "act": 1
     },
     {
@@ -428,30 +425,31 @@
       "row": 18,
       "col": 5,
       "edges_out": [
-        "19-6",
-        "19-5"
+        "19-5",
+        "19-6"
       ],
-      "slug": "number-of-islands",
+      "slug": "linked-list-cycle",
       "act": 1
     },
     {
-      "id": "19-2",
+      "id": "19-1",
       "row": 19,
-      "col": 2,
+      "col": 1,
       "edges_out": [
         "20-2"
       ],
-      "slug": "product-of-array-except-self",
+      "slug": "count-complete-tree-nodes",
       "act": 1
     },
     {
-      "id": "19-3",
+      "id": "19-4",
       "row": 19,
-      "col": 3,
+      "col": 4,
       "edges_out": [
-        "20-3"
+        "20-4",
+        "20-5"
       ],
-      "slug": "letter-combinations-of-a-phone-number",
+      "slug": "add-two-numbers",
       "act": 1
     },
     {
@@ -459,9 +457,9 @@
       "row": 19,
       "col": 5,
       "edges_out": [
-        "20-6"
+        "20-5"
       ],
-      "slug": "two-sum-ii-input-array-is-sorted",
+      "slug": "valid-palindrome",
       "act": 1
     },
     {
@@ -471,7 +469,7 @@
       "edges_out": [
         "20-6"
       ],
-      "slug": "smallest-missing-integer-greater-than-sequential-prefix-sum",
+      "slug": "duplicate-zeros",
       "act": 1
     },
     {
@@ -481,17 +479,28 @@
       "edges_out": [
         "21-2"
       ],
-      "slug": "palindrome-partitioning",
+      "slug": "isomorphic-strings",
       "act": 1
     },
     {
-      "id": "20-3",
+      "id": "20-4",
       "row": 20,
-      "col": 3,
+      "col": 4,
       "edges_out": [
-        "21-3"
+        "21-3",
+        "21-5"
       ],
-      "slug": "top-k-frequent-elements",
+      "slug": "maximum-average-subarray-i",
+      "act": 1
+    },
+    {
+      "id": "20-5",
+      "row": 20,
+      "col": 5,
+      "edges_out": [
+        "21-6"
+      ],
+      "slug": "remove-methods-from-project",
       "act": 1
     },
     {
@@ -499,10 +508,9 @@
       "row": 20,
       "col": 6,
       "edges_out": [
-        "21-7",
-        "21-5"
+        "21-7"
       ],
-      "slug": "lowest-common-ancestor-of-a-binary-tree",
+      "slug": "longest-repeating-character-replacement",
       "act": 1
     },
     {
@@ -512,7 +520,7 @@
       "edges_out": [
         "22-2"
       ],
-      "slug": "next-greater-element-ii",
+      "slug": "valid-parentheses",
       "act": 1
     },
     {
@@ -522,7 +530,7 @@
       "edges_out": [
         "22-3"
       ],
-      "slug": "linked-list-cycle",
+      "slug": "implement-trie-prefix-tree",
       "act": 1
     },
     {
@@ -530,9 +538,19 @@
       "row": 21,
       "col": 5,
       "edges_out": [
-        "22-4"
+        "22-6"
       ],
-      "slug": "count-complete-tree-nodes",
+      "slug": "predict-the-winner",
+      "act": 1
+    },
+    {
+      "id": "21-6",
+      "row": 21,
+      "col": 6,
+      "edges_out": [
+        "22-6"
+      ],
+      "slug": "sort-list",
       "act": 1
     },
     {
@@ -540,9 +558,9 @@
       "row": 21,
       "col": 7,
       "edges_out": [
-        "22-6"
+        "22-8"
       ],
-      "slug": "add-two-numbers",
+      "slug": "integer-to-roman",
       "act": 1
     },
     {
@@ -550,10 +568,9 @@
       "row": 22,
       "col": 2,
       "edges_out": [
-        "23-2",
         "23-1"
       ],
-      "slug": "valid-palindrome",
+      "slug": "find-the-index-of-the-first-occurrence-in-a-string",
       "act": 1
     },
     {
@@ -563,17 +580,7 @@
       "edges_out": [
         "23-2"
       ],
-      "slug": "duplicate-zeros",
-      "act": 1
-    },
-    {
-      "id": "22-4",
-      "row": 22,
-      "col": 4,
-      "edges_out": [
-        "23-5"
-      ],
-      "slug": "integer-to-roman",
+      "slug": "find-the-lexicographically-smallest-valid-sequence",
       "act": 1
     },
     {
@@ -581,9 +588,20 @@
       "row": 22,
       "col": 6,
       "edges_out": [
-        "23-6"
+        "23-6",
+        "23-5"
       ],
-      "slug": "reorder-list",
+      "slug": "daily-temperatures",
+      "act": 1
+    },
+    {
+      "id": "22-8",
+      "row": 22,
+      "col": 8,
+      "edges_out": [
+        "23-8"
+      ],
+      "slug": "find-the-duplicate-number",
       "act": 1
     },
     {
@@ -593,7 +611,7 @@
       "edges_out": [
         "24-1"
       ],
-      "slug": "isomorphic-strings",
+      "slug": "trapping-rain-water",
       "act": 1
     },
     {
@@ -601,9 +619,9 @@
       "row": 23,
       "col": 2,
       "edges_out": [
-        "24-1"
+        "24-3"
       ],
-      "slug": "maximum-average-subarray-i",
+      "slug": "maximum-xor-of-two-numbers-in-an-array",
       "act": 1
     },
     {
@@ -611,9 +629,9 @@
       "row": 23,
       "col": 5,
       "edges_out": [
-        "24-5"
+        "24-6"
       ],
-      "slug": "remove-methods-from-project",
+      "slug": "minimum-cost-for-tickets",
       "act": 1
     },
     {
@@ -621,9 +639,20 @@
       "row": 23,
       "col": 6,
       "edges_out": [
+        "24-7",
+        "24-5"
+      ],
+      "slug": "unique-paths",
+      "act": 1
+    },
+    {
+      "id": "23-8",
+      "row": 23,
+      "col": 8,
+      "edges_out": [
         "24-7"
       ],
-      "slug": "longest-repeating-character-replacement",
+      "slug": "rotting-oranges",
       "act": 1
     },
     {
@@ -631,10 +660,19 @@
       "row": 24,
       "col": 1,
       "edges_out": [
-        "25-0",
-        "25-1"
+        "25-0"
       ],
-      "slug": "valid-parentheses",
+      "slug": "remove-duplicates-from-sorted-array-ii",
+      "act": 1
+    },
+    {
+      "id": "24-3",
+      "row": 24,
+      "col": 3,
+      "edges_out": [
+        "25-2"
+      ],
+      "slug": "maximize-active-section-with-trade-i",
       "act": 1
     },
     {
@@ -644,7 +682,17 @@
       "edges_out": [
         "25-5"
       ],
-      "slug": "implement-trie-prefix-tree",
+      "slug": "house-robber",
+      "act": 1
+    },
+    {
+      "id": "24-6",
+      "row": 24,
+      "col": 6,
+      "edges_out": [
+        "25-5"
+      ],
+      "slug": "sqrtx",
       "act": 1
     },
     {
@@ -652,9 +700,10 @@
       "row": 24,
       "col": 7,
       "edges_out": [
+        "25-6",
         "25-7"
       ],
-      "slug": "predict-the-winner",
+      "slug": "smallest-palindromic-rearrangement-i",
       "act": 1
     },
     {
@@ -662,19 +711,19 @@
       "row": 25,
       "col": 0,
       "edges_out": [
-        "26-0"
+        "26-4"
       ],
-      "slug": "find-the-index-of-the-first-occurrence-in-a-string",
+      "slug": "binary-tree-zigzag-level-order-traversal",
       "act": 1
     },
     {
-      "id": "25-1",
+      "id": "25-2",
       "row": 25,
-      "col": 1,
+      "col": 2,
       "edges_out": [
-        "26-1"
+        "26-4"
       ],
-      "slug": "find-the-lexicographically-smallest-valid-sequence",
+      "slug": "decode-string",
       "act": 1
     },
     {
@@ -682,9 +731,19 @@
       "row": 25,
       "col": 5,
       "edges_out": [
-        "26-6"
+        "26-4"
       ],
-      "slug": "daily-temperatures",
+      "slug": "odd-even-linked-list",
+      "act": 1
+    },
+    {
+      "id": "25-6",
+      "row": 25,
+      "col": 6,
+      "edges_out": [
+        "26-4"
+      ],
+      "slug": "n-queens",
       "act": 1
     },
     {
@@ -692,233 +751,160 @@
       "row": 25,
       "col": 7,
       "edges_out": [
-        "26-8"
+        "26-4"
       ],
-      "slug": "find-the-duplicate-number",
+      "slug": "best-time-to-buy-and-sell-stock-ii",
       "act": 1
     },
     {
-      "id": "26-0",
+      "id": "26-4",
       "row": 26,
-      "col": 0,
+      "col": 4,
       "edges_out": [
-        "27-0"
-      ],
-      "slug": "trapping-rain-water",
-      "act": 1
-    },
-    {
-      "id": "26-1",
-      "row": 26,
-      "col": 1,
-      "edges_out": [
-        "27-2",
-        "27-1"
-      ],
-      "slug": "maximum-xor-of-two-numbers-in-an-array",
-      "act": 1
-    },
-    {
-      "id": "26-6",
-      "row": 26,
-      "col": 6,
-      "edges_out": [
-        "27-7"
-      ],
-      "slug": "minimum-cost-for-tickets",
-      "act": 1
-    },
-    {
-      "id": "26-8",
-      "row": 26,
-      "col": 8,
-      "edges_out": [
-        "27-7"
-      ],
-      "slug": "sort-list",
-      "act": 1
-    },
-    {
-      "id": "27-0",
-      "row": 27,
-      "col": 0,
-      "edges_out": [
-        "28-0"
-      ],
-      "slug": "unique-paths",
-      "act": 1
-    },
-    {
-      "id": "27-1",
-      "row": 27,
-      "col": 1,
-      "edges_out": [
-        "28-2"
-      ],
-      "slug": "rotting-oranges",
-      "act": 1
-    },
-    {
-      "id": "27-2",
-      "row": 27,
-      "col": 2,
-      "edges_out": [
-        "28-2"
-      ],
-      "slug": "remove-duplicates-from-sorted-array-ii",
-      "act": 1
-    },
-    {
-      "id": "27-7",
-      "row": 27,
-      "col": 7,
-      "edges_out": [
-        "28-7",
-        "28-6"
-      ],
-      "slug": "maximize-active-section-with-trade-i",
-      "act": 1
-    },
-    {
-      "id": "28-0",
-      "row": 28,
-      "col": 0,
-      "edges_out": [
-        "29-0"
-      ],
-      "slug": "house-robber",
-      "act": 1
-    },
-    {
-      "id": "28-2",
-      "row": 28,
-      "col": 2,
-      "edges_out": [
-        "29-1",
-        "29-2"
-      ],
-      "slug": "sqrtx",
-      "act": 1
-    },
-    {
-      "id": "28-6",
-      "row": 28,
-      "col": 6,
-      "edges_out": [
-        "29-7"
-      ],
-      "slug": "binary-tree-zigzag-level-order-traversal",
-      "act": 1
-    },
-    {
-      "id": "28-7",
-      "row": 28,
-      "col": 7,
-      "edges_out": [
-        "29-8"
-      ],
-      "slug": "decode-string",
-      "act": 1
-    },
-    {
-      "id": "29-0",
-      "row": 29,
-      "col": 0,
-      "edges_out": [
-        "30-0"
-      ],
-      "slug": "odd-even-linked-list",
-      "act": 1
-    },
-    {
-      "id": "29-1",
-      "row": 29,
-      "col": 1,
-      "edges_out": [
-        "30-1"
-      ],
-      "slug": "n-queens",
-      "act": 1
-    },
-    {
-      "id": "29-2",
-      "row": 29,
-      "col": 2,
-      "edges_out": [
-        "30-3"
+        "27-4"
       ],
       "slug": "spiral-matrix",
       "act": 1
     },
     {
-      "id": "29-7",
+      "id": "27-4",
+      "row": 27,
+      "col": 4,
+      "edges_out": [
+        "28-4",
+        "28-3",
+        "28-5"
+      ],
+      "slug": "sort-an-array",
+      "act": 2
+    },
+    {
+      "id": "28-3",
+      "row": 28,
+      "col": 3,
+      "edges_out": [
+        "29-3",
+        "29-4"
+      ],
+      "slug": "single-element-in-a-sorted-array",
+      "act": 2
+    },
+    {
+      "id": "28-4",
+      "row": 28,
+      "col": 4,
+      "edges_out": [
+        "29-3"
+      ],
+      "slug": "zigzag-conversion",
+      "act": 2
+    },
+    {
+      "id": "28-5",
+      "row": 28,
+      "col": 5,
+      "edges_out": [
+        "29-5",
+        "29-4"
+      ],
+      "slug": "subarray-product-less-than-k",
+      "act": 2
+    },
+    {
+      "id": "29-3",
       "row": 29,
-      "col": 7,
+      "col": 3,
       "edges_out": [
-        "30-8"
+        "30-3",
+        "30-2"
       ],
-      "slug": "length-of-longest-subarray-with-at-most-k-frequency",
-      "act": 1
+      "slug": "non-overlapping-intervals",
+      "act": 2
     },
     {
-      "id": "29-8",
+      "id": "29-4",
       "row": 29,
-      "col": 8,
+      "col": 4,
       "edges_out": [
-        "30-7"
+        "30-4"
       ],
-      "slug": "container-with-most-water",
-      "act": 1
+      "slug": "stone-game-iii",
+      "act": 2
     },
     {
-      "id": "30-0",
-      "row": 30,
-      "col": 0,
+      "id": "29-5",
+      "row": 29,
+      "col": 5,
       "edges_out": [
-        "31-4"
+        "30-6",
+        "30-4"
       ],
-      "slug": "longest-consecutive-sequence",
-      "act": 1
+      "slug": "minimum-number-of-days-to-make-m-bouquets",
+      "act": 2
     },
     {
-      "id": "30-1",
+      "id": "30-2",
       "row": 30,
-      "col": 1,
+      "col": 2,
       "edges_out": [
-        "31-4"
+        "31-2"
       ],
-      "slug": "3sum",
-      "act": 1
+      "slug": "subarray-sums-divisible-by-k",
+      "act": 2
     },
     {
       "id": "30-3",
       "row": 30,
       "col": 3,
       "edges_out": [
-        "31-4"
+        "31-2",
+        "31-3"
       ],
-      "slug": "sort-an-array",
-      "act": 1
+      "slug": "car-pooling",
+      "act": 2
     },
     {
-      "id": "30-7",
+      "id": "30-4",
       "row": 30,
-      "col": 7,
+      "col": 4,
       "edges_out": [
-        "31-4"
+        "31-4",
+        "31-5",
+        "31-3"
       ],
-      "slug": "plus-one",
-      "act": 1
+      "slug": "step-by-step-directions-from-a-binary-tree-node-to-another",
+      "act": 2
     },
     {
-      "id": "30-8",
+      "id": "30-6",
       "row": 30,
-      "col": 8,
+      "col": 6,
       "edges_out": [
-        "31-4"
+        "31-7"
       ],
-      "slug": "merge-sorted-array",
-      "act": 1
+      "slug": "split-array-largest-sum",
+      "act": 2
+    },
+    {
+      "id": "31-2",
+      "row": 31,
+      "col": 2,
+      "edges_out": [
+        "32-3",
+        "32-2"
+      ],
+      "slug": "find-minimum-in-rotated-sorted-array",
+      "act": 2
+    },
+    {
+      "id": "31-3",
+      "row": 31,
+      "col": 3,
+      "edges_out": [
+        "32-3"
+      ],
+      "slug": "rotate-array",
+      "act": 2
     },
     {
       "id": "31-4",
@@ -927,19 +913,98 @@
       "edges_out": [
         "32-4"
       ],
-      "slug": "number-of-visible-people-in-a-queue",
-      "act": 1
+      "slug": "maximize-active-section-with-trade-ii",
+      "act": 2
+    },
+    {
+      "id": "31-5",
+      "row": 31,
+      "col": 5,
+      "edges_out": [
+        "32-5"
+      ],
+      "slug": "find-first-and-last-position-of-element-in-sorted-array",
+      "act": 2
+    },
+    {
+      "id": "31-7",
+      "row": 31,
+      "col": 7,
+      "edges_out": [
+        "32-6"
+      ],
+      "slug": "merge-intervals",
+      "act": 2
+    },
+    {
+      "id": "32-2",
+      "row": 32,
+      "col": 2,
+      "edges_out": [
+        "33-1"
+      ],
+      "slug": "remove-nth-node-from-end-of-list",
+      "act": 2
+    },
+    {
+      "id": "32-3",
+      "row": 32,
+      "col": 3,
+      "edges_out": [
+        "33-2",
+        "33-3"
+      ],
+      "slug": "fruit-into-baskets",
+      "act": 2
     },
     {
       "id": "32-4",
       "row": 32,
       "col": 4,
       "edges_out": [
-        "33-4",
-        "33-5",
-        "33-3"
+        "33-4"
       ],
-      "slug": "zigzag-conversion",
+      "slug": "course-schedule",
+      "act": 2
+    },
+    {
+      "id": "32-5",
+      "row": 32,
+      "col": 5,
+      "edges_out": [
+        "33-4"
+      ],
+      "slug": "lru-cache",
+      "act": 2
+    },
+    {
+      "id": "32-6",
+      "row": 32,
+      "col": 6,
+      "edges_out": [
+        "33-6"
+      ],
+      "slug": "3sum-closest",
+      "act": 2
+    },
+    {
+      "id": "33-1",
+      "row": 33,
+      "col": 1,
+      "edges_out": [
+        "34-2"
+      ],
+      "slug": "4sum",
+      "act": 2
+    },
+    {
+      "id": "33-2",
+      "row": 33,
+      "col": 2,
+      "edges_out": [
+        "34-3"
+      ],
+      "slug": "koko-eating-bananas",
       "act": 2
     },
     {
@@ -949,7 +1014,7 @@
       "edges_out": [
         "34-3"
       ],
-      "slug": "non-overlapping-intervals",
+      "slug": "burst-balloons",
       "act": 2
     },
     {
@@ -959,18 +1024,27 @@
       "edges_out": [
         "34-4"
       ],
-      "slug": "stone-game-iii",
+      "slug": "time-based-key-value-store",
       "act": 2
     },
     {
-      "id": "33-5",
+      "id": "33-6",
       "row": 33,
-      "col": 5,
+      "col": 6,
       "edges_out": [
-        "34-6",
-        "34-5"
+        "34-6"
       ],
-      "slug": "minimum-number-of-days-to-make-m-bouquets",
+      "slug": "partition-equal-subset-sum",
+      "act": 2
+    },
+    {
+      "id": "34-2",
+      "row": 34,
+      "col": 2,
+      "edges_out": [
+        "35-3"
+      ],
+      "slug": "search-in-rotated-sorted-array",
       "act": 2
     },
     {
@@ -978,9 +1052,10 @@
       "row": 34,
       "col": 3,
       "edges_out": [
-        "35-2"
+        "35-4",
+        "35-3"
       ],
-      "slug": "meeting-rooms-ii",
+      "slug": "reverse-integer",
       "act": 2
     },
     {
@@ -988,20 +1063,9 @@
       "row": 34,
       "col": 4,
       "edges_out": [
-        "35-4",
-        "35-3"
+        "35-4"
       ],
-      "slug": "merge-intervals",
-      "act": 2
-    },
-    {
-      "id": "34-5",
-      "row": 34,
-      "col": 5,
-      "edges_out": [
-        "35-6"
-      ],
-      "slug": "subarray-sums-divisible-by-k",
+      "slug": "coin-change",
       "act": 2
     },
     {
@@ -1009,19 +1073,9 @@
       "row": 34,
       "col": 6,
       "edges_out": [
-        "35-5"
+        "35-6"
       ],
-      "slug": "car-pooling",
-      "act": 2
-    },
-    {
-      "id": "35-2",
-      "row": 35,
-      "col": 2,
-      "edges_out": [
-        "36-1"
-      ],
-      "slug": "step-by-step-directions-from-a-binary-tree-node-to-another",
+      "slug": "second-minimum-time-to-reach-destination",
       "act": 2
     },
     {
@@ -1029,9 +1083,10 @@
       "row": 35,
       "col": 3,
       "edges_out": [
-        "36-2"
+        "36-2",
+        "36-3"
       ],
-      "slug": "split-array-largest-sum",
+      "slug": "word-search",
       "act": 2
     },
     {
@@ -1039,20 +1094,11 @@
       "row": 35,
       "col": 4,
       "edges_out": [
-        "36-4",
-        "36-5"
+        "36-5",
+        "36-3",
+        "36-4"
       ],
-      "slug": "find-minimum-in-rotated-sorted-array",
-      "act": 2
-    },
-    {
-      "id": "35-5",
-      "row": 35,
-      "col": 5,
-      "edges_out": [
-        "36-5"
-      ],
-      "slug": "rotate-array",
+      "slug": "longest-substring-of-one-repeating-character",
       "act": 2
     },
     {
@@ -1060,19 +1106,9 @@
       "row": 35,
       "col": 6,
       "edges_out": [
-        "36-6"
+        "36-5"
       ],
-      "slug": "subarray-product-less-than-k",
-      "act": 2
-    },
-    {
-      "id": "36-1",
-      "row": 36,
-      "col": 1,
-      "edges_out": [
-        "37-0"
-      ],
-      "slug": "maximize-active-section-with-trade-ii",
+      "slug": "jump-game-ii",
       "act": 2
     },
     {
@@ -1080,9 +1116,20 @@
       "row": 36,
       "col": 2,
       "edges_out": [
-        "37-1"
+        "37-2"
       ],
-      "slug": "find-first-and-last-position-of-element-in-sorted-array",
+      "slug": "median-of-two-sorted-arrays",
+      "act": 2
+    },
+    {
+      "id": "36-3",
+      "row": 36,
+      "col": 3,
+      "edges_out": [
+        "37-4",
+        "37-2"
+      ],
+      "slug": "find-peak-element",
       "act": 2
     },
     {
@@ -1090,9 +1137,9 @@
       "row": 36,
       "col": 4,
       "edges_out": [
-        "37-4"
+        "37-5"
       ],
-      "slug": "remove-nth-node-from-end-of-list",
+      "slug": "count-valid-sequences",
       "act": 2
     },
     {
@@ -1100,40 +1147,21 @@
       "row": 36,
       "col": 5,
       "edges_out": [
-        "37-6",
+        "37-5",
         "37-4"
       ],
-      "slug": "fruit-into-baskets",
+      "slug": "insert-interval",
       "act": 2
     },
     {
-      "id": "36-6",
-      "row": 36,
-      "col": 6,
-      "edges_out": [
-        "37-5"
-      ],
-      "slug": "3sum-closest",
-      "act": 2
-    },
-    {
-      "id": "37-0",
+      "id": "37-2",
       "row": 37,
-      "col": 0,
+      "col": 2,
       "edges_out": [
-        "38-0"
+        "38-1",
+        "38-3"
       ],
-      "slug": "course-schedule",
-      "act": 2
-    },
-    {
-      "id": "37-1",
-      "row": 37,
-      "col": 1,
-      "edges_out": [
-        "38-2"
-      ],
-      "slug": "lru-cache",
+      "slug": "unique-paths-ii",
       "act": 2
     },
     {
@@ -1141,10 +1169,10 @@
       "row": 37,
       "col": 4,
       "edges_out": [
-        "38-4",
-        "38-3"
+        "38-5",
+        "38-4"
       ],
-      "slug": "4sum",
+      "slug": "powx-n",
       "act": 2
     },
     {
@@ -1152,39 +1180,21 @@
       "row": 37,
       "col": 5,
       "edges_out": [
+        "38-6",
+        "38-4",
         "38-5"
       ],
-      "slug": "longest-substring-without-repeating-characters",
+      "slug": "rotate-list",
       "act": 2
     },
     {
-      "id": "37-6",
-      "row": 37,
-      "col": 6,
-      "edges_out": [
-        "38-6"
-      ],
-      "slug": "longest-common-subsequence",
-      "act": 2
-    },
-    {
-      "id": "38-0",
+      "id": "38-1",
       "row": 38,
-      "col": 0,
+      "col": 1,
       "edges_out": [
-        "39-0"
+        "39-2"
       ],
-      "slug": "koko-eating-bananas",
-      "act": 2
-    },
-    {
-      "id": "38-2",
-      "row": 38,
-      "col": 2,
-      "edges_out": [
-        "39-3"
-      ],
-      "slug": "burst-balloons",
+      "slug": "longest-palindromic-substring",
       "act": 2
     },
     {
@@ -1194,7 +1204,7 @@
       "edges_out": [
         "39-2"
       ],
-      "slug": "time-based-key-value-store",
+      "slug": "sliding-window-maximum",
       "act": 2
     },
     {
@@ -1202,9 +1212,10 @@
       "row": 38,
       "col": 4,
       "edges_out": [
+        "39-3",
         "39-4"
       ],
-      "slug": "partition-equal-subset-sum",
+      "slug": "h-index",
       "act": 2
     },
     {
@@ -1214,7 +1225,7 @@
       "edges_out": [
         "39-5"
       ],
-      "slug": "subarray-sum-equals-k",
+      "slug": "decode-ways",
       "act": 2
     },
     {
@@ -1224,17 +1235,7 @@
       "edges_out": [
         "39-7"
       ],
-      "slug": "single-element-in-a-sorted-array",
-      "act": 2
-    },
-    {
-      "id": "39-0",
-      "row": 39,
-      "col": 0,
-      "edges_out": [
-        "40-0"
-      ],
-      "slug": "search-in-rotated-sorted-array",
+      "slug": "find-median-from-data-stream",
       "act": 2
     },
     {
@@ -1242,9 +1243,10 @@
       "row": 39,
       "col": 2,
       "edges_out": [
+        "40-2",
         "40-1"
       ],
-      "slug": "reverse-integer",
+      "slug": "count-primes",
       "act": 2
     },
     {
@@ -1252,9 +1254,9 @@
       "row": 39,
       "col": 3,
       "edges_out": [
-        "40-3"
+        "40-2"
       ],
-      "slug": "coin-change",
+      "slug": "first-missing-positive",
       "act": 2
     },
     {
@@ -1262,9 +1264,9 @@
       "row": 39,
       "col": 4,
       "edges_out": [
-        "40-5"
+        "40-3"
       ],
-      "slug": "second-minimum-time-to-reach-destination",
+      "slug": "largest-rectangle-in-histogram",
       "act": 2
     },
     {
@@ -1272,9 +1274,10 @@
       "row": 39,
       "col": 5,
       "edges_out": [
-        "40-6"
+        "40-5",
+        "40-4"
       ],
-      "slug": "check-if-array-is-sorted-and-rotated",
+      "slug": "lfu-cache",
       "act": 2
     },
     {
@@ -1284,17 +1287,7 @@
       "edges_out": [
         "40-8"
       ],
-      "slug": "maximum-product-of-three-numbers",
-      "act": 2
-    },
-    {
-      "id": "40-0",
-      "row": 40,
-      "col": 0,
-      "edges_out": [
-        "41-0"
-      ],
-      "slug": "word-search",
+      "slug": "minimum-height-trees",
       "act": 2
     },
     {
@@ -1302,9 +1295,19 @@
       "row": 40,
       "col": 1,
       "edges_out": [
-        "41-2"
+        "41-0"
       ],
-      "slug": "longest-substring-of-one-repeating-character",
+      "slug": "bus-routes",
+      "act": 2
+    },
+    {
+      "id": "40-2",
+      "row": 40,
+      "col": 2,
+      "edges_out": [
+        "41-1"
+      ],
+      "slug": "find-minimum-in-rotated-sorted-array-ii",
       "act": 2
     },
     {
@@ -1312,9 +1315,19 @@
       "row": 40,
       "col": 3,
       "edges_out": [
+        "41-2"
+      ],
+      "slug": "word-ladder",
+      "act": 2
+    },
+    {
+      "id": "40-4",
+      "row": 40,
+      "col": 4,
+      "edges_out": [
         "41-3"
       ],
-      "slug": "jump-game-ii",
+      "slug": "smallest-divisible-digit-product-ii",
       "act": 2
     },
     {
@@ -1322,19 +1335,9 @@
       "row": 40,
       "col": 5,
       "edges_out": [
-        "41-5"
+        "41-4"
       ],
       "slug": "can-place-flowers",
-      "act": 2
-    },
-    {
-      "id": "40-6",
-      "row": 40,
-      "col": 6,
-      "edges_out": [
-        "41-7"
-      ],
-      "slug": "smallest-palindromic-rearrangement-i",
       "act": 2
     },
     {
@@ -1344,7 +1347,7 @@
       "edges_out": [
         "41-8"
       ],
-      "slug": "remove-duplicates-from-sorted-list",
+      "slug": "longest-substring-without-repeating-characters",
       "act": 2
     },
     {
@@ -1352,9 +1355,19 @@
       "row": 41,
       "col": 0,
       "edges_out": [
-        "42-0"
+        "42-4"
       ],
-      "slug": "median-of-two-sorted-arrays",
+      "slug": "smallest-palindromic-rearrangement-ii",
+      "act": 2
+    },
+    {
+      "id": "41-1",
+      "row": 41,
+      "col": 1,
+      "edges_out": [
+        "42-4"
+      ],
+      "slug": "dungeon-game",
       "act": 2
     },
     {
@@ -1362,9 +1375,9 @@
       "row": 41,
       "col": 2,
       "edges_out": [
-        "42-1"
+        "42-4"
       ],
-      "slug": "find-peak-element",
+      "slug": "maximum-good-subarray-sum",
       "act": 2
     },
     {
@@ -1374,27 +1387,17 @@
       "edges_out": [
         "42-4"
       ],
-      "slug": "count-valid-sequences",
+      "slug": "kth-ancestor-of-a-tree-node",
       "act": 2
     },
     {
-      "id": "41-5",
+      "id": "41-4",
       "row": 41,
-      "col": 5,
+      "col": 4,
       "edges_out": [
-        "42-6"
+        "42-4"
       ],
-      "slug": "longest-common-prefix",
-      "act": 2
-    },
-    {
-      "id": "41-7",
-      "row": 41,
-      "col": 7,
-      "edges_out": [
-        "42-6"
-      ],
-      "slug": "implement-queue-using-stacks",
+      "slug": "number-of-visible-people-in-a-queue",
       "act": 2
     },
     {
@@ -1402,340 +1405,17 @@
       "row": 41,
       "col": 8,
       "edges_out": [
-        "42-7"
+        "42-4"
       ],
-      "slug": "merge-two-sorted-lists",
-      "act": 2
-    },
-    {
-      "id": "42-0",
-      "row": 42,
-      "col": 0,
-      "edges_out": [
-        "43-0"
-      ],
-      "slug": "insert-interval",
-      "act": 2
-    },
-    {
-      "id": "42-1",
-      "row": 42,
-      "col": 1,
-      "edges_out": [
-        "43-1"
-      ],
-      "slug": "unique-paths-ii",
+      "slug": "longest-common-subsequence",
       "act": 2
     },
     {
       "id": "42-4",
       "row": 42,
       "col": 4,
-      "edges_out": [
-        "43-4"
-      ],
-      "slug": "powx-n",
-      "act": 2
-    },
-    {
-      "id": "42-6",
-      "row": 42,
-      "col": 6,
-      "edges_out": [
-        "43-6",
-        "43-5"
-      ],
-      "slug": "rotate-list",
-      "act": 2
-    },
-    {
-      "id": "42-7",
-      "row": 42,
-      "col": 7,
-      "edges_out": [
-        "43-8"
-      ],
-      "slug": "generate-parentheses",
-      "act": 2
-    },
-    {
-      "id": "43-0",
-      "row": 43,
-      "col": 0,
-      "edges_out": [
-        "44-0"
-      ],
-      "slug": "minimum-height-trees",
-      "act": 2
-    },
-    {
-      "id": "43-1",
-      "row": 43,
-      "col": 1,
-      "edges_out": [
-        "44-2"
-      ],
-      "slug": "longest-palindromic-substring",
-      "act": 2
-    },
-    {
-      "id": "43-4",
-      "row": 43,
-      "col": 4,
-      "edges_out": [
-        "44-3"
-      ],
-      "slug": "sliding-window-maximum",
-      "act": 2
-    },
-    {
-      "id": "43-5",
-      "row": 43,
-      "col": 5,
-      "edges_out": [
-        "44-4"
-      ],
-      "slug": "h-index",
-      "act": 2
-    },
-    {
-      "id": "43-6",
-      "row": 43,
-      "col": 6,
-      "edges_out": [
-        "44-5"
-      ],
-      "slug": "water-bottles",
-      "act": 2
-    },
-    {
-      "id": "43-8",
-      "row": 43,
-      "col": 8,
-      "edges_out": [
-        "44-8"
-      ],
-      "slug": "best-time-to-buy-and-sell-stock",
-      "act": 2
-    },
-    {
-      "id": "44-0",
-      "row": 44,
-      "col": 0,
-      "edges_out": [
-        "45-0"
-      ],
-      "slug": "decode-ways",
-      "act": 2
-    },
-    {
-      "id": "44-2",
-      "row": 44,
-      "col": 2,
-      "edges_out": [
-        "45-3"
-      ],
-      "slug": "find-median-from-data-stream",
-      "act": 2
-    },
-    {
-      "id": "44-3",
-      "row": 44,
-      "col": 3,
-      "edges_out": [
-        "45-4"
-      ],
-      "slug": "count-primes",
-      "act": 2
-    },
-    {
-      "id": "44-4",
-      "row": 44,
-      "col": 4,
-      "edges_out": [
-        "45-3"
-      ],
-      "slug": "first-missing-positive",
-      "act": 2
-    },
-    {
-      "id": "44-5",
-      "row": 44,
-      "col": 5,
-      "edges_out": [
-        "45-6"
-      ],
-      "slug": "missing-number",
-      "act": 2
-    },
-    {
-      "id": "44-8",
-      "row": 44,
-      "col": 8,
-      "edges_out": [
-        "45-7"
-      ],
-      "slug": "palindrome-number",
-      "act": 2
-    },
-    {
-      "id": "45-0",
-      "row": 45,
-      "col": 0,
-      "edges_out": [
-        "46-0"
-      ],
-      "slug": "largest-rectangle-in-histogram",
-      "act": 2
-    },
-    {
-      "id": "45-3",
-      "row": 45,
-      "col": 3,
-      "edges_out": [
-        "46-3",
-        "46-4"
-      ],
-      "slug": "lfu-cache",
-      "act": 2
-    },
-    {
-      "id": "45-4",
-      "row": 45,
-      "col": 4,
-      "edges_out": [
-        "46-4"
-      ],
-      "slug": "bus-routes",
-      "act": 2
-    },
-    {
-      "id": "45-6",
-      "row": 45,
-      "col": 6,
-      "edges_out": [
-        "46-5"
-      ],
-      "slug": "shift-2d-grid",
-      "act": 2
-    },
-    {
-      "id": "45-7",
-      "row": 45,
-      "col": 7,
-      "edges_out": [
-        "46-6"
-      ],
-      "slug": "find-customer-referee",
-      "act": 2
-    },
-    {
-      "id": "46-0",
-      "row": 46,
-      "col": 0,
-      "edges_out": [
-        "47-1"
-      ],
-      "slug": "find-minimum-in-rotated-sorted-array-ii",
-      "act": 2
-    },
-    {
-      "id": "46-3",
-      "row": 46,
-      "col": 3,
-      "edges_out": [
-        "47-3"
-      ],
-      "slug": "word-ladder",
-      "act": 2
-    },
-    {
-      "id": "46-4",
-      "row": 46,
-      "col": 4,
-      "edges_out": [
-        "47-5",
-        "47-4"
-      ],
-      "slug": "smallest-divisible-digit-product-ii",
-      "act": 2
-    },
-    {
-      "id": "46-5",
-      "row": 46,
-      "col": 5,
-      "edges_out": [
-        "47-5"
-      ],
-      "slug": "smallest-palindromic-rearrangement-ii",
-      "act": 2
-    },
-    {
-      "id": "46-6",
-      "row": 46,
-      "col": 6,
-      "edges_out": [
-        "47-6"
-      ],
-      "slug": "invert-binary-tree",
-      "act": 2
-    },
-    {
-      "id": "47-1",
-      "row": 47,
-      "col": 1,
-      "edges_out": [
-        "48-4"
-      ],
-      "slug": "dungeon-game",
-      "act": 2
-    },
-    {
-      "id": "47-3",
-      "row": 47,
-      "col": 3,
-      "edges_out": [
-        "48-4"
-      ],
-      "slug": "maximum-good-subarray-sum",
-      "act": 2
-    },
-    {
-      "id": "47-4",
-      "row": 47,
-      "col": 4,
-      "edges_out": [
-        "48-4"
-      ],
-      "slug": "kth-ancestor-of-a-tree-node",
-      "act": 2
-    },
-    {
-      "id": "47-5",
-      "row": 47,
-      "col": 5,
-      "edges_out": [
-        "48-4"
-      ],
-      "slug": "reverse-pairs",
-      "act": 2
-    },
-    {
-      "id": "47-6",
-      "row": 47,
-      "col": 6,
-      "edges_out": [
-        "48-4"
-      ],
-      "slug": "squares-of-a-sorted-array",
-      "act": 2
-    },
-    {
-      "id": "48-4",
-      "row": 48,
-      "col": 4,
       "edges_out": [],
-      "slug": "divide-two-integers",
+      "slug": "reverse-pairs",
       "act": 2
     }
   ]

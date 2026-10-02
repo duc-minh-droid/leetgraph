@@ -1,1 +1,0 @@
-{"slug":"meeting-rooms-ii","id":"253","title":"Meeting Rooms II","content":null,"metaData":{"name":"minMeetingRooms","params":[{"name":"intervals","type":"integer[][]"}],"return":{"type":"integer"}},"exampleTestcases":"[[0,30],[5,10],[15,20]]\n[[7,10],[2,4]]","codeSnippets":{}}

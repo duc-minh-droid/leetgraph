@@ -1,1 +1,0 @@
-{"slug":"find-the-celebrity","id":"277","title":"Find the Celebrity","content":null,"metaData":{"name":"findCelebrity","params":[{"name":"graph","type":"integer[][]","internal":true}],"return":{"type":"integer"},"manual":true},"exampleTestcases":"[[1,1,0],[0,1,0],[1,1,1]]\n[[1,0,1],[1,1,0],[0,1,1]]","codeSnippets":{}}
