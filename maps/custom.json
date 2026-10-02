@@ -1,0 +1,208 @@
+{
+  "name": "Custom",
+  "eloMin": 900,
+  "eloMax": 2500,
+  "nodes": [
+    {
+      "id": "0-4",
+      "row": 0,
+      "col": 4,
+      "edges_out": [
+        "1-5",
+        "1-4"
+      ],
+      "slug": "invert-binary-tree",
+      "act": 0
+    },
+    {
+      "id": "1-4",
+      "row": 1,
+      "col": 4,
+      "edges_out": [
+        "2-4"
+      ],
+      "slug": "reverse-linked-list",
+      "act": 0
+    },
+    {
+      "id": "1-5",
+      "row": 1,
+      "col": 5,
+      "edges_out": [
+        "2-4"
+      ],
+      "slug": "max-area-of-island",
+      "act": 0
+    },
+    {
+      "id": "2-4",
+      "row": 2,
+      "col": 4,
+      "edges_out": [
+        "3-4"
+      ],
+      "slug": "binary-tree-level-order-traversal",
+      "act": 0
+    },
+    {
+      "id": "3-4",
+      "row": 3,
+      "col": 4,
+      "edges_out": [
+        "4-4"
+      ],
+      "slug": "maximum-depth-of-binary-tree",
+      "act": 0
+    },
+    {
+      "id": "4-4",
+      "row": 4,
+      "col": 4,
+      "edges_out": [
+        "5-4"
+      ],
+      "slug": "merge-two-sorted-lists",
+      "act": 1
+    },
+    {
+      "id": "5-4",
+      "row": 5,
+      "col": 4,
+      "edges_out": [
+        "6-5"
+      ],
+      "slug": "design-hit-counter",
+      "act": 1
+    },
+    {
+      "id": "6-5",
+      "row": 6,
+      "col": 5,
+      "edges_out": [
+        "7-4"
+      ],
+      "slug": "number-of-islands",
+      "act": 1
+    },
+    {
+      "id": "7-4",
+      "row": 7,
+      "col": 4,
+      "edges_out": [
+        "8-4"
+      ],
+      "slug": "linked-list-cycle",
+      "act": 1
+    },
+    {
+      "id": "8-4",
+      "row": 8,
+      "col": 4,
+      "edges_out": [
+        "9-4"
+      ],
+      "slug": "clone-graph",
+      "act": 1
+    },
+    {
+      "id": "9-4",
+      "row": 9,
+      "col": 4,
+      "edges_out": [
+        "10-5",
+        "10-3"
+      ],
+      "slug": "lowest-common-ancestor-of-a-binary-tree",
+      "act": 2
+    },
+    {
+      "id": "10-3",
+      "row": 10,
+      "col": 3,
+      "edges_out": [
+        "11-2"
+      ],
+      "slug": "network-delay-time",
+      "act": 2
+    },
+    {
+      "id": "10-5",
+      "row": 10,
+      "col": 5,
+      "edges_out": [
+        "11-5"
+      ],
+      "slug": "rotting-oranges",
+      "act": 2
+    },
+    {
+      "id": "11-2",
+      "row": 11,
+      "col": 2,
+      "edges_out": [
+        "12-3"
+      ],
+      "slug": "course-schedule",
+      "act": 2
+    },
+    {
+      "id": "11-5",
+      "row": 11,
+      "col": 5,
+      "edges_out": [
+        "12-4"
+      ],
+      "slug": "course-schedule-ii",
+      "act": 2
+    },
+    {
+      "id": "12-3",
+      "row": 12,
+      "col": 3,
+      "edges_out": [
+        "13-3"
+      ],
+      "slug": "insert-delete-getrandom-o1",
+      "act": 2
+    },
+    {
+      "id": "12-4",
+      "row": 12,
+      "col": 4,
+      "edges_out": [
+        "13-4",
+        "13-3"
+      ],
+      "slug": "shortest-path-in-binary-matrix",
+      "act": 2
+    },
+    {
+      "id": "13-3",
+      "row": 13,
+      "col": 3,
+      "edges_out": [
+        "14-4"
+      ],
+      "slug": "lru-cache",
+      "act": 2
+    },
+    {
+      "id": "13-4",
+      "row": 13,
+      "col": 4,
+      "edges_out": [
+        "14-4"
+      ],
+      "slug": "time-based-key-value-store",
+      "act": 2
+    },
+    {
+      "id": "14-4",
+      "row": 14,
+      "col": 4,
+      "edges_out": [],
+      "slug": "validate-binary-search-tree",
+      "act": 2
+    }
+  ]
+}

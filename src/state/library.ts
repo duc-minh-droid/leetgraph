@@ -2,10 +2,12 @@ import amazonData from "../../maps/amazon.json";
 import googleData from "../../maps/google.json";
 import appleData from "../../maps/apple.json";
 import metaData from "../../maps/meta.json";
+import customData from "../../maps/custom.json";
 import amazonCsv from "../../maps/amazon.csv?raw";
 import googleCsv from "../../maps/google.csv?raw";
 import appleCsv from "../../maps/apple.csv?raw";
 import metaCsv from "../../maps/meta.csv?raw";
+import customCsv from "../../maps/custom.csv?raw";
 import type { MapData } from "../map";
 import { parseProblems, type Problem } from "../data/problems-core";
 import { touchedSlugs } from "./attempts";
@@ -68,6 +70,13 @@ const DESCRIPTORS: Descriptor[] = [
     json: metaData,
     csv: metaCsv,
     requiredLevel: 8,
+  },
+  {
+    id: "custom",
+    description: "Hand-picked practice set — grids, trees, linked lists and small class designs, shuffled and Elo-scored.",
+    json: customData,
+    csv: customCsv,
+    requiredLevel: 1,
   },
 ];
 

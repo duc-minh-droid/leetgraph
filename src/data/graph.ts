@@ -31,7 +31,17 @@ function clamp(v: number, lo: number, hi: number) {
 //     that happens, so mid-act pinches appear naturally, not just at the top.
 //   • All walks funnel into the act's single convergence node, which is bridged
 //     to the next act's start. Difficulty is assigned LAST, by global row.
-export function buildActsGraph(problems: Problem[], name: string): GraphJson {
+export interface GraphOpts {
+  walkRows?: [number, number]; // rows per act
+  walks?: [number, number]; // parallel walks per act
+  maxNodes?: number;
+  jitter?: number; // 0 = strict Elo order down the map; higher shuffles problems between neighbouring rows
+}
+
+export function buildActsGraph(problems: Problem[], name: string, opts: GraphOpts = {}): GraphJson {
+  const [minRows, maxRows] = opts.walkRows ?? [12, 18];
+  const [minWalks, maxWalks] = opts.walks ?? [2, 8];
+  const maxNodes = opts.maxNodes ?? MAX_NODES;
   const nodes = new Map<string, MapNode>();
   const ensure = (row: number, col: number, act: number): MapNode => {
     const id = `${row}-${col}`;
@@ -49,7 +59,7 @@ export function buildActsGraph(problems: Problem[], name: string): GraphJson {
 
   let cursor = 0; // running global row; acts are contiguous, gap is render-only
   for (let a = 0; a < ACTS; a++) {
-    const walkRows = randInt(12, 18); // randomized act height
+    const walkRows = randInt(minRows, maxRows); // randomized act height
     const baseRow = cursor;
     const convId = `${baseRow + walkRows}-${START_COL}`;
     ensure(baseRow, START_COL, a); // single start
@@ -70,7 +80,7 @@ export function buildActsGraph(problems: Problem[], name: string): GraphJson {
       addEdge(`${row}-${col}`, convId); // every walk converges here
     };
 
-    const P = randInt(2, 8); // re-rolled per act
+    const P = randInt(minWalks, maxWalks); // re-rolled per act
     for (let i = 0; i < P; i++) spawnWalk();
 
     // Bridge this act's convergence to the next act's start.
@@ -94,7 +104,7 @@ export function buildActsGraph(problems: Problem[], name: string): GraphJson {
   // (rewiring predecessor → successor) until we're at or under it. This only
   // fires when a wide-braid act overflowed; narrow acts are never padded up.
   let guard = 0;
-  while (nodes.size > MAX_NODES && guard++ < 10000) {
+  while (nodes.size > maxNodes && guard++ < 10000) {
     const cands = [...nodes.values()].filter((n) => {
       if (n.edges_out.length !== 1) return false;
       const preds = [...nodes.values()].filter((x) => x.edges_out.includes(n.id));
@@ -127,7 +137,10 @@ export function buildActsGraph(problems: Problem[], name: string): GraphJson {
   // ---- Assign problems by Elo tier across global rows (never before) ----
   const result = [...nodes.values()].sort((x, y) => x.row - y.row || x.col - y.col);
   const totalRows = result.length ? result[result.length - 1].row + 1 : 1;
-  const sorted = [...problems].sort((p, q) => p.elo - q.elo);
+  const jit = opts.jitter ?? 0;
+  const byElo = [...problems].sort((p, q) => p.elo - q.elo);
+  const rank = new Map(byElo.map((p, i) => [p.slug, i / Math.max(1, byElo.length - 1) + (Math.random() - 0.5) * jit]));
+  const sorted = jit ? [...byElo].sort((p, q) => rank.get(p.slug)! - rank.get(q.slug)!) : byElo;
   const tierPool: Problem[][] = Array.from({ length: totalRows }, () => []);
   sorted.forEach((p, i) => {
     const r = Math.min(totalRows - 1, Math.floor((i / sorted.length) * totalRows));
@@ -153,7 +166,12 @@ export function buildActsGraph(problems: Problem[], name: string): GraphJson {
     }
     return sorted[0].slug;
   };
-  for (const n of result) n.slug = takeFromTier(n.row);
+  if (opts.jitter !== undefined && result.length <= sorted.length) {
+    // Small curated sets: deal problems down the map in (jittered) Elo order.
+    result.forEach((n, i) => (n.slug = sorted[i].slug));
+  } else {
+    for (const n of result) n.slug = takeFromTier(n.row);
+  }
 
   const eloOf = new Map(problems.map((p) => [p.slug, p.elo]));
   const elos = result.map((n) => eloOf.get(n.slug) ?? 0);
