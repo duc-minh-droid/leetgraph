@@ -204,7 +204,7 @@ function SquareNodeImpl({ data }: NodeProps) {
   // ---- full card ----
   return (
     <motion.div
-      initial={{ scale: 0.7, opacity: 0 }}
+      initial={false}
       animate={animate}
       whileHover={interactive ? { scale: 1.06, y: -5, rotate: d.current ? -1.5 : 1.2 } : { y: -2 }}
       whileTap={interactive ? { scale: 0.93, rotate: 0 } : {}}
